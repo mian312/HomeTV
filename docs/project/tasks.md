@@ -1,0 +1,64 @@
+# HomeTV — Task Tracker
+
+Detailed task queue and development history. Current implementation truth is in [PROJECT_STATE.md](PROJECT_STATE.md); architecture and product requirements are in [../README.md](../README.md).
+
+**Statuses:** `TODO` · `IN_PROGRESS` · `BLOCKED` · `COMPLETED` · `FAILED` · `SKIPPED`
+
+## Task Table
+
+| ID | Phase | Task | Expected Outcome | Status | Changes Made | Lint/Test Issues | Decisions | Commit | Notes |
+|---|---|---|---|---|---|---|---|---|---|
+| T001 | 0 | Inspect existing Expo workspace | Workspace and current configuration are understood before changes | COMPLETED | Inspected package/configuration/routes and found SDK 57 starter | Not run (inspection only) | Preserve existing app; don't scaffold another | — | Baseline in PROJECT_STATE.md |
+| T002 | 1 | Establish project architecture | Clean feature/domain/data boundaries exist | TODO | | | | | Next implementation task |
+| T003 | 1 | Establish theme/design system | Light/dark/system themes and centralized UI tokens work | TODO | | | | | Existing theme is partial |
+| T004 | 1 | Establish reusable UI foundation | Common OTT UI components are reusable and consistent | TODO | | | | | |
+| T005 | 1 | Establish quality tooling | Strict TS, ESLint, Prettier and tests work | TODO | | | | | Jest installed; test config/RTL missing |
+| T006 | 2 | Establish SQLite foundation | Versioned database and migrations work | TODO | | | | | |
+| T007 | 2 | Establish local repositories | Persistent data uses repository boundaries | TODO | | | | | |
+| T008 | 3 | Integrate iptv-org SDK | IPTV data is accessible through a provider abstraction | TODO | | | | | |
+| T009 | 3 | Establish domain data mapping | UI is independent of raw provider models | TODO | | | | | |
+| T010 | 3 | Establish TanStack Query layer | Cache-first loading and background refresh work | TODO | | | | | |
+| T011 | 4 | Build Home screen | OTT-style reusable home sections work | TODO | | | | | |
+| T012 | 4 | Build channel browsing | Efficient channel browsing works | TODO | | | | | |
+| T013 | 4 | Build channel filters | Country, language and category filters work | TODO | | | | | |
+| T014 | 4 | Build global search | Multi-scope search works | TODO | | | | | |
+| T015 | 5 | Implement favorites | Favorites persist locally | TODO | | | | | |
+| T016 | 5 | Implement recently watched | Latest 20 channels persist correctly | TODO | | | | | |
+| T017 | 5 | Implement playlists | Custom playlists persist and can be managed | TODO | | | | | |
+| T018 | 6 | Establish EPG data layer | EPG data is mapped independently of UI | TODO | | | | | |
+| T019 | 6 | Build TV Guide | Current/upcoming programs are usable | TODO | | | | | |
+| T020 | 7 | Establish player architecture | Player responsibilities are isolated and reusable | TODO | | | | | |
+| T021 | 7 | Implement video playback | expo-video playback and controls work | TODO | | | | | |
+| T022 | 7 | Implement stream fallback | Alternate streams are attempted after failure | TODO | | | | | |
+| T023 | 7 | Implement player error states | Offline/unstable/unavailable states are clear | TODO | | | | | |
+| T024 | 7 | Implement player gestures | Double tap and swipe gestures work correctly | TODO | | | | | |
+| T025 | 7 | Implement fullscreen/orientation | Fullscreen transitions work reliably | TODO | | | | | |
+| T026 | 8 | Integrate end-to-end flows | Browse → channel → player → history/favorites works | TODO | | | | | |
+| T027 | 8 | Accessibility/UX pass | Core UI is accessible and consistent | TODO | | | | | |
+| T028 | 8 | Performance pass | Large IPTV datasets and images remain responsive | TODO | | | | | |
+| T029 | 8 | Automated test pass | Critical logic is covered | TODO | | | | | |
+| T030 | 8 | Android/iOS validation | Core flows work on both platforms | TODO | | | | | |
+| T031 | 8 | Final documentation checkpoint | Project documentation matches implementation | TODO | | | | | Final pass after feature work |
+| T032 | 0 | Organize project instructions and documentation | AI contract, guide, state snapshot, and task queue have clear canonical locations | COMPLETED | Consolidated AI contract in AGENTS.md; grouped guide/state/tracker under docs | `git diff --check` passed; checked internal Markdown links | Root AGENTS; docs/README; docs/project/* | See Git history | |
+
+## Error and Issue Log
+
+| ID | Task | Type | Error / Issue | Cause | Resolution | Status |
+|---|---|---|---|---|---|---|
+| E001 | | | | | | |
+
+## Architecture Decision Log
+
+| ID | Date | Decision | Reason | Alternatives | Impact |
+|---|---|---|---|---|---|
+| D001 | 2026-09-27 | Keep a single root `AGENTS.md` as the AI operating contract; keep product guide and progress records under `docs/` | Avoid duplicate instructions and scattered project records while retaining Antigravity-specific rule/workflow/skill discovery | Keep a separate root INSTRUCTIONS.md and state/task files | AI workflow stays at root; human/project tracking docs are grouped under docs |
+
+## Current Checkpoint
+
+- **Current Phase:** 0 — workspace organization complete; implementation foundation next.
+- **Current Task:** T002
+- **Last Completed Tasks:** T001 and T032
+- **Last Commit:** See Git history.
+- **Next Task:** T002 — establish project architecture.
+- **Known Issues:** Starter UI remains; theme persistence uses AsyncStorage; theme tokens/tests are incomplete.
+- **Next Expected Outcome:** Define and implement minimal application architecture boundaries without adding speculative feature behavior.
