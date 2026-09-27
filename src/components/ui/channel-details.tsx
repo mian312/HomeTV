@@ -57,7 +57,11 @@ export function ChannelDetails({ channel, visible, onClose }: ChannelDetailsProp
                 hitSlop={8}
                 style={styles.closeButton}
               >
-                <SymbolView name="xmark" size={19} tintColor={colors.textSecondary} />
+                <SymbolView
+                  name={{ ios: 'xmark', android: 'close', web: 'close' }}
+                  size={19}
+                  tintColor={colors.textSecondary}
+                />
               </Pressable>
             </View>
 

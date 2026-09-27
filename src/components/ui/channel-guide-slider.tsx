@@ -61,7 +61,11 @@ export function ChannelGuideSlider({ channel, onClose }: ChannelGuideSliderProps
             accessibilityLabel="Close channel guide"
             style={styles.closeButton}
           >
-            <SymbolView name="xmark" size={19} tintColor={colors.textSecondary} />
+              <SymbolView
+                name={{ ios: 'xmark', android: 'close', web: 'close' }}
+                size={19}
+                tintColor={colors.textSecondary}
+              />
           </Pressable>
         </View>
 

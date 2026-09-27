@@ -174,7 +174,11 @@ export function ChannelVideoPlayer({ channel }: ChannelVideoPlayerProps) {
                 accessibilityRole="button"
                 accessibilityLabel="Close player"
               >
-                <SymbolView name="chevron.left" size={22} tintColor={colors.playerText} />
+                <SymbolView
+                  name={{ ios: 'chevron.left', android: 'arrow_back', web: 'arrow_back' }}
+                  size={22}
+                  tintColor={colors.playerText}
+                />
               </Pressable>
               <View style={styles.channelTitle}>
                 <ThemedText
@@ -197,8 +201,16 @@ export function ChannelVideoPlayer({ channel }: ChannelVideoPlayerProps) {
                 <SymbolView
                   name={
                     isFullscreen
-                      ? 'arrow.down.right.and.arrow.up.left'
-                      : 'arrow.up.left.and.arrow.down.right'
+                      ? {
+                          ios: 'arrow.down.right.and.arrow.up.left',
+                          android: 'fullscreen_exit',
+                          web: 'fullscreen_exit',
+                        }
+                      : {
+                          ios: 'arrow.up.left.and.arrow.down.right',
+                          android: 'fullscreen',
+                          web: 'fullscreen',
+                        }
                   }
                   size={20}
                   tintColor={colors.playerText}
@@ -255,7 +267,11 @@ export function ChannelVideoPlayer({ channel }: ChannelVideoPlayerProps) {
                   accessibilityRole="button"
                   accessibilityLabel="Back 10 seconds"
                 >
-                  <SymbolView name="gobackward.10" size={25} tintColor={colors.playerText} />
+                  <SymbolView
+                    name={{ ios: 'gobackward.10', android: 'replay_10', web: 'replay_10' }}
+                    size={25}
+                    tintColor={colors.playerText}
+                  />
                 </Pressable>
                 <Pressable
                   onPress={() =>
@@ -266,7 +282,11 @@ export function ChannelVideoPlayer({ channel }: ChannelVideoPlayerProps) {
                   accessibilityLabel={session.isPlaying ? 'Pause' : 'Play'}
                 >
                   <SymbolView
-                    name={session.isPlaying ? 'pause.fill' : 'play.fill'}
+                    name={
+                      session.isPlaying
+                        ? { ios: 'pause.fill', android: 'pause', web: 'pause' }
+                        : { ios: 'play.fill', android: 'play_arrow', web: 'play_arrow' }
+                    }
                     size={23}
                     tintColor={colors.playerBackground}
                   />
@@ -277,7 +297,11 @@ export function ChannelVideoPlayer({ channel }: ChannelVideoPlayerProps) {
                   accessibilityRole="button"
                   accessibilityLabel="Forward 10 seconds"
                 >
-                  <SymbolView name="goforward.10" size={25} tintColor={colors.playerText} />
+                  <SymbolView
+                    name={{ ios: 'goforward.10', android: 'forward_10', web: 'forward_10' }}
+                    size={25}
+                    tintColor={colors.playerText}
+                  />
                 </Pressable>
                 {session.streamCount > 1 ? (
                   <ThemedText variant="caption" style={styles.streamCount}>
@@ -297,6 +321,19 @@ export function ChannelVideoPlayer({ channel }: ChannelVideoPlayerProps) {
                     style={[styles.progressTrack, { backgroundColor: colors.playerControlMuted }]}
                     accessibilityRole="adjustable"
                     accessibilityLabel="Playback position"
+                    accessibilityValue={{
+                      min: 0,
+                      max: Math.round(session.duration),
+                      now: Math.round(session.currentTime),
+                      text: `${formatTime(session.currentTime)} of ${formatTime(session.duration)}`,
+                    }}
+                    accessibilityActions={[
+                      { name: 'increment', label: 'Forward 10 seconds' },
+                      { name: 'decrement', label: 'Back 10 seconds' },
+                    ]}
+                    onAccessibilityAction={({ nativeEvent }) => {
+                      session.player.seekBy(nativeEvent.actionName === 'increment' ? 10 : -10);
+                    }}
                   >
                     <View
                       style={[

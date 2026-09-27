@@ -71,7 +71,11 @@ export function ModalPicker<T>({
             testID="modal-picker-clear"
             hitSlop={8}
           >
-            <SymbolView name="xmark.circle.fill" size={20} tintColor={colors.textSecondary} />
+            <SymbolView
+              name={{ ios: 'xmark.circle.fill', android: 'cancel', web: 'cancel' }}
+              size={20}
+              tintColor={colors.textSecondary}
+            />
           </Pressable>
         ) : null}
       </View>

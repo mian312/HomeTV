@@ -1,3 +1,4 @@
+import { useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { useState } from 'react';
 import { FlatList, Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
@@ -6,38 +7,40 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import {
-  Button,
-  CardContent,
-  ChannelAvatarStack,
-  ChannelCard,
-  ChannelLogo,
-  HorizontalList,
-  Input,
-  LoadingView,
-  PressableCard,
-  SectionHeader,
-  SlideUpSheet,
+    Button,
+    CardContent,
+    ChannelAvatarStack,
+    ChannelCard,
+    ChannelLogo,
+    ErrorView,
+    HorizontalList,
+    Input,
+    LoadingView,
+    PressableCard,
+    SectionHeader,
+    SlideUpSheet,
 } from '@/components/ui';
 import { Radius, Spacing } from '@/constants/theme';
 import { useChannels } from '@/data/queries/iptv';
 import {
-  useCreatePlaylist,
-  useFavorites,
-  usePlaylistItems,
-  usePlaylistSummaries,
-  usePlaylists,
-  useRecentlyWatched,
-  useRemovePlaylistItem,
+    useCreatePlaylist,
+    useFavorites,
+    usePlaylistItems,
+    usePlaylistSummaries,
+    usePlaylists,
+    useRecentlyWatched,
+    useRemovePlaylistItem,
 } from '@/data/queries/local';
 import { useTheme } from '@/hooks/use-theme';
 import type { Channel, Playlist } from '@/types/domain';
 
 export default function LibraryScreen() {
+  const router = useRouter();
   const { data: favorites } = useFavorites();
   const { data: recentlyWatched } = useRecentlyWatched();
   const { data: playlists } = usePlaylists();
   const { data: playlistSummaries } = usePlaylistSummaries();
-  const { data: channels, isLoading } = useChannels();
+  const { data: channels, isLoading, refetch } = useChannels();
   const { colors } = useTheme();
   const [activePlaylistId, setActivePlaylistId] = useState<string | null>(null);
   const [createVisible, setCreateVisible] = useState(false);
@@ -54,20 +57,26 @@ export default function LibraryScreen() {
     return <LoadingView message="Loading library..." />;
   }
 
-  // Hydrate local entities with channel data
+  if (!channels) {
+    return <ErrorView message="Saved channels are unavailable right now." onRetry={refetch} />;
+  }
+
+  const channelsById = new Map<string, Channel>(
+    channels.map((channel) => [channel.id, channel]),
+  );
   const favoriteChannels = (favorites ?? [])
-    .map((f) => channels?.find((c) => c.id === f.entityRef.entityId))
+    .map((favorite) => channelsById.get(favorite.entityRef.entityId))
     .filter((c): c is Channel => c !== undefined);
 
   const historyChannels = (recentlyWatched ?? [])
-    .map((h) => channels?.find((c) => c.id === h.entityRef.entityId))
+    .map((entry) => channelsById.get(entry.entityRef.entityId))
     .filter((c): c is Channel => c !== undefined);
 
   const summaries = new Map(
     (playlistSummaries ?? []).map((summary) => [summary.playlistId, summary]),
   );
   const playlistChannels = activeItems
-    .map((item) => channels?.find((channel) => channel.id === item.entityRef.entityId))
+    .map((item) => channelsById.get(item.entityRef.entityId))
     .filter((channel): channel is Channel => channel !== undefined);
 
   const handleCreatePlaylist = async () => {
@@ -146,7 +155,7 @@ export default function LibraryScreen() {
                 {playlists.map((playlist) => {
                   const summary = summaries.get(playlist.id);
                   const previewChannels = (summary?.previewChannelIds ?? [])
-                    .map((id) => channels?.find((channel) => channel.id === id))
+                    .map((id) => channelsById.get(id))
                     .filter((channel): channel is Channel => channel !== undefined);
 
                   return (
@@ -161,7 +170,11 @@ export default function LibraryScreen() {
                         <View
                           style={[styles.playlistIcon, { backgroundColor: colors.primaryMuted }]}
                         >
-                          <SymbolView name="list.bullet" size={20} tintColor={colors.primary} />
+                          <SymbolView
+                            name={{ ios: 'list.bullet', android: 'format_list_bulleted', web: 'format_list_bulleted' }}
+                            size={20}
+                            tintColor={colors.primary}
+                          />
                         </View>
                         <View style={styles.playlistText}>
                           <ThemedText numberOfLines={1} style={styles.playlistName}>
@@ -177,7 +190,7 @@ export default function LibraryScreen() {
                           totalCount={summary?.channelCount ?? previewChannels.length}
                         />
                         <SymbolView
-                          name="chevron.right"
+                          name={{ ios: 'chevron.right', android: 'chevron_right', web: 'chevron_right' }}
                           size={16}
                           tintColor={colors.textTertiary}
                         />
@@ -248,7 +261,11 @@ export default function LibraryScreen() {
           <View style={styles.playlistSheetContent}>
             <View style={styles.playlistSheetHeader}>
               <View style={[styles.playlistIcon, { backgroundColor: colors.primaryMuted }]}>
-                <SymbolView name="list.bullet" size={20} tintColor={colors.primary} />
+                <SymbolView
+                  name={{ ios: 'list.bullet', android: 'format_list_bulleted', web: 'format_list_bulleted' }}
+                  size={20}
+                  tintColor={colors.primary}
+                />
               </View>
               <View style={styles.detailHeading}>
                 <ThemedText variant="headlineSmall" numberOfLines={1}>
@@ -264,7 +281,11 @@ export default function LibraryScreen() {
                 accessibilityLabel="Close playlist details"
                 style={styles.closeButton}
               >
-                <SymbolView name="xmark" size={19} tintColor={colors.textSecondary} />
+                <SymbolView
+                  name={{ ios: 'xmark', android: 'close', web: 'close' }}
+                  size={19}
+                  tintColor={colors.textSecondary}
+                />
               </Pressable>
             </View>
             {playlistChannels.length > 0 ? (
@@ -282,13 +303,23 @@ export default function LibraryScreen() {
                 renderItem={({ item }) => (
                   <PlaylistChannelRow
                     channel={item}
+                    onPlay={() =>
+                      router.push({
+                        pathname: '/player/[channelId]',
+                        params: { channelId: item.id },
+                      })
+                    }
                     onRemove={() => removeChannel(activePlaylist, item)}
                   />
                 )}
               />
             ) : (
               <View style={styles.detailEmpty}>
-                <SymbolView name="text.badge.plus" size={32} tintColor={colors.textTertiary} />
+                <SymbolView
+                  name={{ ios: 'text.badge.plus', android: 'playlist_add', web: 'playlist_add' }}
+                  size={32}
+                  tintColor={colors.textTertiary}
+                />
                 <ThemedText variant="titleSmall">No channels yet</ThemedText>
                 <ThemedText themeColor="textSecondary" style={styles.emptyText}>
                   Add channels from the Channels tab using the playlist button on a channel card.
@@ -304,9 +335,11 @@ export default function LibraryScreen() {
 
 function PlaylistChannelRow({
   channel,
+  onPlay,
   onRemove,
 }: {
   readonly channel: Channel;
+  readonly onPlay: () => void;
   readonly onRemove?: () => void;
 }) {
   const { colors } = useTheme();
@@ -317,26 +350,38 @@ function PlaylistChannelRow({
         { backgroundColor: colors.surface, borderColor: colors.borderMuted },
       ]}
     >
-      <ChannelLogo
-        channel={channel}
-        style={[styles.channelLogo, { backgroundColor: colors.backgroundElement }]}
-      />
-      <View style={styles.channelInfo}>
-        <ThemedText numberOfLines={1} variant="titleSmall">
-          {channel.name}
-        </ThemedText>
-        <ThemedText numberOfLines={1} variant="caption" themeColor="textSecondary">
-          {channel.country ?? channel.network ?? 'TV channel'}
-        </ThemedText>
-      </View>
+      <Pressable
+        onPress={onPlay}
+        accessibilityRole="button"
+        accessibilityLabel={`Play ${channel.name}`}
+        style={styles.channelPlayAction}
+      >
+        <ChannelLogo
+          channel={channel}
+          style={[styles.channelLogo, { backgroundColor: colors.backgroundElement }]}
+        />
+        <View style={styles.channelInfo}>
+          <ThemedText numberOfLines={1} variant="titleSmall">
+            {channel.name}
+          </ThemedText>
+          <ThemedText numberOfLines={1} variant="caption" themeColor="textSecondary">
+            {channel.country ?? channel.network ?? 'TV channel'}
+          </ThemedText>
+        </View>
+      </Pressable>
       {onRemove ? (
         <Pressable
           onPress={onRemove}
           accessibilityRole="button"
           accessibilityLabel={`Remove ${channel.name} from playlist`}
+          style={styles.removeButton}
           hitSlop={10}
         >
-          <SymbolView name="minus.circle" size={21} tintColor={colors.textTertiary} />
+          <SymbolView
+            name={{ ios: 'minus.circle', android: 'remove_circle_outline', web: 'remove_circle_outline' }}
+            size={21}
+            tintColor={colors.textTertiary}
+          />
         </Pressable>
       ) : null}
     </View>
@@ -443,6 +488,19 @@ const styles = StyleSheet.create({
   channelInfo: {
     flex: 1,
     gap: Spacing.xxs,
+  },
+  channelPlayAction: {
+    flex: 1,
+    minHeight: 48,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.md,
+  },
+  removeButton: {
+    width: 48,
+    height: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   detailEmpty: {
     flex: 1,

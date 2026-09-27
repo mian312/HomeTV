@@ -5,11 +5,11 @@ import { Pressable, StyleProp, StyleSheet, View, ViewStyle } from 'react-native'
 import { ThemedText } from '../themed-text';
 import { CardContent, PressableCard } from './card';
 
-import { Radius, Spacing } from '@/constants/theme';
+import { MinTouchTarget, Radius, Spacing } from '@/constants/theme';
 import {
-  useChannelPlaylistMemberships,
-  useIsFavorite,
-  useToggleFavorite,
+    useChannelPlaylistMemberships,
+    useIsFavorite,
+    useToggleFavorite,
 } from '@/data/queries/local';
 import { useTheme } from '@/hooks/use-theme';
 import type { Channel } from '@/types/domain';
@@ -85,7 +85,11 @@ export function ChannelCard({ channel, onPress, style }: ChannelCardProps) {
                 testID="channel-details-action"
                 hitSlop={6}
               >
-                <SymbolView name="info.circle" size={17} tintColor={colors.textTertiary} />
+                <SymbolView
+                  name={{ ios: 'info.circle', android: 'info', web: 'info' }}
+                  size={17}
+                  tintColor={colors.textTertiary}
+                />
               </Pressable>
             </View>
             <Pressable
@@ -99,7 +103,11 @@ export function ChannelCard({ channel, onPress, style }: ChannelCardProps) {
               accessibilityLabel={`Show guide for ${channel.name}`}
               testID="channel-guide-action"
             >
-              <SymbolView name="calendar" size={15} tintColor={colors.primary} />
+              <SymbolView
+                name={{ ios: 'calendar', android: 'calendar_today', web: 'calendar_today' }}
+                size={15}
+                tintColor={colors.primary}
+              />
               <ThemedText
                 variant="caption"
                 style={[styles.guideButtonText, { color: colors.primary }]}
@@ -114,9 +122,14 @@ export function ChannelCard({ channel, onPress, style }: ChannelCardProps) {
             hitSlop={8}
             accessibilityRole="button"
             accessibilityLabel={`Add ${channel.name} to a playlist. In ${playlistMemberships.length} ${playlistMemberships.length === 1 ? 'playlist' : 'playlists'}.`}
+            accessibilityHint="Opens the playlist picker"
             testID="channel-playlist-action"
           >
-            <SymbolView name="text.badge.plus" size={18} tintColor={colors.textTertiary} />
+            <SymbolView
+              name={{ ios: 'text.badge.plus', android: 'playlist_add', web: 'playlist_add' }}
+              size={18}
+              tintColor={colors.textTertiary}
+            />
             {playlistMemberships.length > 0 ? (
               <View style={[styles.playlistCount, { backgroundColor: colors.primary }]}>
                 <ThemedText style={[styles.playlistCountText, { color: colors.primaryText }]}>
@@ -129,9 +142,17 @@ export function ChannelCard({ channel, onPress, style }: ChannelCardProps) {
             onPress={handleFavoritePress}
             style={({ pressed }) => [styles.favoriteButton, pressed && { opacity: 0.7 }]}
             hitSlop={8}
+            accessibilityRole="button"
+            accessibilityLabel={`${isFavorite ? 'Remove' : 'Add'} ${channel.name} ${isFavorite ? 'from' : 'to'} favorites`}
+            accessibilityState={{ selected: !!isFavorite }}
+            testID="channel-favorite-action"
           >
             <SymbolView
-              name={isFavorite ? 'heart.fill' : 'heart'}
+              name={
+                isFavorite
+                  ? { ios: 'heart.fill', android: 'favorite', web: 'favorite' }
+                  : { ios: 'heart', android: 'favorite_border', web: 'favorite_border' }
+              }
               size={18}
               tintColor={isFavorite ? colors.primary : colors.textTertiary}
               fallback={
@@ -193,13 +214,13 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   detailsButton: {
-    width: 24,
-    height: 24,
+    width: MinTouchTarget,
+    height: MinTouchTarget,
     alignItems: 'center',
     justifyContent: 'center',
   },
   guideButton: {
-    minHeight: 30,
+    minHeight: MinTouchTarget,
     alignSelf: 'stretch',
     flexDirection: 'row',
     alignItems: 'center',
@@ -217,18 +238,21 @@ const styles = StyleSheet.create({
   },
   favoriteButton: {
     position: 'absolute',
-    top: 8,
-    right: 8,
-    padding: 4,
+    top: 4,
+    right: 4,
+    width: MinTouchTarget,
+    height: MinTouchTarget,
+    alignItems: 'center',
+    justifyContent: 'center',
     borderRadius: 16,
     backgroundColor: 'rgba(0,0,0,0.3)',
   },
   playlistButton: {
     position: 'absolute',
-    top: 8,
-    left: 8,
-    width: 30,
-    height: 30,
+    top: 4,
+    left: 4,
+    width: MinTouchTarget,
+    height: MinTouchTarget,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 15,

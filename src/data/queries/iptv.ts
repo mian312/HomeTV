@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 
-import { defaultProvider } from '../providers';
 import type { ChannelId } from '@/types/domain';
+import { defaultProvider } from '../providers';
 
 // ---------------------------------------------------------------------------
 // Query Keys
@@ -56,8 +56,9 @@ export function useLanguages() {
 
 export function useStreams(channelId: ChannelId) {
   return useQuery({
-    queryKey: iptvKeys.streams(channelId),
-    queryFn: () => defaultProvider.getStreams(channelId),
+    queryKey: iptvKeys.allStreams(),
+    queryFn: () => defaultProvider.getAllStreams(),
+    select: (streams) => streams.filter((stream) => stream.channelId === channelId),
     staleTime: 1000 * 60 * 60, // 1 hour
     enabled: !!channelId,
   });

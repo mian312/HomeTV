@@ -7,11 +7,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Radius, Spacing } from '@/constants/theme';
 import {
-  useAddPlaylistItem,
-  useChannelPlaylistMemberships,
-  useCreatePlaylist,
-  usePlaylists,
-  useRemovePlaylistItem,
+    useAddPlaylistItem,
+    useChannelPlaylistMemberships,
+    useCreatePlaylist,
+    usePlaylists,
+    useRemovePlaylistItem,
 } from '@/data/queries/local';
 import { useTheme } from '@/hooks/use-theme';
 import type { Channel } from '@/types/domain';
@@ -91,7 +91,11 @@ export function PlaylistPicker({ channel, visible, onClose }: PlaylistPickerProp
               </ThemedText>
             </View>
             <Pressable onPress={onClose} accessibilityRole="button" accessibilityLabel="Close">
-              <SymbolView name="xmark" size={20} tintColor={colors.textSecondary} />
+              <SymbolView
+                name={{ ios: 'xmark', android: 'close', web: 'close' }}
+                size={20}
+                tintColor={colors.textSecondary}
+              />
             </Pressable>
           </View>
 
@@ -121,7 +125,11 @@ export function PlaylistPicker({ channel, visible, onClose }: PlaylistPickerProp
                       </ThemedText>
                     </View>
                     <SymbolView
-                      name={selected ? 'checkmark.circle.fill' : 'circle'}
+                      name={
+                        selected
+                          ? { ios: 'checkmark.circle.fill', android: 'check_circle', web: 'check_circle' }
+                          : { ios: 'circle', android: 'radio_button_unchecked', web: 'radio_button_unchecked' }
+                      }
                       size={22}
                       tintColor={selected ? colors.primary : colors.textTertiary}
                     />

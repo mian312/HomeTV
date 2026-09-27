@@ -14,8 +14,8 @@ This is a verified implementation snapshot. `tasks.md` is the task/history recor
 ## Current milestone and next task
 
 - Phase: 8 — End-to-End Integration and Validation.
-- Last completed task: T025 Implement fullscreen/orientation.
-- Next planned task: T026 Integrate end-to-end flows.
+- Last completed task: T029 Automated test pass.
+- Next planned task: T031 Final documentation checkpoint.
 
 ## Implemented design system (`src/constants/theme.ts`)
 
@@ -106,7 +106,7 @@ All routes beyond these are planned, not implemented. TV guide access is a chann
 - Playlists are created from the Library or while adding a channel.
 - Channel cards open a playlist picker to add or remove that channel; a count indicates how many playlists contain it.
 - The Library overview shows each playlist's channel count and up to four channel-logo previews.
-- Opening a playlist shows its channels as rows with remove controls. Launching playback directly from a playlist row remains part of T026.
+- Opening a playlist shows its channels as rows with separate play and remove controls. Launching playback directly from a playlist row works correctly.
 - Playlist list, membership, and preview data use shared TanStack Query caches backed by the SQLite playlist repository.
 
 ## Channel details and guide
@@ -138,8 +138,7 @@ All routes beyond these are planned, not implemented. TV guide access is a chann
 
 ## Not implemented yet
 
-- Playlist-row to player navigation (T026).
-- Full accessibility/performance/device validation.
+- Physical device validation for iOS/Android (currently blocked by environment constraints).
 
 ## Known issues and limitations
 

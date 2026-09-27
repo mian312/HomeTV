@@ -4,6 +4,7 @@ import { useVideoPlayer } from 'expo-video';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useStreams } from '@/data/queries/iptv';
+import { useAddRecentlyWatched } from '@/data/queries/local';
 import type { ChannelId } from '@/types/domain';
 import { createVideoSource } from './player-source';
 import { getNextStreamIndex } from './stream-fallback';
@@ -25,6 +26,8 @@ export function usePlayerSession(channelId: ChannelId) {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const handledFailure = useRef<number | null>(null);
+  const recordedChannelId = useRef<ChannelId | null>(null);
+  const { mutate: recordRecentlyWatched } = useAddRecentlyWatched();
 
   const player = useVideoPlayer(null, (instance) => {
     instance.timeUpdateEventInterval = 0.5;
@@ -73,6 +76,10 @@ export function usePlayerSession(channelId: ChannelId) {
       'playingChange',
       ({ isPlaying: nextPlaying }) => {
         setIsPlaying(nextPlaying);
+        if (nextPlaying && recordedChannelId.current !== channelId) {
+          recordedChannelId.current = channelId;
+          recordRecentlyWatched({ entityType: 'channel', entityId: channelId });
+        }
       },
     );
     const timeSubscription = player.addListener('timeUpdate', ({ currentTime: nextTime }) => {
@@ -88,7 +95,7 @@ export function usePlayerSession(channelId: ChannelId) {
       timeSubscription.remove();
       sourceSubscription.remove();
     };
-  }, [handleStreamFailure, player, streamIndex]);
+  }, [channelId, handleStreamFailure, player, recordRecentlyWatched, streamIndex]);
 
   useEffect(() => {
     if (isLoadingStreams || isOffline || streams.length === 0 || streamIndex >= streams.length) {

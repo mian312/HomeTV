@@ -5,11 +5,13 @@ import { ChannelCard } from '@/components/ui/channel-card';
 import { HorizontalList } from '@/components/ui/horizontal-list';
 import { useGuide } from '@/data/queries/iptv';
 import {
-  useAddPlaylistItem,
-  useChannelPlaylistMemberships,
-  useCreatePlaylist,
-  usePlaylists,
-  useRemovePlaylistItem,
+    useAddPlaylistItem,
+    useChannelPlaylistMemberships,
+    useCreatePlaylist,
+    useIsFavorite,
+    usePlaylists,
+    useRemovePlaylistItem,
+    useToggleFavorite,
 } from '@/data/queries/local';
 import type { Channel, GuideEntry } from '@/types/domain';
 
@@ -53,14 +55,17 @@ const mockPlaylist = {
 const mockUsePlaylists = jest.mocked(usePlaylists);
 const mockUseMemberships = jest.mocked(useChannelPlaylistMemberships);
 const mockUseCreatePlaylist = jest.mocked(useCreatePlaylist);
+const mockUseIsFavorite = jest.mocked(useIsFavorite);
 const mockUseAddPlaylistItem = jest.mocked(useAddPlaylistItem);
 const mockUseRemovePlaylistItem = jest.mocked(useRemovePlaylistItem);
+const mockUseToggleFavorite = jest.mocked(useToggleFavorite);
 const mockUseGuide = jest.mocked(useGuide);
 const mockUseRouter = jest.mocked(useRouter);
 const navigateToPlayer = jest.fn();
 const addPlaylistItem = jest.fn();
 const removePlaylistItem = jest.fn();
 const createPlaylist = jest.fn();
+const toggleFavorite = jest.fn();
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -77,6 +82,8 @@ beforeEach(() => {
   } as never);
   mockUsePlaylists.mockReturnValue({ data: [mockPlaylist] } as never);
   mockUseMemberships.mockReturnValue({ data: [] } as never);
+  mockUseIsFavorite.mockReturnValue({ data: false } as never);
+  mockUseToggleFavorite.mockReturnValue({ mutate: toggleFavorite } as never);
   mockUseCreatePlaylist.mockReturnValue({ mutateAsync: createPlaylist, isPending: false } as never);
   mockUseAddPlaylistItem.mockReturnValue({
     mutateAsync: addPlaylistItem,
@@ -122,6 +129,21 @@ describe('ChannelCard', () => {
     expect(screen.getByTestId('channel-playlist-action').props.accessibilityLabel).toBe(
       'Add Test Channel to a playlist. In 2 playlists.',
     );
+  });
+
+  it('toggles favorite accessibly without opening the player', () => {
+    render(<ChannelCard channel={mockChannel} />);
+
+    const favoriteAction = screen.getByTestId('channel-favorite-action');
+    expect(favoriteAction.props.accessibilityLabel).toBe('Add Test Channel to favorites');
+    expect(favoriteAction.props.accessibilityState.selected).toBe(false);
+    fireEvent.press(favoriteAction);
+
+    expect(toggleFavorite).toHaveBeenCalledWith({
+      entityRef: { entityType: 'channel', entityId: mockChannel.id },
+      isFavorite: false,
+    });
+    expect(navigateToPlayer).not.toHaveBeenCalled();
   });
 
   it('opens the playlist picker from the channel card', () => {

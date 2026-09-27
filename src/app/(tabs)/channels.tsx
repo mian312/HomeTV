@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useDeferredValue, useMemo, useState } from 'react';
 import { FlatList, Platform, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -29,10 +29,11 @@ export default function ChannelsScreen() {
   const [selectedCategory, setSelectedCategory] = useState<CategoryId | null>(null);
   const [selectedCountry, setSelectedCountry] = useState<CountryCode | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const deferredSearchQuery = useDeferredValue(searchQuery);
 
   const filteredChannels = useMemo(() => {
     if (!channels) return [];
-    const query = searchQuery.trim().toLowerCase();
+    const query = deferredSearchQuery.trim().toLowerCase();
 
     return channels.filter((c) => {
       if (selectedCategory && !c.categories.includes(selectedCategory)) return false;
@@ -44,7 +45,7 @@ export default function ChannelsScreen() {
       }
       return true;
     });
-  }, [channels, selectedCategory, selectedCountry, searchQuery]);
+  }, [channels, selectedCategory, selectedCountry, deferredSearchQuery]);
 
   if (channelsLoading) {
     return <LoadingView message="Loading catalog..." />;

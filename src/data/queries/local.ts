@@ -1,9 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import {
-  favoritesRepository,
-  playlistRepository,
-  recentlyWatchedRepository,
+    favoritesRepository,
+    playlistRepository,
+    recentlyWatchedRepository,
 } from '@/data/repositories';
 import type { EntityRef } from '@/types/domain';
 
@@ -27,8 +27,14 @@ export function useFavorites() {
 
 export function useIsFavorite(entityRef: EntityRef) {
   return useQuery({
-    queryKey: [...KEYS.favorites, entityRef.entityId],
-    queryFn: () => favoritesRepository.isFavorite(entityRef),
+    queryKey: KEYS.favorites,
+    queryFn: () => favoritesRepository.getAll(),
+    select: (favorites) =>
+      favorites.some(
+        (favorite) =>
+          favorite.entityRef.entityType === entityRef.entityType &&
+          favorite.entityRef.entityId === entityRef.entityId,
+      ),
   });
 }
 
@@ -51,9 +57,6 @@ export function useToggleFavorite() {
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: KEYS.favorites });
-      queryClient.invalidateQueries({
-        queryKey: [...KEYS.favorites, variables.entityRef.entityId],
-      });
     },
   });
 }
