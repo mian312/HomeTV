@@ -12,6 +12,7 @@ export * from './channel-avatar-stack';
 export * from './channel-card';
 export * from './channel-details';
 export * from './channel-guide-slider';
+export * from './channel-logo';
 export * from './collapsible';
 export * from './filter-row';
 export * from './horizontal-list';

@@ -5,10 +5,10 @@
  * Business logic, SQL, and feature-specific behavior do not belong here.
  */
 
+import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 
 import { AnimatedSplashOverlay } from '@/components/animated-icon';
-import AppTabs from '@/components/app-tabs';
 import { AppProviders } from '@/lib/providers';
 
 SplashScreen.preventAutoHideAsync();
@@ -17,7 +17,10 @@ export default function RootLayout() {
   return (
     <AppProviders>
       <AnimatedSplashOverlay />
-      <AppTabs />
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="(tabs)" options={{ orientation: 'portrait' }} />
+        <Stack.Screen name="player/[channelId]" options={{ presentation: 'fullScreenModal' }} />
+      </Stack>
     </AppProviders>
   );
 }

@@ -13,9 +13,9 @@ This is a verified implementation snapshot. `tasks.md` is the task/history recor
 
 ## Current milestone and next task
 
-- Phase: 7 — Player Architecture and Playback.
-- Last completed task: T019 Build TV Guide.
-- Next planned task: T020 Establish player architecture.
+- Phase: 8 — End-to-End Integration and Validation.
+- Last completed task: T025 Implement fullscreen/orientation.
+- Next planned task: T026 Integrate end-to-end flows.
 
 ## Implemented design system (`src/constants/theme.ts`)
 
@@ -86,18 +86,27 @@ Timing presets: `fast` (150ms), `normal` (250ms), `slow` (400ms). Spring configs
 ## Routes currently present
 
 - `src/app/_layout.tsx`
-- `src/app/index.tsx` (Home screen with categorized horizontal lists)
-- `src/app/channels.tsx` (Channels screen with grid, search, and filtering)
-- `src/app/library.tsx` (Library screen with favorites, history, playlist creation/overview, and playlist detail)
+- `src/app/(tabs)/index.tsx` (Home screen with categorized horizontal lists)
+- `src/app/(tabs)/channels.tsx` (Channels screen with grid, search, and filtering)
+- `src/app/(tabs)/library.tsx` (Library screen with favorites, history, playlist creation/overview, and playlist detail)
+- `src/app/player/[channelId].tsx` (Channel playback route)
+- `src/app/(tabs)/_layout.tsx` (Tab group nested under the root player stack)
 
 All routes beyond these are planned, not implemented. TV guide access is a channel-card action, not a separate tab or route.
+
+## Player
+
+- `src/features/player/use-player-session.ts` owns Expo Video lifecycle, stream loading/failover, NetInfo status, and playback events.
+- `src/features/player/player-source.ts` maps stream headers and HLS URLs to Expo Video source options.
+- `src/components/player/channel-video-player.tsx` provides playback controls, timeline seeking, error/retry states, double-tap/swipe gestures, and fullscreen orientation handling.
+- Channel cards open `/player/[channelId]`; route and player responsibilities are isolated from data fetching and provider details.
 
 ## Playlist feature
 
 - Playlists are created from the Library or while adding a channel.
 - Channel cards open a playlist picker to add or remove that channel; a count indicates how many playlists contain it.
 - The Library overview shows each playlist's channel count and up to four channel-logo previews.
-- Opening a playlist shows its channels as rows with remove controls. Playback is not wired yet and remains part of T020/T021.
+- Opening a playlist shows its channels as rows with remove controls. Launching playback directly from a playlist row remains part of T026.
 - Playlist list, membership, and preview data use shared TanStack Query caches backed by the SQLite playlist repository.
 
 ## Channel details and guide
@@ -129,13 +138,16 @@ All routes beyond these are planned, not implemented. TV guide access is a chann
 
 ## Not implemented yet
 
-- Isolated video player, fallback, and player error UX.
+- Playlist-row to player navigation (T026).
 - Full accessibility/performance/device validation.
 
 ## Known issues and limitations
 
 - Legacy Spacing aliases and `type` prop in ThemedText are kept for backward compat.
 - EPG schedules are deterministic mock data, not listings from a live guide provider.
+- Channel logos are joined from the iptv-org logos feed; broken URLs fall back to channel initials.
+- Fullscreen and device orientation have static/test validation only; physical Android/iOS behavior still needs device testing.
+- Expo Doctor reports the existing `@types/jest` 30.0.0 differs from the Expo SDK 57 expected 29.5.14; `tsc`, lint, and Jest pass.
 - IPTV streams may be unavailable or unsuitable for a given device or jurisdiction; availability is dynamic.
 
 ## Recovery checklist

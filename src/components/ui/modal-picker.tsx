@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
-import { Modal, FlatList, Pressable, StyleSheet, View } from 'react-native';
+import { SymbolView } from 'expo-symbols';
+import { useState } from 'react';
+import { FlatList, Modal, Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { ThemedText } from '../themed-text';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { ThemedText } from '../themed-text';
 import { Button } from './button';
 import { Input } from './input';
 
@@ -35,34 +36,60 @@ export function ModalPicker<T>({
   const selectedItem = items.find((i) => i.value === selectedValue);
 
   const filteredItems = items.filter((item) =>
-    item.label.toLowerCase().includes(searchQuery.toLowerCase())
+    item.label.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   return (
     <>
-      <Pressable
-        style={({ pressed }) => [
-          styles.trigger,
-          {
-            backgroundColor: colors.backgroundElement,
-            borderColor: colors.border,
-            opacity: pressed ? 0.7 : 1,
-          },
-        ]}
-        onPress={() => setVisible(true)}
-      >
-        <ThemedText style={{ color: selectedItem ? colors.text : colors.textSecondary }} numberOfLines={1}>
-          {selectedItem ? selectedItem.label : placeholder}
-        </ThemedText>
-      </Pressable>
+      <View style={styles.triggerRow}>
+        <Pressable
+          style={({ pressed }) => [
+            styles.trigger,
+            {
+              backgroundColor: colors.backgroundElement,
+              borderColor: colors.border,
+              opacity: pressed ? 0.7 : 1,
+            },
+          ]}
+          onPress={() => setVisible(true)}
+          accessibilityRole="button"
+          accessibilityLabel={`${title}: ${selectedItem?.label ?? placeholder}`}
+        >
+          <ThemedText
+            style={{ color: selectedItem ? colors.text : colors.textSecondary }}
+            numberOfLines={1}
+          >
+            {selectedItem ? selectedItem.label : placeholder}
+          </ThemedText>
+        </Pressable>
+        {selectedItem ? (
+          <Pressable
+            onPress={() => onValueChange(null)}
+            style={({ pressed }) => [styles.clearButton, pressed && { opacity: 0.65 }]}
+            accessibilityRole="button"
+            accessibilityLabel={`Clear ${title.toLowerCase()} filter`}
+            testID="modal-picker-clear"
+            hitSlop={8}
+          >
+            <SymbolView name="xmark.circle.fill" size={20} tintColor={colors.textSecondary} />
+          </Pressable>
+        ) : null}
+      </View>
 
-      <Modal visible={visible} animationType="slide" transparent={false} onRequestClose={() => setVisible(false)}>
+      <Modal
+        visible={visible}
+        animationType="slide"
+        transparent={false}
+        onRequestClose={() => setVisible(false)}
+      >
         <SafeAreaView style={[styles.modalContainer, { backgroundColor: colors.background }]}>
           <View style={[styles.header, { borderBottomColor: colors.border }]}>
             <ThemedText variant="titleLarge" style={styles.title}>
               {title}
             </ThemedText>
-            <Button variant="ghost" onPress={() => setVisible(false)}>Close</Button>
+            <Button variant="ghost" onPress={() => setVisible(false)}>
+              <ThemedText themeColor="text">Close</ThemedText>
+            </Button>
           </View>
 
           <Input
@@ -79,7 +106,10 @@ export function ModalPicker<T>({
               <Pressable
                 style={({ pressed }) => [
                   styles.item,
-                  { backgroundColor: selectedValue === null ? colors.backgroundSelected : 'transparent' },
+                  {
+                    backgroundColor:
+                      selectedValue === null ? colors.backgroundSelected : 'transparent',
+                  },
                   pressed && { opacity: 0.7 },
                 ]}
                 onPress={() => {
@@ -87,7 +117,9 @@ export function ModalPicker<T>({
                   setVisible(false);
                 }}
               >
-                <ThemedText style={{ color: selectedValue === null ? colors.primary : colors.text }}>
+                <ThemedText
+                  style={{ color: selectedValue === null ? colors.primary : colors.text }}
+                >
                   None / All
                 </ThemedText>
               </Pressable>
@@ -120,6 +152,12 @@ export function ModalPicker<T>({
 }
 
 const styles = StyleSheet.create({
+  triggerRow: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
+  },
   trigger: {
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
@@ -128,6 +166,13 @@ const styles = StyleSheet.create({
     minHeight: 48,
     justifyContent: 'center',
     flex: 1,
+    minWidth: 0,
+  },
+  clearButton: {
+    width: 32,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   modalContainer: {
     flex: 1,

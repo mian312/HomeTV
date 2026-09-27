@@ -1,4 +1,3 @@
-import { Image } from 'expo-image';
 import { SymbolView } from 'expo-symbols';
 import { useState } from 'react';
 import { FlatList, Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
@@ -11,6 +10,7 @@ import {
   CardContent,
   ChannelAvatarStack,
   ChannelCard,
+  ChannelLogo,
   HorizontalList,
   Input,
   LoadingView,
@@ -317,25 +317,10 @@ function PlaylistChannelRow({
         { backgroundColor: colors.surface, borderColor: colors.borderMuted },
       ]}
     >
-      {channel.logoUrl ? (
-        <Image
-          source={{ uri: channel.logoUrl }}
-          style={[styles.channelLogo, { backgroundColor: colors.backgroundElement }]}
-          contentFit="contain"
-        />
-      ) : (
-        <View
-          style={[
-            styles.channelLogo,
-            styles.channelInitials,
-            { backgroundColor: colors.backgroundElement },
-          ]}
-        >
-          <ThemedText variant="titleSmall" themeColor="textSecondary">
-            {channel.name.slice(0, 2).toUpperCase()}
-          </ThemedText>
-        </View>
-      )}
+      <ChannelLogo
+        channel={channel}
+        style={[styles.channelLogo, { backgroundColor: colors.backgroundElement }]}
+      />
       <View style={styles.channelInfo}>
         <ThemedText numberOfLines={1} variant="titleSmall">
           {channel.name}
@@ -454,10 +439,6 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: Radius.sm,
-  },
-  channelInitials: {
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   channelInfo: {
     flex: 1,

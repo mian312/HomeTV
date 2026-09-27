@@ -1,4 +1,4 @@
-import { Image } from 'expo-image';
+import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 
@@ -16,6 +16,7 @@ import type { Channel } from '@/types/domain';
 import { SymbolView } from 'expo-symbols';
 import { ChannelDetails } from './channel-details';
 import { ChannelGuideSlider } from './channel-guide-slider';
+import { ChannelLogo } from './channel-logo';
 import { PlaylistPicker } from './playlist-picker';
 
 interface ChannelCardProps {
@@ -25,6 +26,7 @@ interface ChannelCardProps {
 }
 
 export function ChannelCard({ channel, onPress, style }: ChannelCardProps) {
+  const router = useRouter();
   const { colors } = useTheme();
   const [playlistPickerVisible, setPlaylistPickerVisible] = useState(false);
   const [detailsVisible, setDetailsVisible] = useState(false);
@@ -42,29 +44,27 @@ export function ChannelCard({ channel, onPress, style }: ChannelCardProps) {
     });
   };
 
+  const handleChannelPress = () => {
+    if (onPress) {
+      onPress(channel);
+      return;
+    }
+    router.push({ pathname: '/player/[channelId]', params: { channelId: channel.id } });
+  };
+
   return (
     <>
       <PressableCard
         variant="elevated"
-        onPress={onPress ? () => onPress(channel) : undefined}
+        onPress={handleChannelPress}
         style={[styles.card, style]}
         accessibilityLabel={channel.name}
       >
         <CardContent style={styles.content}>
-          {channel.logoUrl ? (
-            <Image
-              source={{ uri: channel.logoUrl }}
-              style={[styles.logoPlaceholder, { backgroundColor: colors.backgroundElement }]}
-              contentFit="contain"
-              transition={200}
-            />
-          ) : (
-            <View style={[styles.logoPlaceholder, { backgroundColor: colors.backgroundElement }]}>
-              <ThemedText style={[styles.initials, { color: colors.textSecondary }]}>
-                {channel.name.substring(0, 2).toUpperCase()}
-              </ThemedText>
-            </View>
-          )}
+          <ChannelLogo
+            channel={channel}
+            style={[styles.logoPlaceholder, { backgroundColor: colors.backgroundElement }]}
+          />
           <View style={styles.textContainer}>
             <ThemedText numberOfLines={1} style={styles.name}>
               {channel.name}
@@ -176,10 +176,6 @@ const styles = StyleSheet.create({
     borderRadius: 40,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  initials: {
-    fontSize: 24,
-    fontWeight: 'bold',
   },
   name: {
     fontWeight: '600',

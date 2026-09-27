@@ -17,7 +17,12 @@ export default function ChannelsScreen() {
     },
   });
 
-  const { data: channels, isLoading: channelsLoading, isError: channelsError, refetch } = useChannels();
+  const {
+    data: channels,
+    isLoading: channelsLoading,
+    isError: channelsError,
+    refetch,
+  } = useChannels();
   const { data: categories } = useCategories();
   const { data: countries } = useCountries();
 
@@ -28,8 +33,8 @@ export default function ChannelsScreen() {
   const filteredChannels = useMemo(() => {
     if (!channels) return [];
     const query = searchQuery.trim().toLowerCase();
-    
-    return channels.filter(c => {
+
+    return channels.filter((c) => {
       if (selectedCategory && !c.categories.includes(selectedCategory)) return false;
       if (selectedCountry && c.country !== selectedCountry) return false;
       if (query) {
@@ -81,23 +86,23 @@ export default function ChannelsScreen() {
                   containerStyle={styles.searchContainer}
                 />
               </ThemedView>
-              
+
               <View style={styles.filtersRow}>
                 {categories && (
                   <ModalPicker
                     title="Select Category"
                     placeholder="Categories"
-                    items={categories.map(c => ({ label: c.name, value: c.id }))}
+                    items={categories.map((c) => ({ label: c.name, value: c.id }))}
                     selectedValue={selectedCategory}
                     onValueChange={setSelectedCategory}
                   />
                 )}
-                
+
                 {countries && (
                   <ModalPicker
                     title="Select Country"
                     placeholder="Countries"
-                    items={countries.map(c => ({ label: c.name, value: c.code }))}
+                    items={countries.map((c) => ({ label: c.name, value: c.code }))}
                     selectedValue={selectedCountry}
                     onValueChange={setSelectedCountry}
                   />

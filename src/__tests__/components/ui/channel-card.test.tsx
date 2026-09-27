@@ -1,4 +1,5 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
+import { useRouter } from 'expo-router';
 
 import { ChannelCard } from '@/components/ui/channel-card';
 import { HorizontalList } from '@/components/ui/horizontal-list';
@@ -55,12 +56,19 @@ const mockUseCreatePlaylist = jest.mocked(useCreatePlaylist);
 const mockUseAddPlaylistItem = jest.mocked(useAddPlaylistItem);
 const mockUseRemovePlaylistItem = jest.mocked(useRemovePlaylistItem);
 const mockUseGuide = jest.mocked(useGuide);
+const mockUseRouter = jest.mocked(useRouter);
+const navigateToPlayer = jest.fn();
 const addPlaylistItem = jest.fn();
 const removePlaylistItem = jest.fn();
 const createPlaylist = jest.fn();
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockUseRouter.mockReturnValue({
+    push: navigateToPlayer,
+    back: jest.fn(),
+    replace: jest.fn(),
+  } as never);
   mockUseGuide.mockReturnValue({
     data: [],
     isLoading: false,
@@ -96,6 +104,16 @@ describe('ChannelCard', () => {
     render(<ChannelCard channel={mockChannel} onPress={onPress} />);
     fireEvent.press(screen.getByRole('button', { name: 'Test Channel' }));
     expect(onPress).toHaveBeenCalledWith(mockChannel);
+  });
+
+  it('opens the player when a channel card is pressed without a custom handler', () => {
+    render(<ChannelCard channel={mockChannel} />);
+    fireEvent.press(screen.getByRole('button', { name: 'Test Channel' }));
+
+    expect(navigateToPlayer).toHaveBeenCalledWith({
+      pathname: '/player/[channelId]',
+      params: { channelId: mockChannel.id },
+    });
   });
 
   it('shows how many playlists contain the channel', () => {

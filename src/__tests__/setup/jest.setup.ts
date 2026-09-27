@@ -55,7 +55,7 @@ jest.mock('expo-crypto', () => ({
 
 // Mock expo-router (navigation primitives not available in tests)
 jest.mock('expo-router', () => ({
-  useRouter: () => ({ push: jest.fn(), back: jest.fn(), replace: jest.fn() }),
+  useRouter: jest.fn(() => ({ push: jest.fn(), back: jest.fn(), replace: jest.fn() })),
   useLocalSearchParams: () => ({}),
   useSegments: () => [],
   Link: ({ children }: { children: React.ReactNode }) => children,

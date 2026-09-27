@@ -1,10 +1,10 @@
-import { Image } from 'expo-image';
 import { StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import type { Channel } from '@/types/domain';
+import { ChannelLogo } from './channel-logo';
 
 interface ChannelAvatarStackProps {
   readonly channels: readonly Channel[];
@@ -31,13 +31,7 @@ export function ChannelAvatarStack({
             { backgroundColor: colors.backgroundElement, borderColor: colors.backgroundElevated },
           ]}
         >
-          {channel.logoUrl ? (
-            <Image source={{ uri: channel.logoUrl }} style={styles.image} contentFit="contain" />
-          ) : (
-            <ThemedText variant="caption" style={{ color: colors.textSecondary }}>
-              {channel.name.slice(0, 1).toUpperCase()}
-            </ThemedText>
-          )}
+          <ChannelLogo channel={channel} style={styles.image} initialsLength={1} />
         </View>
       ))}
       {overflow > 0 ? (

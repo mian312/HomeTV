@@ -1,4 +1,3 @@
-import { Image } from 'expo-image';
 import { SymbolView } from 'expo-symbols';
 import { Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
@@ -6,6 +5,7 @@ import { ThemedText } from '@/components/themed-text';
 import { Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import type { Channel } from '@/types/domain';
+import { ChannelLogo } from './channel-logo';
 
 interface ChannelDetailsProps {
   readonly channel: Channel;
@@ -37,25 +37,10 @@ export function ChannelDetails({ channel, visible, onClose }: ChannelDetailsProp
           <ScrollView contentContainerStyle={styles.content}>
             <View style={styles.header}>
               <View style={styles.identity}>
-                {channel.logoUrl ? (
-                  <Image
-                    source={{ uri: channel.logoUrl }}
-                    style={[styles.logo, { backgroundColor: colors.backgroundElement }]}
-                    contentFit="contain"
-                  />
-                ) : (
-                  <View
-                    style={[
-                      styles.logo,
-                      styles.initials,
-                      { backgroundColor: colors.backgroundElement },
-                    ]}
-                  >
-                    <ThemedText variant="titleLarge" themeColor="textSecondary">
-                      {channel.name.slice(0, 2).toUpperCase()}
-                    </ThemedText>
-                  </View>
-                )}
+                <ChannelLogo
+                  channel={channel}
+                  style={[styles.logo, { backgroundColor: colors.backgroundElement }]}
+                />
                 <View style={styles.titleBlock}>
                   <ThemedText variant="headlineSmall" numberOfLines={2}>
                     {channel.name}
@@ -141,10 +126,6 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: Radius.md,
-  },
-  initials: {
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   titleBlock: {
     flex: 1,

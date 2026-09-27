@@ -46,8 +46,21 @@ export class IptvOrgProvider implements IptvProvider {
   }
 
   async getChannels(): Promise<readonly Channel[]> {
-    const raw = await this.fetchApi<Types.ChannelData[]>('/channels.json');
-    return raw.map(mapChannel);
+    const [raw, logos] = await Promise.all([
+      this.fetchApi<Types.ChannelData[]>('/channels.json'),
+      this.fetchApi<Types.LogoData[]>('/logos.json').catch(() => []),
+    ]);
+    const logoByChannel = new Map<string, Types.LogoData>();
+
+    for (const logo of logos) {
+      if (!logo.in_use) continue;
+      const current = logoByChannel.get(logo.channel);
+      if (!current || getLogoPriority(logo) > getLogoPriority(current)) {
+        logoByChannel.set(logo.channel, logo);
+      }
+    }
+
+    return raw.map((channel) => mapChannel(channel, logoByChannel.get(channel.id)?.url ?? null));
   }
 
   async getStreams(channelId: ChannelId): Promise<readonly Stream[]> {
@@ -91,7 +104,7 @@ export class IptvOrgProvider implements IptvProvider {
 // Mappers (T009: Establish domain data mapping)
 // ---------------------------------------------------------------------------
 
-function mapChannel(raw: Types.ChannelData): Channel {
+function mapChannel(raw: Types.ChannelData, logoUrl: string | null = null): Channel {
   return {
     id: raw.id as ChannelId,
     name: raw.name,
@@ -103,13 +116,23 @@ function mapChannel(raw: Types.ChannelData): Channel {
     categories: (raw.categories as CategoryId[]) || [],
     languages: [], // Need cross-reference or we ignore for now, wait, ChannelData might not have it directly
     isNsfw: raw.is_nsfw ?? false,
-    logoUrl: null, // Logo is separate in iptv-org API, wait, we might need it?
-    // We will leave logoUrl null here and join it in the UI/Query layer if needed, or
-    // update this if we find a way to get it directly. Actually, the UI can fall back to name.
+    logoUrl,
     website: raw.website || null,
     launched: raw.launched || null,
     closed: raw.closed || null,
   };
+}
+
+function getLogoPriority(logo: Types.LogoData): number {
+  switch (logo.format?.toUpperCase()) {
+    case 'PNG':
+    case 'WEBP':
+    case 'JPEG':
+    case 'JPG':
+      return 2;
+    default:
+      return 1;
+  }
 }
 
 function mapStream(raw: Types.StreamData, channelId: ChannelId): Stream {

@@ -1,4 +1,3 @@
-import { Image } from 'expo-image';
 import { SymbolView } from 'expo-symbols';
 import { useState } from 'react';
 import { FlatList, Pressable, StyleSheet, View } from 'react-native';
@@ -8,6 +7,7 @@ import { Radius, Spacing } from '@/constants/theme';
 import { useGuide } from '@/data/queries/iptv';
 import { useTheme } from '@/hooks/use-theme';
 import type { Channel, GuideEntry } from '@/types/domain';
+import { ChannelLogo } from './channel-logo';
 import { SlideUpSheet } from './slide-up-sheet';
 
 type GuideRange = 'day' | 'past' | 'future';
@@ -45,21 +45,7 @@ export function ChannelGuideSlider({ channel, onClose }: ChannelGuideSliderProps
       <View style={styles.content}>
         <View style={styles.header}>
           <View style={styles.channelHeading}>
-            {channel.logoUrl ? (
-              <Image source={{ uri: channel.logoUrl }} style={styles.logo} contentFit="contain" />
-            ) : (
-              <View
-                style={[
-                  styles.logo,
-                  styles.logoFallback,
-                  { backgroundColor: colors.backgroundElement },
-                ]}
-              >
-                <ThemedText variant="titleSmall" themeColor="textSecondary">
-                  {channel.name.slice(0, 2).toUpperCase()}
-                </ThemedText>
-              </View>
-            )}
+            <ChannelLogo channel={channel} style={styles.logo} />
             <View style={styles.titleGroup}>
               <ThemedText variant="headlineSmall" numberOfLines={1}>
                 {channel.name}
@@ -205,10 +191,6 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: Radius.sm,
-  },
-  logoFallback: {
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   titleGroup: {
     flex: 1,

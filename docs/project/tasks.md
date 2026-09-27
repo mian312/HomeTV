@@ -24,15 +24,15 @@ Detailed task queue and development history. Current implementation truth is in 
 | T014 | 4 | Build global search | Multi-scope search works | COMPLETED | Added `Input` search bar at the top of the `channels.tsx` catalog | `npx tsc --noEmit` ✓ | Simple client-side text filter over TanStack Query cache | See Git history | |
 | T015 | 5 | Implement favorites | Favorites persist locally | COMPLETED | Added SQLite hook and favorite toggle on ChannelCard | `npx tsc --noEmit` ✓ | Favorites hydrate channel objects via query client | See Git history | |
 | T016 | 5 | Implement recently watched | Latest 20 channels persist correctly | COMPLETED | Added hook, rendered history horizontally on Library screen | `npx tsc --noEmit` ✓ | Recently watched hydrates the same way as favorites | See Git history | |
-| T017 | 5 | Implement playlists | Users can create playlists, add/remove channels, preview membership, and browse playlist contents | COMPLETED | Added playlist creation, channel-card add/remove picker, membership counts, and draggable playlist details with three channel avatars plus `+N` and a removable channel list | `npx tsc --noEmit` ✓, `npx expo lint` ✓, Jest ✓, Prettier ✓ | SQLite remains the persistence owner; playback is handled separately in T020/T021 | See Git history | |
+| T017 | 5 | Implement playlists | Users can create playlists, add/remove channels, preview membership, and browse playlist contents | COMPLETED | Added playlist creation, channel-card add/remove picker, membership counts, and draggable playlist details with three channel avatars plus `+N` and a removable channel list | `npx tsc --noEmit` ✓, `npx expo lint` ✓, Jest ✓, Prettier ✓ | SQLite remains the persistence owner; playlist-to-player launch is part of T026 | See Git history | |
 | T018 | 6 | Establish EPG data layer | EPG data is mapped independently of UI | COMPLETED | Added `getGuide` to `IptvOrgProvider` with a deterministic mock EPG generator, mapped to `domain.ts` `GuideEntry` | `npx tsc --noEmit` ✓ | iptv-org EPG data is XMLTV which is too expensive for client-side RN parsing. Mocked deterministically to prove the data layer architecture | See Git history | |
 | T019 | 6 | Build TV Guide | Channel guide is opened on demand from its card with past/current/future schedules | COMPLETED | Removed the Guide tab; added a draggable channel-card guide sheet with next-24-hours, past-3-days, and next-7-days filters and a live-program badge | `npx tsc --noEmit` ✓, `npx expo lint` ✓, Jest ✓, Prettier ✓ | Guide stays contextual to a channel; mock EPG spans the selected windows | See Git history | |
-| T020 | 7 | Establish player architecture | Player responsibilities are isolated and reusable | TODO | | | | | |
-| T021 | 7 | Implement video playback | expo-video playback and controls work | TODO | | | | | |
-| T022 | 7 | Implement stream fallback | Alternate streams are attempted after failure | TODO | | | | | |
-| T023 | 7 | Implement player error states | Offline/unstable/unavailable states are clear | TODO | | | | | |
-| T024 | 7 | Implement player gestures | Double tap and swipe gestures work correctly | TODO | | | | | |
-| T025 | 7 | Implement fullscreen/orientation | Fullscreen transitions work reliably | TODO | | | | | |
+| T020 | 7 | Establish player architecture | Player responsibilities are isolated and reusable | COMPLETED | Added player-session hook, source adapter, dynamic route, and reusable video-player component | `npx tsc --noEmit` ✓, `npx expo lint` ✓ | Expo Video lifecycle lives in a feature hook; route resolves the channel and renders the player | See Git history | |
+| T021 | 7 | Implement video playback | expo-video playback and controls work | COMPLETED | Added stream loading, playback controls, and a seek timeline | `npx tsc --noEmit` ✓, Jest ✓ | Stream headers pass through; HLS URLs are identified as HLS sources | See Git history | |
+| T022 | 7 | Implement stream fallback | Alternate streams are attempted after failure | COMPLETED | Automatically tries alternate streams on player errors; supports manual alternate selection and retry | Jest ✓ | Automatic failover stops while offline; retry restarts the stream sequence | See Git history | |
+| T023 | 7 | Implement player error states | Offline/unstable/unavailable states are clear | COMPLETED | Added offline, stream-loading failure, no-stream, and player-error states with retry | Jest ✓ | Network state comes from NetInfo; provider and player failures remain distinct | See Git history | |
+| T024 | 7 | Implement player gestures | Double tap and swipe gestures work correctly | COMPLETED | Added double-tap seeking and horizontal seek/vertical volume gestures with feedback | `npx expo lint` ✓, Jest ✓ | Gesture thresholds and action mapping are unit-tested | See Git history | |
+| T025 | 7 | Implement fullscreen/orientation | Fullscreen transitions work reliably | COMPLETED | Added VideoView fullscreen controls and landscape lock with portrait restoration | `npx tsc --noEmit` ✓ | Tabs and normal player remain portrait; fullscreen opts into landscape | See Git history | |
 | T026 | 8 | Integrate end-to-end flows | Browse → channel → player → history/favorites works | TODO | | | | | |
 | T027 | 8 | Accessibility/UX pass | Core UI is accessible and consistent | TODO | | | | | |
 | T028 | 8 | Performance pass | Large IPTV datasets and images remain responsive | TODO | | | | | |
@@ -55,10 +55,10 @@ Detailed task queue and development history. Current implementation truth is in 
 
 ## Current Checkpoint
 
-- **Current Phase:** 7 — Player Architecture and Playback.
-- **Current Task:** T020
-- **Last Completed Tasks:** T018, T019
+- **Current Phase:** 8 — End-to-End Integration and Validation.
+- **Current Task:** T026
+- **Last Completed Tasks:** T020, T021, T022, T023, T024, T025
 - **Last Commit:** See Git history.
-- **Next Task:** T020 — Establish player architecture.
-- **Known Issues:** None.
-- **Next Expected Outcome:** Player boundaries and abstraction created.
+- **Next Task:** T026 — Integrate end-to-end flows.
+- **Known Issues:** `npx expo-doctor` reports the existing `@types/jest` 30.0.0 differs from SDK 57's expected 29.5.14; TypeScript, lint, and Jest pass.
+- **Next Expected Outcome:** Browse → channel → player → history/favorites flows are connected.

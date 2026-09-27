@@ -12,8 +12,14 @@ export default function HomeScreen() {
 
   // Pick some categories for the home screen (just arbitrary slices for now)
   const featured = useMemo(() => channels?.slice(0, 10) ?? [], [channels]);
-  const news = useMemo(() => channels?.filter(c => c.categories.includes('news' as any)).slice(0, 10) ?? [], [channels]);
-  const music = useMemo(() => channels?.filter(c => c.categories.includes('music' as any)).slice(0, 10) ?? [], [channels]);
+  const news = useMemo(
+    () => channels?.filter((c) => c.categories.includes('news' as any)).slice(0, 10) ?? [],
+    [channels],
+  );
+  const music = useMemo(
+    () => channels?.filter((c) => c.categories.includes('music' as any)).slice(0, 10) ?? [],
+    [channels],
+  );
 
   if (isLoading) {
     return <LoadingView message="Loading channels..." />;
@@ -33,7 +39,7 @@ export default function HomeScreen() {
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => <ChannelCard channel={item} />}
           />
-          
+
           {news.length > 0 && (
             <HorizontalList
               title="News"
