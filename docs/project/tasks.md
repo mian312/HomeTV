@@ -12,7 +12,7 @@ Detailed task queue and development history. Current implementation truth is in 
 | T002 | 1 | Establish project architecture | Clean feature/domain/data boundaries exist | COMPLETED | Created `src/types/domain.ts` (branded IDs, domain models, AsyncState); `src/data/providers/provider.ts` (IptvProvider interface + ProviderError); `src/data/repositories/repositories.ts` (Favorites/RecentlyWatched/Playlist/Settings interfaces); `src/lib/query-client.ts` (TanStack Query client with cache-first defaults); `src/lib/providers.tsx` (root AppProviders); moved theme store to `src/stores/theme.ts` with stricter ThemeMode type; enhanced `useTheme()` → ThemeResult with colors/scheme/isDark; updated all consumers; wired AppProviders into root layout | `tsc --noEmit` ✓, `expo lint` ✓, `git diff --check` ✓ | Use branded IDs for compile-time safety; widen ThemeColors for `as const` compat; keep AppProviders composition for easy extension | See Git history | |
 | T003 | 1 | Establish theme/design system | Light/dark/system themes and centralized UI tokens work | COMPLETED | Extended `Colors` to full semantic OTT palette (30+ tokens per scheme); added `Typography` (13 named presets); added `Radius` (7 levels); added `Elevation` (5 shadow presets); added `Motion` (timing + spring configs); renamed Spacing to semantic names with legacy aliases; `useTheme()` now returns full design system; `ThemedText` supports `variant` prop with legacy `type` compat; `ThemedView` simplified; `ThemeToggleWrapper` uses tokens | `tsc --noEmit` ✓, `expo lint` ✓, `git diff --check` ✓ | Preserve legacy Spacing aliases and `type` prop for starter UI backward compat; will remove when starter screens are replaced | See Git history | |
 | T004 | 1 | React Native Reusables / reusable UI foundation | Common OTT UI components are reusable and consistent | COMPLETED | Created `Button` (6 variants, scale animation), `Badge` (6 variants), `Card`+`PressableCard` (4 variants + sub-sections), `Input` (focus ring, label, error, adornments), `Separator`, `Skeleton`+`SkeletonRow` (Reanimated pulse), `SectionHeader` (OTT pattern), `LoadingView`/`EmptyView`/`ErrorView`/`OfflineView` (explicit async states); barrel index at `src/components/ui/index.ts`; all use `useTheme()` tokens, no NativeWind | `tsc --noEmit` ✓, `expo lint` ✓, `git diff --check` ✓ | NativeWind dropped — conflicts with our token-based design system; RNR pattern adopted as copy-paste/own-the-code without the CLI dependency | See Git history | |
-| T005 | 1 | Establish quality tooling | Strict TS, ESLint, Prettier and tests work | TODO | | | | | Jest installed; test config/RTL missing |
+| T005 | 1 | Establish quality tooling | Strict TS, ESLint, Prettier and tests work | COMPLETED | Installed `@testing-library/react-native`, added `jest.config.js` with RNTL built-in matchers, created manual mocks for `expo-router`/`react-native-reanimated`/`expo-splash-screen`, added `.prettierrc`, added 43 tests across 3 suites | `npm test` ✓, `npm run format:check` ✓ | RNTL v13 built-in matchers used instead of deprecated jest-native. Manual Reanimated mock prevents native-module crashes in Jest. | See Git history | |
 | T006 | 2 | Establish SQLite foundation | Versioned database and migrations work | TODO | | | | | |
 | T007 | 2 | Establish local repositories | Persistent data uses repository boundaries | TODO | | | | | |
 | T008 | 3 | Integrate iptv-org SDK | IPTV data is accessible through a provider abstraction | TODO | | | | | |
@@ -55,10 +55,10 @@ Detailed task queue and development history. Current implementation truth is in 
 
 ## Current Checkpoint
 
-- **Current Phase:** 1 — UI foundation complete; quality tooling next.
-- **Current Task:** T005
-- **Last Completed Tasks:** T004
+- **Current Phase:** 2 — data foundation and sqlite start.
+- **Current Task:** T006
+- **Last Completed Tasks:** T005
 - **Last Commit:** See Git history.
-- **Next Task:** T005 — establish quality tooling (Jest config, React Native Testing Library).
-- **Known Issues:** Starter UI remains; AsyncStorage theme persistence (migration deferred to T007); no tests yet.
-- **Next Expected Outcome:** Working Jest + RNTL setup with at least one test per UI component.
+- **Next Task:** T006 — Establish SQLite foundation (Versioned database and migrations work).
+- **Known Issues:** Starter UI remains; AsyncStorage theme persistence (migration deferred to T007).
+- **Next Expected Outcome:** SQLite schema and migrations set up for favorites/recently watched/settings.

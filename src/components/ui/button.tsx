@@ -206,6 +206,7 @@ export function Button({
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
       accessibilityState={{ disabled: isDisabled }}
+      disabled={isDisabled}
       testID={testID}
       style={[
         styles.base,

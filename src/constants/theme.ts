@@ -9,8 +9,6 @@
  * New token groups: Typography, Radius, Elevation, Motion.
  */
 
-import '@/global.css';
-
 import { Platform, TextStyle, ViewStyle } from 'react-native';
 
 // ---------------------------------------------------------------------------
