@@ -1,8 +1,18 @@
+/**
+ * ThemeToggleWrapper — floating button that cycles theme modes.
+ *
+ * Uses design system tokens for spacing, radius, and elevation.
+ * This is a development utility; it may be replaced by a settings
+ * screen toggle in the future.
+ */
+
 import React from 'react';
 import { StyleSheet, Pressable, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useThemeStore } from '@/stores/theme';
+
+import { Elevation, MinTouchTarget, Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { useThemeStore } from '@/stores/theme';
 
 export function ThemeToggleWrapper({ children }: { children: React.ReactNode }) {
   const { mode, setMode } = useThemeStore();
@@ -27,12 +37,15 @@ export function ThemeToggleWrapper({ children }: { children: React.ReactNode }) 
         onPress={handleToggle}
         style={[
           styles.floatingButton,
-          { backgroundColor: colors.backgroundElement, borderColor: colors.backgroundSelected },
+          {
+            backgroundColor: colors.backgroundElevated,
+            borderColor: colors.border,
+          },
         ]}
         accessibilityRole="button"
         accessibilityLabel={`Switch theme. Current: ${mode}`}
       >
-        <Ionicons name={getIcon()} size={28} color={colors.text} />
+        <Ionicons name={getIcon()} size={24} color={colors.icon} />
       </Pressable>
     </View>
   );
@@ -44,19 +57,15 @@ const styles = StyleSheet.create({
   },
   floatingButton: {
     position: 'absolute',
-    bottom: 40,
-    right: 24,
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    bottom: Spacing.xxxl + Spacing.sm,
+    right: Spacing.xxl,
+    width: MinTouchTarget + Spacing.md,
+    height: MinTouchTarget + Spacing.md,
+    borderRadius: Radius.full,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 5,
+    ...Elevation.md,
     zIndex: 999,
   },
 });
