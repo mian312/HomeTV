@@ -1,101 +1,74 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
+import { StyleSheet, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemeToggleWrapper } from '@/components/theme-toggle';
-import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
-
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
-  return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
-}
+import { ChannelCard, HorizontalList, LoadingView, ErrorView } from '@/components/ui';
+import { useChannels } from '@/data/queries/iptv';
+import { MaxContentWidth, Spacing } from '@/constants/theme';
+import { useMemo } from 'react';
 
 export default function HomeScreen() {
+  const { data: channels, isLoading, isError, refetch } = useChannels();
+
+  // Pick some categories for the home screen (just arbitrary slices for now)
+  const featured = useMemo(() => channels?.slice(0, 10) ?? [], [channels]);
+  const news = useMemo(() => channels?.filter(c => c.categories.includes('news' as any)).slice(0, 10) ?? [], [channels]);
+  const music = useMemo(() => channels?.filter(c => c.categories.includes('music' as any)).slice(0, 10) ?? [], [channels]);
+
+  if (isLoading) {
+    return <LoadingView message="Loading channels..." />;
+  }
+
+  if (isError) {
+    return <ErrorView message="Failed to load channels" onRetry={refetch} />;
+  }
+
   return (
-    <ThemeToggleWrapper>
-      <ThemedView style={styles.container}>
-        <SafeAreaView style={styles.safeArea}>
-          <ThemedView style={styles.heroSection}>
-            <AnimatedIcon />
-            <ThemedText type="title" style={styles.title}>
-              Welcome to&nbsp;Expo
-            </ThemedText>
-          </ThemedView>
-
-          <ThemedText type="code" style={styles.code}>
-            get started
-          </ThemedText>
-
-          <ThemedView type="backgroundElement" style={styles.stepContainer}>
-            <HintRow
-              title="Try editing"
-              hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
+    <ThemedView style={styles.container}>
+      <SafeAreaView style={styles.safeArea}>
+        <ScrollView contentContainerStyle={styles.scrollContent}>
+          <HorizontalList
+            title="Featured Channels"
+            data={featured}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => <ChannelCard channel={item} />}
+          />
+          
+          {news.length > 0 && (
+            <HorizontalList
+              title="News"
+              data={news}
+              keyExtractor={(item) => item.id}
+              renderItem={({ item }) => <ChannelCard channel={item} />}
             />
-            <HintRow title="Dev tools" hint={getDevMenuHint()} />
-            <HintRow
-              title="Fresh start"
-              hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-            />
-          </ThemedView>
+          )}
 
-          {Platform.OS === 'web' && <WebBadge />}
-        </SafeAreaView>
-      </ThemedView>
-    </ThemeToggleWrapper>
+          {music.length > 0 && (
+            <HorizontalList
+              title="Music"
+              data={music}
+              keyExtractor={(item) => item.id}
+              renderItem={({ item }) => <ChannelCard channel={item} />}
+            />
+          )}
+        </ScrollView>
+      </SafeAreaView>
+    </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
+    alignItems: 'center', // Center on large screens
   },
   safeArea: {
     flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
+    width: '100%',
     maxWidth: MaxContentWidth,
   },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
-  },
-  title: {
-    textAlign: 'center',
-  },
-  code: {
-    textTransform: 'uppercase',
-  },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
+  scrollContent: {
     paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
+    gap: Spacing.four,
   },
 });
