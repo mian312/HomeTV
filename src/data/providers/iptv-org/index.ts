@@ -80,10 +80,10 @@ export class IptvOrgProvider implements IptvProvider {
   }
 
   async getGuide(channelId: ChannelId): Promise<readonly GuideEntry[]> {
-    // iptv-org has guides in a separate repo/structure.
-    // We return empty for now since we don't have a direct JSON endpoint for all guides yet,
-    // or we'll need to parse XMLTV later.
-    return [];
+    // iptv-org guides are massive XMLTV files which are expensive to parse in RN.
+    // For V1, we simulate EPG data deterministically based on the channel ID.
+    // This allows us to build the TV Guide UI correctly against our domain model.
+    return generateMockGuide(channelId);
   }
 }
 
@@ -142,4 +142,57 @@ function mapLanguage(raw: Types.LanguageData): Language {
     code: raw.code as LanguageCode,
     name: raw.name,
   };
+}
+
+// ---------------------------------------------------------------------------
+// Mock EPG Generator
+// ---------------------------------------------------------------------------
+
+function generateMockGuide(channelId: ChannelId): GuideEntry[] {
+  // Generate deterministic but realistic-looking program schedules for today
+  const now = new Date();
+  // Start schedule at midnight today
+  const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+  
+  // Use char codes of channel ID to seed the deterministic random
+  const seed = Array.from(channelId).reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  
+  const programTypes = [
+    { name: 'Morning News', duration: 120 },
+    { name: 'Talk Show', duration: 60 },
+    { name: 'Documentary', duration: 90 },
+    { name: 'Sports Highlights', duration: 30 },
+    { name: 'Cooking Masterclass', duration: 60 },
+    { name: 'Movie: The Adventure', duration: 120 },
+    { name: 'Local News', duration: 30 },
+    { name: 'Game Show', duration: 60 },
+    { name: 'Sitcom', duration: 30 },
+    { name: 'Late Night Talk', duration: 60 },
+  ];
+
+  const entries: GuideEntry[] = [];
+  let currentTime = startOfDay.getTime();
+  
+  // Generate 48 hours of programming
+  for (let i = 0; i < 48; i++) {
+    // Deterministic selection based on seed and index
+    const pIndex = (seed + i * 13) % programTypes.length;
+    const program = programTypes[pIndex];
+    
+    const startTime = new Date(currentTime);
+    const endTime = new Date(currentTime + program.duration * 60 * 1000);
+    
+    entries.push({
+      channelId,
+      title: program.name,
+      description: `Watch ${program.name} on ${channelId}. This is a simulated EPG description for demonstration purposes.`,
+      start: startTime,
+      end: endTime,
+      icon: null,
+    });
+    
+    currentTime = endTime.getTime();
+  }
+  
+  return entries;
 }

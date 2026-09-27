@@ -25,8 +25,8 @@ Detailed task queue and development history. Current implementation truth is in 
 | T015 | 5 | Implement favorites | Favorites persist locally | COMPLETED | Added SQLite hook and favorite toggle on ChannelCard | `npx tsc --noEmit` ✓ | Favorites hydrate channel objects via query client | See Git history | |
 | T016 | 5 | Implement recently watched | Latest 20 channels persist correctly | COMPLETED | Added hook, rendered history horizontally on Library screen | `npx tsc --noEmit` ✓ | Recently watched hydrates the same way as favorites | See Git history | |
 | T017 | 5 | Implement playlists | Users can create playlists, add/remove channels, preview membership, and browse playlist contents | COMPLETED | Added playlist creation, channel-card add/remove picker, channel membership counts, playlist channel previews, and a removable channel detail list in Library | `npx tsc --noEmit` ✓, `npx expo lint` ✓, Jest 49 tests ✓, Prettier ✓ | SQLite remains the persistence owner; playback is handled separately in T020/T021 | See Git history | |
-| T018 | 6 | Establish EPG data layer | EPG data is mapped independently of UI | TODO | | | | | |
-| T019 | 6 | Build TV Guide | Current/upcoming programs are usable | TODO | | | | | |
+| T018 | 6 | Establish EPG data layer | EPG data is mapped independently of UI | COMPLETED | Added `getGuide` to `IptvOrgProvider` with a deterministic mock EPG generator, mapped to `domain.ts` `GuideEntry` | `npx tsc --noEmit` ✓ | iptv-org EPG data is XMLTV which is too expensive for client-side RN parsing. Mocked deterministically to prove the data layer architecture | See Git history | |
+| T019 | 6 | Build TV Guide | Current/upcoming programs are usable | COMPLETED | Created `src/app/guide.tsx` with a virtualized vertical list of channels and horizontal nested lists of upcoming programs | `npx tsc --noEmit` ✓ | Used `initialNumToRender` and windowSize to handle large lists; added a Guide tab to `AppTabs` | See Git history | |
 | T020 | 7 | Establish player architecture | Player responsibilities are isolated and reusable | TODO | | | | | |
 | T021 | 7 | Implement video playback | expo-video playback and controls work | TODO | | | | | |
 | T022 | 7 | Implement stream fallback | Alternate streams are attempted after failure | TODO | | | | | |
@@ -55,10 +55,10 @@ Detailed task queue and development history. Current implementation truth is in 
 
 ## Current Checkpoint
 
-- **Current Phase:** 6 — EPG (TV Guide).
-- **Current Task:** T018
-- **Last Completed Tasks:** T017, T016, T015
+- **Current Phase:** 7 — Player Architecture and Playback.
+- **Current Task:** T020
+- **Last Completed Tasks:** T018, T019
 - **Last Commit:** See Git history.
-- **Next Task:** T018 — Establish EPG data layer (EPG data is mapped independently of UI).
+- **Next Task:** T020 — Establish player architecture.
 - **Known Issues:** None.
-- **Next Expected Outcome:** An EPG provider and mapping logic is implemented.
+- **Next Expected Outcome:** Player boundaries and abstraction created.

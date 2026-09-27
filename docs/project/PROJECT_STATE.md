@@ -13,9 +13,9 @@ This is a verified implementation snapshot. `tasks.md` is the task/history recor
 
 ## Current milestone and next task
 
-- Phase: 6 — EPG (TV Guide).
-- Last completed task: T017 implement playlists.
-- Next planned task: T018 establish EPG data layer.
+- Phase: 7 — Player Architecture and Playback.
+- Last completed task: T019 Build TV Guide.
+- Next planned task: T020 Establish player architecture.
 
 ## Implemented design system (`src/constants/theme.ts`)
 
@@ -89,6 +89,7 @@ Timing presets: `fast` (150ms), `normal` (250ms), `slow` (400ms). Spring configs
 - `src/app/index.tsx` (Home screen with categorized horizontal lists)
 - `src/app/channels.tsx` (Channels screen with grid, search, and filtering)
 - `src/app/library.tsx` (Library screen with favorites, history, playlist creation/overview, and playlist detail)
+- `src/app/guide.tsx` (TV Guide screen with horizontal timelines of programs for each channel)
 
 All routes beyond these are planned, not implemented.
 
@@ -116,7 +117,6 @@ All routes beyond these are planned, not implemented.
 
 ## Not implemented yet
 
-- EPG screen and business logic.
 - Isolated video player, fallback, and player error UX.
 - Full accessibility/performance/device validation.
 
