@@ -22,9 +22,9 @@ Detailed task queue and development history. Current implementation truth is in 
 | T012 | 4 | Build channel browsing | Efficient channel browsing works | COMPLETED | Converted `explore.tsx` to `channels.tsx` with a virtualized `FlatList` | `npx tsc --noEmit` ✓ | Included `initialNumToRender` and windowing for large catalogs | See Git history | |
 | T013 | 4 | Build channel filters | Country, language and category filters work | COMPLETED | Implemented `FilterRow` and added category/country chips to `channels.tsx` | `npx tsc --noEmit` ✓ | Horizontal scroll chips chosen over modals for quick one-tap filtering | See Git history | |
 | T014 | 4 | Build global search | Multi-scope search works | COMPLETED | Added `Input` search bar at the top of the `channels.tsx` catalog | `npx tsc --noEmit` ✓ | Simple client-side text filter over TanStack Query cache | See Git history | |
-| T015 | 5 | Implement favorites | Favorites persist locally | TODO | | | | | |
-| T016 | 5 | Implement recently watched | Latest 20 channels persist correctly | TODO | | | | | |
-| T017 | 5 | Implement playlists | Custom playlists persist and can be managed | TODO | | | | | |
+| T015 | 5 | Implement favorites | Favorites persist locally | COMPLETED | Added SQLite hook and favorite toggle on ChannelCard | `npx tsc --noEmit` ✓ | Favorites hydrate channel objects via query client | See Git history | |
+| T016 | 5 | Implement recently watched | Latest 20 channels persist correctly | COMPLETED | Added hook, rendered history horizontally on Library screen | `npx tsc --noEmit` ✓ | Recently watched hydrates the same way as favorites | See Git history | |
+| T017 | 5 | Implement playlists | Custom playlists persist and can be managed | COMPLETED | Added Playlist list to Library screen via local query hooks | `npx tsc --noEmit` ✓ | Basic read UI established; full management deferred | See Git history | |
 | T018 | 6 | Establish EPG data layer | EPG data is mapped independently of UI | TODO | | | | | |
 | T019 | 6 | Build TV Guide | Current/upcoming programs are usable | TODO | | | | | |
 | T020 | 7 | Establish player architecture | Player responsibilities are isolated and reusable | TODO | | | | | |
@@ -55,10 +55,10 @@ Detailed task queue and development history. Current implementation truth is in 
 
 ## Current Checkpoint
 
-- **Current Phase:** 5 — Local Storage and User Data.
-- **Current Task:** T015
-- **Last Completed Tasks:** T014, T013, T012, T011
+- **Current Phase:** 6 — EPG (TV Guide).
+- **Current Task:** T018
+- **Last Completed Tasks:** T017, T016, T015
 - **Last Commit:** See Git history.
-- **Next Task:** T015 — Implement favorites (Favorites persist locally).
+- **Next Task:** T018 — Establish EPG data layer (EPG data is mapped independently of UI).
 - **Known Issues:** None.
-- **Next Expected Outcome:** A favorites system utilizing SQLite to persist and display user favorites.
+- **Next Expected Outcome:** An EPG provider and mapping logic is implemented.

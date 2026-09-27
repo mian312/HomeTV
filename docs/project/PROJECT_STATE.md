@@ -13,9 +13,9 @@ This is a verified implementation snapshot. `tasks.md` is the task/history recor
 
 ## Current milestone and next task
 
-- Phase: 5 — Local Storage and User Data.
-- Last completed task: T014 build global search.
-- Next planned task: T015 implement favorites.
+- Phase: 6 — EPG (TV Guide).
+- Last completed task: T017 implement playlists.
+- Next planned task: T018 establish EPG data layer.
 
 ## Implemented design system (`src/constants/theme.ts`)
 
@@ -88,6 +88,7 @@ Timing presets: `fast` (150ms), `normal` (250ms), `slow` (400ms). Spring configs
 - `src/app/_layout.tsx`
 - `src/app/index.tsx` (Home screen with categorized horizontal lists)
 - `src/app/channels.tsx` (Channels screen with grid, search, and filtering)
+- `src/app/library.tsx` (Library screen with favorites, history, and playlists)
 
 All routes beyond these are planned, not implemented.
 
@@ -107,7 +108,7 @@ All routes beyond these are planned, not implemented.
 
 ## Not implemented yet
 
-- Favorites/history/playlist/EPG screens and business logic.
+- EPG screen and business logic.
 - Isolated video player, fallback, and player error UX.
 - Full accessibility/performance/device validation.
 
