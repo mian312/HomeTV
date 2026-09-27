@@ -13,9 +13,9 @@ This is a verified implementation snapshot. `tasks.md` is the task/history recor
 
 ## Current milestone and next task
 
-- Phase: 1 — design system complete.
-- Last completed task: T003 establish theme/design system.
-- Next planned task: T004 establish reusable UI foundation.
+- Phase: 2 — data foundation and sqlite start.
+- Last completed task: T005 establish quality tooling.
+- Next planned task: T006 establish SQLite foundation.
 
 ## Implemented design system (`src/constants/theme.ts`)
 
@@ -87,16 +87,28 @@ Timing presets: `fast` (150ms), `normal` (250ms), `slow` (400ms). Spring configs
 
 All routes beyond these are planned, not implemented.
 
+## Reusable UI Foundation (`src/components/ui/`)
+
+- Built without NativeWind to respect our design system tokens natively.
+- Components include `Button`, `Badge`, `Card`, `PressableCard`, `Input`, `Separator`, `Skeleton`, `SectionHeader`, and explicit state views (`LoadingView`, `EmptyView`, `ErrorView`, `OfflineView`).
+- Exported via a single barrel file `src/components/ui/index.ts`.
+- Uses Reanimated for press scale animations and Skeleton pulse effects.
+
+## Quality Tooling
+
+- Configured Jest, React Native Testing Library v13 (using built-in matchers).
+- Manual mocks established for `expo-router`, `react-native-reanimated`, and `expo-splash-screen`.
+- Basic unit tests covering UI components and theme hooks.
+- Code formatting set via `.prettierrc` matching project styles.
+
 ## Not implemented yet
 
-- Reusable OTT UI components (cards, section lists, buttons, badges, etc.).
 - SQLite database client, schema/migrations, and repository implementations.
 - iptv-org provider adapter (concrete `IptvProvider` implementation).
 - Domain data mapping from SDK types.
 - HomeTV-specific query hooks and cache policies.
 - Home/channel/search/favorites/history/playlist/EPG screens and business logic.
 - Isolated video player, fallback, and player error UX.
-- Jest configuration, test files, and `@testing-library/react-native` setup.
 - Full accessibility/performance/device validation.
 
 ## Known issues and limitations
