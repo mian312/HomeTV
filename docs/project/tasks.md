@@ -18,10 +18,10 @@ Detailed task queue and development history. Current implementation truth is in 
 | T008 | 3 | Integrate iptv-org SDK | IPTV data is accessible through a provider abstraction | COMPLETED | Created `src/data/providers/iptv-org/index.ts` using raw fetch to circumvent Node-only dependencies in the SDK. | `npx tsc --noEmit` ✓ | Using direct fetch with SDK types instead of `DataManager` to avoid `fs-extra` crash in React Native | See Git history | |
 | T009 | 3 | Establish domain data mapping | UI is independent of raw provider models | COMPLETED | Implemented `mapChannel`, `mapStream`, `mapCategory`, etc., to convert SDK `Types` to `domain.ts` interfaces. | `npx tsc --noEmit` ✓ | Domain types are cleanly separated from the iptv-org payload format | See Git history | |
 | T010 | 3 | Establish TanStack Query layer | Cache-first loading and background refresh work | COMPLETED | Created `src/data/queries/iptv.ts` with standard hooks like `useChannels`, `useStreams`, etc. | `npx tsc --noEmit` ✓ | Used sensible `staleTime`s (1hr to 24hr) since this catalog data changes infrequently | See Git history | |
-| T011 | 4 | Build Home screen | OTT-style reusable home sections work | TODO | | | | | |
-| T012 | 4 | Build channel browsing | Efficient channel browsing works | TODO | | | | | |
-| T013 | 4 | Build channel filters | Country, language and category filters work | TODO | | | | | |
-| T014 | 4 | Build global search | Multi-scope search works | TODO | | | | | |
+| T011 | 4 | Build Home screen | OTT-style reusable home sections work | COMPLETED | Created `src/app/index.tsx` with `HorizontalList` and `ChannelCard` showing categorized query results | `npx tsc --noEmit` ✓, tests ✓ | Replaced starter home screen | See Git history | |
+| T012 | 4 | Build channel browsing | Efficient channel browsing works | COMPLETED | Converted `explore.tsx` to `channels.tsx` with a virtualized `FlatList` | `npx tsc --noEmit` ✓ | Included `initialNumToRender` and windowing for large catalogs | See Git history | |
+| T013 | 4 | Build channel filters | Country, language and category filters work | COMPLETED | Implemented `FilterRow` and added category/country chips to `channels.tsx` | `npx tsc --noEmit` ✓ | Horizontal scroll chips chosen over modals for quick one-tap filtering | See Git history | |
+| T014 | 4 | Build global search | Multi-scope search works | COMPLETED | Added `Input` search bar at the top of the `channels.tsx` catalog | `npx tsc --noEmit` ✓ | Simple client-side text filter over TanStack Query cache | See Git history | |
 | T015 | 5 | Implement favorites | Favorites persist locally | TODO | | | | | |
 | T016 | 5 | Implement recently watched | Latest 20 channels persist correctly | TODO | | | | | |
 | T017 | 5 | Implement playlists | Custom playlists persist and can be managed | TODO | | | | | |
@@ -55,10 +55,10 @@ Detailed task queue and development history. Current implementation truth is in 
 
 ## Current Checkpoint
 
-- **Current Phase:** 4 — UI and core flows.
-- **Current Task:** T011
-- **Last Completed Tasks:** T010, T009, T008
+- **Current Phase:** 5 — Local Storage and User Data.
+- **Current Task:** T015
+- **Last Completed Tasks:** T014, T013, T012, T011
 - **Last Commit:** See Git history.
-- **Next Task:** T011 — Build Home screen (OTT-style reusable home sections work).
-- **Known Issues:** Starter UI remains.
-- **Next Expected Outcome:** A dynamic home screen fetching channels via TanStack Query and rendering categorized sections.
+- **Next Task:** T015 — Implement favorites (Favorites persist locally).
+- **Known Issues:** None.
+- **Next Expected Outcome:** A favorites system utilizing SQLite to persist and display user favorites.

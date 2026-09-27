@@ -13,9 +13,9 @@ This is a verified implementation snapshot. `tasks.md` is the task/history recor
 
 ## Current milestone and next task
 
-- Phase: 4 — UI and core flows.
-- Last completed task: T010 establish TanStack Query layer.
-- Next planned task: T011 build Home screen.
+- Phase: 5 — Local Storage and User Data.
+- Last completed task: T014 build global search.
+- Next planned task: T015 implement favorites.
 
 ## Implemented design system (`src/constants/theme.ts`)
 
@@ -86,8 +86,8 @@ Timing presets: `fast` (150ms), `normal` (250ms), `slow` (400ms). Spring configs
 ## Routes currently present
 
 - `src/app/_layout.tsx`
-- `src/app/index.tsx`
-- `src/app/explore.tsx`
+- `src/app/index.tsx` (Home screen with categorized horizontal lists)
+- `src/app/channels.tsx` (Channels screen with grid, search, and filtering)
 
 All routes beyond these are planned, not implemented.
 
@@ -107,14 +107,13 @@ All routes beyond these are planned, not implemented.
 
 ## Not implemented yet
 
-- Home/channel/search/favorites/history/playlist/EPG screens and business logic.
+- Favorites/history/playlist/EPG screens and business logic.
 - Isolated video player, fallback, and player error UX.
 - Full accessibility/performance/device validation.
 
 ## Known issues and limitations
 
-- The starter home screen remains.
-- Legacy Spacing aliases and `type` prop in ThemedText are kept for starter backward compat; will be removed when starter UI is replaced.
+- Legacy Spacing aliases and `type` prop in ThemedText are kept for backward compat.
 - Tests have no current test files/configuration.
 - IPTV streams may be unavailable or unsuitable for a given device or jurisdiction; availability is dynamic.
 
