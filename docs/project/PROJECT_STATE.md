@@ -16,7 +16,7 @@ This is a verified implementation snapshot. `tasks.md` is the task/history recor
 - Phase: 0 — workspace baseline/organization, with implementation foundation next.
 - Last completed task: T001 workspace and dependency inspection, plus T032 documentation organization.
 - Next planned task: T002 establish project architecture.
-- Do not claim a git commit for this documentation update until one exists in git history.
+- Commit details for the documentation organization are recorded in Git history.
 
 ## Implemented baseline
 
