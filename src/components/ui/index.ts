@@ -10,6 +10,7 @@ export * from './button';
 export * from './card';
 export * from './channel-card';
 export * from './collapsible';
+export * from './filter-row';
 export * from './horizontal-list';
 export * from './input';
 export * from './section-header';

@@ -1,4 +1,4 @@
-import { StyleSheet, View } from 'react-native';
+import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 
 import { ThemedText } from '../themed-text';
 import { CardContent, PressableCard } from './card';
@@ -9,16 +9,17 @@ import { useTheme } from '@/hooks/use-theme';
 interface ChannelCardProps {
   readonly channel: Channel;
   readonly onPress?: (channel: Channel) => void;
+  readonly style?: StyleProp<ViewStyle>;
 }
 
-export function ChannelCard({ channel, onPress }: ChannelCardProps) {
+export function ChannelCard({ channel, onPress, style }: ChannelCardProps) {
   const { colors } = useTheme();
 
   return (
     <PressableCard
       variant="elevated"
       onPress={onPress ? () => onPress(channel) : undefined}
-      style={styles.card}
+      style={[styles.card, style]}
     >
       <CardContent style={styles.content}>
         {/* Placeholder for Logo, since we don't have images locally, we can just use initials or name */}
