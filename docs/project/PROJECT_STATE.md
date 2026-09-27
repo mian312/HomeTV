@@ -13,9 +13,9 @@ This is a verified implementation snapshot. `tasks.md` is the task/history recor
 
 ## Current milestone and next task
 
-- Phase: 2 — data foundation and sqlite start.
-- Last completed task: T005 establish quality tooling.
-- Next planned task: T006 establish SQLite foundation.
+- Phase: 3 — iptv-org catalog integration.
+- Last completed task: T007 establish local repositories.
+- Next planned task: T008 integrate iptv-org SDK.
 
 ## Implemented design system (`src/constants/theme.ts`)
 
@@ -75,9 +75,12 @@ Timing presets: `fast` (150ms), `normal` (250ms), `slow` (400ms). Spring configs
 - **Domain types** (`src/types/domain.ts`): Branded IDs, domain models, `AsyncState<T>`.
 - **Provider interface** (`src/data/providers/provider.ts`): `IptvProvider` + `ProviderError`.
 - **Repository interfaces** (`src/data/repositories/repositories.ts`): Favorites, RecentlyWatched, Playlist, Settings.
+- **SQLite Database** (`src/data/db/index.ts`): Global connection sharing via `expo-sqlite`.
+- **Database Migrations** (`src/data/db/schema.ts`): Explicit versioned initialization (`migrateDbIfNeeded`) creating `settings`, `favorites`, `recently_watched`, `playlists`, and `playlist_items` tables.
+- **Local Repositories** (`src/data/repositories/sqlite-*.ts`): Implementations mapping SQLite rows to domain entities.
 - **Query client** (`src/lib/query-client.ts`): Cache-first defaults.
-- **Root providers** (`src/lib/providers.tsx`): `AppProviders` (QueryClient + ThemeProvider).
-- **Theme store** (`src/stores/theme.ts`): `ThemeMode` ('light' | 'dark' | 'system'), persisted via AsyncStorage (migrate to SQLite in T007).
+- **Root providers** (`src/lib/providers.tsx`): `AppProviders` (SQLiteProvider + QueryClient + ThemeProvider).
+- **Theme store** (`src/stores/theme.ts`): `ThemeMode` ('light' | 'dark' | 'system'), persisted via custom Zustand adapter backed by the SQLite `SettingsRepository`.
 
 ## Routes currently present
 
@@ -103,7 +106,6 @@ All routes beyond these are planned, not implemented.
 
 ## Not implemented yet
 
-- SQLite database client, schema/migrations, and repository implementations.
 - iptv-org provider adapter (concrete `IptvProvider` implementation).
 - Domain data mapping from SDK types.
 - HomeTV-specific query hooks and cache policies.
@@ -114,7 +116,6 @@ All routes beyond these are planned, not implemented.
 ## Known issues and limitations
 
 - The starter home screen remains.
-- AsyncStorage currently persists theme state (migration deferred to T007).
 - Legacy Spacing aliases and `type` prop in ThemedText are kept for starter backward compat; will be removed when starter UI is replaced.
 - Tests have no current test files/configuration.
 - IPTV streams may be unavailable or unsuitable for a given device or jurisdiction; availability is dynamic.

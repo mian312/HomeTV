@@ -10,14 +10,7 @@
  *   <Text style={[typography.body, { color: colors.text }]}>Hello</Text>
  */
 
-import {
-  Colors,
-  Elevation,
-  Motion,
-  Radius,
-  Spacing,
-  Typography,
-} from '@/constants/theme';
+import { Colors, Elevation, Motion, Radius, Spacing, Typography } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useThemeStore } from '@/stores/theme';
 
@@ -65,11 +58,7 @@ export function useTheme(): ThemeResult {
   const themeMode = useThemeStore((state) => state.mode);
 
   const scheme: ResolvedScheme =
-    themeMode === 'system'
-      ? systemColorScheme === 'dark'
-        ? 'dark'
-        : 'light'
-      : themeMode;
+    themeMode === 'system' ? (systemColorScheme === 'dark' ? 'dark' : 'light') : themeMode;
 
   return {
     colors: Colors[scheme],

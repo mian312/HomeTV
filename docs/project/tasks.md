@@ -13,8 +13,8 @@ Detailed task queue and development history. Current implementation truth is in 
 | T003 | 1 | Establish theme/design system | Light/dark/system themes and centralized UI tokens work | COMPLETED | Extended `Colors` to full semantic OTT palette (30+ tokens per scheme); added `Typography` (13 named presets); added `Radius` (7 levels); added `Elevation` (5 shadow presets); added `Motion` (timing + spring configs); renamed Spacing to semantic names with legacy aliases; `useTheme()` now returns full design system; `ThemedText` supports `variant` prop with legacy `type` compat; `ThemedView` simplified; `ThemeToggleWrapper` uses tokens | `tsc --noEmit` ✓, `expo lint` ✓, `git diff --check` ✓ | Preserve legacy Spacing aliases and `type` prop for starter UI backward compat; will remove when starter screens are replaced | See Git history | |
 | T004 | 1 | React Native Reusables / reusable UI foundation | Common OTT UI components are reusable and consistent | COMPLETED | Created `Button` (6 variants, scale animation), `Badge` (6 variants), `Card`+`PressableCard` (4 variants + sub-sections), `Input` (focus ring, label, error, adornments), `Separator`, `Skeleton`+`SkeletonRow` (Reanimated pulse), `SectionHeader` (OTT pattern), `LoadingView`/`EmptyView`/`ErrorView`/`OfflineView` (explicit async states); barrel index at `src/components/ui/index.ts`; all use `useTheme()` tokens, no NativeWind | `tsc --noEmit` ✓, `expo lint` ✓, `git diff --check` ✓ | NativeWind dropped — conflicts with our token-based design system; RNR pattern adopted as copy-paste/own-the-code without the CLI dependency | See Git history | |
 | T005 | 1 | Establish quality tooling | Strict TS, ESLint, Prettier and tests work | COMPLETED | Installed `@testing-library/react-native`, added `jest.config.js` with RNTL built-in matchers, created manual mocks for `expo-router`/`react-native-reanimated`/`expo-splash-screen`, added `.prettierrc`, added 43 tests across 3 suites | `npm test` ✓, `npm run format:check` ✓ | RNTL v13 built-in matchers used instead of deprecated jest-native. Manual Reanimated mock prevents native-module crashes in Jest. | See Git history | |
-| T006 | 2 | Establish SQLite foundation | Versioned database and migrations work | TODO | | | | | |
-| T007 | 2 | Establish local repositories | Persistent data uses repository boundaries | TODO | | | | | |
+| T006 | 2 | Establish SQLite foundation | Versioned database and migrations work | COMPLETED | Created `src/data/db/schema.ts` with explicit tables for settings, favorites, recently_watched, playlists, and playlist_items. Added SQLiteProvider to AppProviders. | `npm run test` ✓ | SQLite is cache-first local priority for user data. DB initialization happens during app splash screen via useSuspense and expo-sqlite | See Git history | |
+| T007 | 2 | Establish local repositories | Persistent data uses repository boundaries | COMPLETED | Created repository implementations for favorites, playlists, recently_watched, and settings in `src/data/repositories/sqlite-*.ts`. Replaced Zustand's AsyncStorage with SQLite in `src/stores/theme.ts`. | `npm run test` ✓ | Using `openDatabaseSync` enables synchronous global database access inside Zustand stores outside of the React context | See Git history | |
 | T008 | 3 | Integrate iptv-org SDK | IPTV data is accessible through a provider abstraction | TODO | | | | | |
 | T009 | 3 | Establish domain data mapping | UI is independent of raw provider models | TODO | | | | | |
 | T010 | 3 | Establish TanStack Query layer | Cache-first loading and background refresh work | TODO | | | | | |
@@ -55,10 +55,10 @@ Detailed task queue and development history. Current implementation truth is in 
 
 ## Current Checkpoint
 
-- **Current Phase:** 2 — data foundation and sqlite start.
-- **Current Task:** T006
-- **Last Completed Tasks:** T005
+- **Current Phase:** 3 — iptv-org catalog integration.
+- **Current Task:** T008
+- **Last Completed Tasks:** T007, T006
 - **Last Commit:** See Git history.
-- **Next Task:** T006 — Establish SQLite foundation (Versioned database and migrations work).
-- **Known Issues:** Starter UI remains; AsyncStorage theme persistence (migration deferred to T007).
-- **Next Expected Outcome:** SQLite schema and migrations set up for favorites/recently watched/settings.
+- **Next Task:** T008 — Integrate iptv-org SDK (IPTV data is accessible through a provider abstraction).
+- **Known Issues:** Starter UI remains.
+- **Next Expected Outcome:** iptv-org provider implementation exposing Channels/Categories to queries.

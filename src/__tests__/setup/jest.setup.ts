@@ -5,9 +5,10 @@
  * Keep this file minimal; per-test mocks belong in the test files themselves.
  */
 
+/* eslint-disable @typescript-eslint/no-require-imports */
+
 // Mock react-native-reanimated — minimal manual mock to avoid native module deps
 jest.mock('react-native-reanimated', () => {
-  const React = require('react');
   const { View } = require('react-native');
   const Animated = {
     View,
@@ -26,7 +27,7 @@ jest.mock('react-native-reanimated', () => {
     FadeIn: { duration: () => ({ duration: () => ({}) }) },
     Easing: { elastic: () => () => 0, linear: () => 0 },
     Keyframe: class {},
-    createAnimatedComponent: (Component: React.ComponentType<any>) => Component,
+    createAnimatedComponent: (Component: any) => Component,
   };
 });
 
@@ -35,10 +36,22 @@ jest.mock('react-native-worklets', () => ({
   scheduleOnRN: (fn: Function, ...args: unknown[]) => fn(...args),
 }));
 
-// Mock @react-native-async-storage/async-storage
-jest.mock('@react-native-async-storage/async-storage', () =>
-  require('@react-native-async-storage/async-storage/jest/async-storage-mock')
-);
+// Mock expo-sqlite
+jest.mock('expo-sqlite', () => ({
+  openDatabaseSync: jest.fn(() => ({
+    getFirstAsync: jest.fn(),
+    getAllAsync: jest.fn(),
+    runAsync: jest.fn(),
+    withTransactionAsync: jest.fn((cb) => cb()),
+    execAsync: jest.fn(),
+  })),
+  SQLiteProvider: ({ children }: any) => children,
+}));
+
+// Mock expo-crypto
+jest.mock('expo-crypto', () => ({
+  randomUUID: jest.fn(() => 'mock-uuid'),
+}));
 
 // Mock expo-router (navigation primitives not available in tests)
 jest.mock('expo-router', () => ({
@@ -59,7 +72,10 @@ jest.mock('expo-splash-screen', () => ({
 jest.mock('@expo/vector-icons', () => {
   const { View } = require('react-native');
   const MockIcon = () => View;
-  return new Proxy({}, {
-    get: () => MockIcon,
-  });
+  return new Proxy(
+    {},
+    {
+      get: () => MockIcon,
+    },
+  );
 });

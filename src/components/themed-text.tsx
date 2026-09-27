@@ -43,24 +43,14 @@ const LEGACY_VARIANT_MAP: Record<NonNullable<ThemedTextProps['type']>, Typograph
   code: 'code',
 };
 
-export function ThemedText({
-  style,
-  variant,
-  type,
-  themeColor,
-  ...rest
-}: ThemedTextProps) {
+export function ThemedText({ style, variant, type, themeColor, ...rest }: ThemedTextProps) {
   const { colors, typography } = useTheme();
 
   // Resolve which Typography preset to use
-  const resolvedVariant: TypographyVariant =
-    variant ?? (type ? LEGACY_VARIANT_MAP[type] : 'body');
+  const resolvedVariant: TypographyVariant = variant ?? (type ? LEGACY_VARIANT_MAP[type] : 'body');
 
   // Resolve text color
-  const resolvedColor =
-    type === 'linkPrimary'
-      ? colors.primary
-      : colors[themeColor ?? 'text'];
+  const resolvedColor = type === 'linkPrimary' ? colors.primary : colors[themeColor ?? 'text'];
 
   return (
     <Text

@@ -65,11 +65,7 @@ export function Badge({ label, variant = 'default', style, testID }: BadgeProps)
         style,
       ]}
     >
-      <ThemedText
-        variant="overline"
-        style={{ color: text }}
-        numberOfLines={1}
-      >
+      <ThemedText variant="overline" style={{ color: text }} numberOfLines={1}>
         {label}
       </ThemedText>
     </View>

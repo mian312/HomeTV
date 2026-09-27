@@ -6,14 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import {
-  StyleProp,
-  StyleSheet,
-  TextInput,
-  TextInputProps,
-  View,
-  ViewStyle,
-} from 'react-native';
+import { StyleProp, StyleSheet, TextInput, TextInputProps, View, ViewStyle } from 'react-native';
 
 import { Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
@@ -50,11 +43,7 @@ export function Input({
   const { colors, typography } = useTheme();
   const [focused, setFocused] = useState(false);
 
-  const borderColor = error
-    ? colors.error
-    : focused
-    ? colors.primary
-    : colors.border;
+  const borderColor = error ? colors.error : focused ? colors.primary : colors.border;
 
   return (
     <View style={[styles.wrapper, containerStyle]}>
@@ -87,11 +76,7 @@ export function Input({
             setFocused(false);
             textInputProps.onBlur?.(e);
           }}
-          style={[
-            typography.body,
-            styles.textInput,
-            { color: colors.text },
-          ]}
+          style={[typography.body, styles.textInput, { color: colors.text }]}
           placeholderTextColor={colors.textTertiary}
           selectionColor={colors.primary}
           cursorColor={colors.primary}

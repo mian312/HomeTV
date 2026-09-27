@@ -8,9 +8,10 @@
  * complete, and AsyncStorage will be removed.
  */
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
-import { createJSONStorage, persist } from 'zustand/middleware';
+import { createJSONStorage, persist, StateStorage } from 'zustand/middleware';
+
+import { settingsRepository } from '@/data/db';
 
 /** The three theme modes supported by HomeTV. */
 export type ThemeMode = 'light' | 'dark' | 'system';
@@ -22,6 +23,19 @@ interface ThemeState {
   setMode: (mode: ThemeMode) => void;
 }
 
+const sqliteStorage: StateStorage = {
+  getItem: async (name: string): Promise<string | null> => {
+    const value = await settingsRepository.get<string | null>(name, null);
+    return value ?? null;
+  },
+  setItem: async (name: string, value: string): Promise<void> => {
+    await settingsRepository.set(name, value);
+  },
+  removeItem: async (name: string): Promise<void> => {
+    await settingsRepository.remove(name);
+  },
+};
+
 export const useThemeStore = create<ThemeState>()(
   persist(
     (set) => ({
@@ -30,7 +44,7 @@ export const useThemeStore = create<ThemeState>()(
     }),
     {
       name: 'theme-storage',
-      storage: createJSONStorage(() => AsyncStorage),
+      storage: createJSONStorage(() => sqliteStorage),
     },
   ),
 );

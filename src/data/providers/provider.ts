@@ -34,11 +34,7 @@ export class ProviderError extends Error {
   }
 }
 
-export type ProviderErrorCode =
-  | 'NETWORK'
-  | 'NOT_FOUND'
-  | 'PARSE'
-  | 'UNKNOWN';
+export type ProviderErrorCode = 'NETWORK' | 'NOT_FOUND' | 'PARSE' | 'UNKNOWN';
 
 // ---------------------------------------------------------------------------
 // Provider interface

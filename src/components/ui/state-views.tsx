@@ -68,12 +68,7 @@ export interface EmptyViewProps {
   style?: StyleProp<ViewStyle>;
 }
 
-export function EmptyView({
-  message = 'Nothing here yet.',
-  icon,
-  action,
-  style,
-}: EmptyViewProps) {
+export function EmptyView({ message = 'Nothing here yet.', icon, action, style }: EmptyViewProps) {
   return (
     <StateContainer style={style}>
       {icon ? <View style={styles.icon}>{icon}</View> : null}
@@ -96,11 +91,7 @@ export interface ErrorViewProps {
   style?: StyleProp<ViewStyle>;
 }
 
-export function ErrorView({
-  message = 'Something went wrong.',
-  onRetry,
-  style,
-}: ErrorViewProps) {
+export function ErrorView({ message = 'Something went wrong.', onRetry, style }: ErrorViewProps) {
   const { colors } = useTheme();
 
   return (

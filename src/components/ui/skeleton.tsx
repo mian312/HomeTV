@@ -47,10 +47,7 @@ export function Skeleton({ width, height, radius = 'sm', style }: SkeletonProps)
 
   useEffect(() => {
     progress.value = withRepeat(
-      withSequence(
-        withTiming(1, { duration: 800 }),
-        withTiming(0, { duration: 800 }),
-      ),
+      withSequence(withTiming(1, { duration: 800 }), withTiming(0, { duration: 800 })),
       -1,
       false,
     );

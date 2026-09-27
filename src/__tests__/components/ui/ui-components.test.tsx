@@ -24,7 +24,7 @@ describe('Badge', () => {
     'renders variant "%s" without error',
     (variant) => {
       expect(() => render(<Badge label="tag" variant={variant} />)).not.toThrow();
-    }
+    },
   );
 });
 

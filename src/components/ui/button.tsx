@@ -9,14 +9,7 @@
  */
 
 import React from 'react';
-import {
-  ActivityIndicator,
-  Pressable,
-  StyleProp,
-  StyleSheet,
-  View,
-  ViewStyle,
-} from 'react-native';
+import { ActivityIndicator, Pressable, StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
 import { Elevation, MinTouchTarget, Radius, Spacing } from '@/constants/theme';
@@ -26,13 +19,7 @@ import { ThemeColors, useTheme } from '@/hooks/use-theme';
 // Types
 // ---------------------------------------------------------------------------
 
-export type ButtonVariant =
-  | 'default'
-  | 'secondary'
-  | 'outline'
-  | 'ghost'
-  | 'destructive'
-  | 'link';
+export type ButtonVariant = 'default' | 'secondary' | 'outline' | 'ghost' | 'destructive' | 'link';
 
 export type ButtonSize = 'sm' | 'md' | 'lg' | 'icon';
 
@@ -194,9 +181,7 @@ export function Button({
 
   // Spinner color
   const spinnerColor =
-    variant === 'default' || variant === 'destructive'
-      ? colors.primaryText
-      : colors.text;
+    variant === 'default' || variant === 'destructive' ? colors.primaryText : colors.text;
 
   return (
     <AnimatedPressable
@@ -225,11 +210,7 @@ export function Button({
             pressed && !isDisabled && { opacity: pressedOpacity },
           ]}
         >
-          {loading ? (
-            <ActivityIndicator size="small" color={spinnerColor} />
-          ) : (
-            children
-          )}
+          {loading ? <ActivityIndicator size="small" color={spinnerColor} /> : children}
         </View>
       )}
     </AnimatedPressable>

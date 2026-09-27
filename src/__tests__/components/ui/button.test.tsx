@@ -16,44 +16,72 @@ import { Button } from '@/components/ui/button';
 
 describe('Button', () => {
   it('renders children', () => {
-    render(<Button><Text>Press me</Text></Button>);
+    render(
+      <Button>
+        <Text>Press me</Text>
+      </Button>,
+    );
     expect(screen.getByText('Press me')).toBeTruthy();
   });
 
   it('calls onPress when tapped', () => {
     const onPress = jest.fn();
-    render(<Button onPress={onPress}><Text>Tap</Text></Button>);
+    render(
+      <Button onPress={onPress}>
+        <Text>Tap</Text>
+      </Button>,
+    );
     fireEvent.press(screen.getByRole('button'));
     expect(onPress).toHaveBeenCalledTimes(1);
   });
 
   it('does not call onPress when disabled', () => {
     const onPress = jest.fn();
-    render(<Button disabled onPress={onPress}><Text>Tap</Text></Button>);
+    render(
+      <Button disabled onPress={onPress}>
+        <Text>Tap</Text>
+      </Button>,
+    );
     fireEvent.press(screen.getByRole('button'));
     expect(onPress).not.toHaveBeenCalled();
   });
 
   it('does not call onPress when loading', () => {
     const onPress = jest.fn();
-    render(<Button loading onPress={onPress}><Text>Tap</Text></Button>);
+    render(
+      <Button loading onPress={onPress}>
+        <Text>Tap</Text>
+      </Button>,
+    );
     fireEvent.press(screen.getByRole('button'));
     expect(onPress).not.toHaveBeenCalled();
   });
 
   it('shows ActivityIndicator when loading', () => {
-    render(<Button loading><Text>Tap</Text></Button>);
+    render(
+      <Button loading>
+        <Text>Tap</Text>
+      </Button>,
+    );
     // Children are replaced by the spinner when loading
     expect(screen.queryByText('Tap')).toBeNull();
   });
 
   it('has correct accessibilityRole', () => {
-    render(<Button accessibilityLabel="Submit form"><Text>Submit</Text></Button>);
+    render(
+      <Button accessibilityLabel="Submit form">
+        <Text>Submit</Text>
+      </Button>,
+    );
     expect(screen.getByRole('button', { name: 'Submit form' })).toBeTruthy();
   });
 
   it('has disabled accessibilityState when disabled', () => {
-    render(<Button disabled><Text>X</Text></Button>);
+    render(
+      <Button disabled>
+        <Text>X</Text>
+      </Button>,
+    );
     const btn = screen.getByRole('button');
     expect(btn.props.accessibilityState?.disabled).toBe(true);
   });
@@ -62,8 +90,12 @@ describe('Button', () => {
     'renders variant "%s" without error',
     (variant) => {
       expect(() =>
-        render(<Button variant={variant}><Text>{variant}</Text></Button>)
+        render(
+          <Button variant={variant}>
+            <Text>{variant}</Text>
+          </Button>,
+        ),
       ).not.toThrow();
-    }
+    },
   );
 });

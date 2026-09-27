@@ -12,13 +12,15 @@
  * as their tasks are implemented.
  */
 
-import React, { useMemo } from 'react';
+import React, { Suspense, useMemo } from 'react';
 import { useColorScheme } from 'react-native';
 import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
 import { QueryClientProvider } from '@tanstack/react-query';
+import { SQLiteProvider } from 'expo-sqlite';
 
 import { createQueryClient } from '@/lib/query-client';
 import { useThemeStore } from '@/stores/theme';
+import { migrateDbIfNeeded } from '@/data/db/schema';
 
 interface AppProvidersProps {
   children: React.ReactNode;
@@ -29,14 +31,17 @@ export function AppProviders({ children }: AppProvidersProps) {
   const systemColorScheme = useColorScheme();
   const themeMode = useThemeStore((state) => state.mode);
 
-  const resolvedScheme =
-    themeMode === 'system' ? systemColorScheme : themeMode;
+  const resolvedScheme = themeMode === 'system' ? systemColorScheme : themeMode;
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider value={resolvedScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        {children}
-      </ThemeProvider>
-    </QueryClientProvider>
+    <Suspense fallback={null}>
+      <SQLiteProvider databaseName="hometv.db" onInit={migrateDbIfNeeded} useSuspense>
+        <QueryClientProvider client={queryClient}>
+          <ThemeProvider value={resolvedScheme === 'dark' ? DarkTheme : DefaultTheme}>
+            {children}
+          </ThemeProvider>
+        </QueryClientProvider>
+      </SQLiteProvider>
+    </Suspense>
   );
 }

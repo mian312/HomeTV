@@ -108,9 +108,13 @@ export function PressableCard({
     <AnimatedPressable
       onPress={onPress}
       // eslint-disable-next-line react-hooks/immutability
-      onPressIn={() => { scale.value = withTiming(0.97, { duration: 80 }); }}
+      onPressIn={() => {
+        scale.value = withTiming(0.97, { duration: 80 });
+      }}
       // eslint-disable-next-line react-hooks/immutability
-      onPressOut={() => { scale.value = withTiming(1, { duration: 120 }); }}
+      onPressOut={() => {
+        scale.value = withTiming(1, { duration: 120 });
+      }}
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
       testID={testID}
@@ -122,13 +126,31 @@ export function PressableCard({
 }
 
 // Card sub-sections (composable)
-export function CardHeader({ style, children }: { style?: StyleProp<ViewStyle>; children: React.ReactNode }) {
+export function CardHeader({
+  style,
+  children,
+}: {
+  style?: StyleProp<ViewStyle>;
+  children: React.ReactNode;
+}) {
   return <View style={[styles.header, style]}>{children}</View>;
 }
-export function CardContent({ style, children }: { style?: StyleProp<ViewStyle>; children: React.ReactNode }) {
+export function CardContent({
+  style,
+  children,
+}: {
+  style?: StyleProp<ViewStyle>;
+  children: React.ReactNode;
+}) {
   return <View style={[styles.content, style]}>{children}</View>;
 }
-export function CardFooter({ style, children }: { style?: StyleProp<ViewStyle>; children: React.ReactNode }) {
+export function CardFooter({
+  style,
+  children,
+}: {
+  style?: StyleProp<ViewStyle>;
+  children: React.ReactNode;
+}) {
   return <View style={[styles.footer, style]}>{children}</View>;
 }
 
