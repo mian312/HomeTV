@@ -1,23 +1,52 @@
-import React from 'react';
-import { StyleSheet, View, ScrollView } from 'react-native';
+import { Image } from 'expo-image';
+import { SymbolView } from 'expo-symbols';
+import { useState } from 'react';
+import { FlatList, Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Spacing } from '@/constants/theme';
-import { useTheme } from '@/hooks/use-theme';
-import { useFavorites, useRecentlyWatched, usePlaylists } from '@/data/queries/local';
-import { ChannelCard, HorizontalList, LoadingView, PressableCard, CardContent, SectionHeader } from '@/components/ui';
+import {
+  Button,
+  CardContent,
+  ChannelCard,
+  HorizontalList,
+  Input,
+  LoadingView,
+  PressableCard,
+  SectionHeader,
+} from '@/components/ui';
+import { Radius, Spacing } from '@/constants/theme';
 import { useChannels } from '@/data/queries/iptv';
-import type { Channel } from '@/types/domain';
-import { SymbolView } from 'expo-symbols';
+import {
+  useCreatePlaylist,
+  useFavorites,
+  usePlaylistItems,
+  usePlaylistSummaries,
+  usePlaylists,
+  useRecentlyWatched,
+  useRemovePlaylistItem,
+} from '@/data/queries/local';
+import { useTheme } from '@/hooks/use-theme';
+import type { Channel, Playlist } from '@/types/domain';
 
 export default function LibraryScreen() {
   const { data: favorites } = useFavorites();
   const { data: recentlyWatched } = useRecentlyWatched();
   const { data: playlists } = usePlaylists();
+  const { data: playlistSummaries } = usePlaylistSummaries();
   const { data: channels, isLoading } = useChannels();
   const { colors } = useTheme();
+  const [activePlaylistId, setActivePlaylistId] = useState<string | null>(null);
+  const [createVisible, setCreateVisible] = useState(false);
+  const [newPlaylistName, setNewPlaylistName] = useState('');
+  const [createError, setCreateError] = useState<string | null>(null);
+  const createPlaylist = useCreatePlaylist();
+  const removePlaylistItem = useRemovePlaylistItem();
+  const activePlaylist = playlists?.find((playlist) => playlist.id === activePlaylistId);
+  const { data: activeItems = [], isLoading: itemsLoading } = usePlaylistItems(
+    activePlaylistId ?? '',
+  );
 
   if (isLoading) {
     return <LoadingView message="Loading library..." />;
@@ -25,12 +54,96 @@ export default function LibraryScreen() {
 
   // Hydrate local entities with channel data
   const favoriteChannels = (favorites ?? [])
-    .map(f => channels?.find(c => c.id === f.entityRef.entityId))
+    .map((f) => channels?.find((c) => c.id === f.entityRef.entityId))
     .filter((c): c is Channel => c !== undefined);
 
   const historyChannels = (recentlyWatched ?? [])
-    .map(h => channels?.find(c => c.id === h.entityRef.entityId))
+    .map((h) => channels?.find((c) => c.id === h.entityRef.entityId))
     .filter((c): c is Channel => c !== undefined);
+
+  const summaries = new Map(
+    (playlistSummaries ?? []).map((summary) => [summary.playlistId, summary]),
+  );
+  const playlistChannels = activeItems
+    .map((item) => channels?.find((channel) => channel.id === item.entityRef.entityId))
+    .filter((channel): channel is Channel => channel !== undefined);
+
+  const handleCreatePlaylist = async () => {
+    const name = newPlaylistName.trim();
+    if (!name) {
+      setCreateError('Enter a playlist name.');
+      return;
+    }
+
+    setCreateError(null);
+    try {
+      const playlist = await createPlaylist.mutateAsync({ name });
+      setNewPlaylistName('');
+      setCreateVisible(false);
+      setActivePlaylistId(playlist.id);
+    } catch {
+      setCreateError('Could not create the playlist. Try again.');
+    }
+  };
+
+  const removeChannel = (playlist: Playlist, channel: Channel) => {
+    removePlaylistItem.mutate({
+      playlistId: playlist.id,
+      entityRef: { entityType: 'channel', entityId: channel.id },
+    });
+  };
+
+  if (activePlaylistId) {
+    return (
+      <ThemedView style={styles.container}>
+        <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
+          <View style={styles.detailHeader}>
+            <Pressable
+              onPress={() => setActivePlaylistId(null)}
+              accessibilityRole="button"
+              accessibilityLabel="Back to library"
+              hitSlop={10}
+              style={styles.backButton}
+            >
+              <SymbolView name="chevron.left" size={21} tintColor={colors.text} />
+            </Pressable>
+            <View style={styles.detailHeading}>
+              <ThemedText variant="headlineSmall" numberOfLines={1}>
+                {activePlaylist?.name ?? 'Playlist'}
+              </ThemedText>
+              <ThemedText variant="bodySmall" themeColor="textSecondary">
+                {playlistChannels.length} {playlistChannels.length === 1 ? 'channel' : 'channels'}
+              </ThemedText>
+            </View>
+          </View>
+
+          {itemsLoading ? (
+            <LoadingView message="Loading playlist..." />
+          ) : playlistChannels.length > 0 ? (
+            <FlatList
+              data={playlistChannels}
+              keyExtractor={(channel) => channel.id}
+              contentContainerStyle={styles.detailList}
+              renderItem={({ item }) => (
+                <PlaylistChannelRow
+                  channel={item}
+                  onRemove={activePlaylist ? () => removeChannel(activePlaylist, item) : undefined}
+                />
+              )}
+            />
+          ) : (
+            <View style={styles.detailEmpty}>
+              <SymbolView name="text.badge.plus" size={32} tintColor={colors.textTertiary} />
+              <ThemedText variant="titleSmall">No channels yet</ThemedText>
+              <ThemedText themeColor="textSecondary" style={styles.emptyText}>
+                Add channels from the Channels tab using the playlist button on a channel card.
+              </ThemedText>
+            </View>
+          )}
+        </SafeAreaView>
+      </ThemedView>
+    );
+  }
 
   return (
     <ThemedView style={styles.container}>
@@ -72,34 +185,192 @@ export default function LibraryScreen() {
           )}
 
           <View style={styles.section}>
-            <SectionHeader title="Playlists" seeAllLabel="Create" onSeeAll={() => console.log('Create playlist')} style={styles.sectionHeader} />
+            <SectionHeader
+              title="Playlists"
+              seeAllLabel="Create"
+              onSeeAll={() => setCreateVisible(true)}
+              style={styles.sectionHeader}
+            />
             {playlists && playlists.length > 0 ? (
               <View style={styles.playlistsContainer}>
-                {playlists.map(p => (
-                  <PressableCard key={p.id} variant="elevated" style={styles.playlistCard}>
-                    <CardContent style={styles.playlistContent}>
-                      <SymbolView name="list.bullet" size={24} tintColor={colors.primary} />
-                      <View style={styles.playlistText}>
-                        <ThemedText style={{ fontWeight: '600' }}>{p.name}</ThemedText>
-                        <ThemedText type="small" themeColor="textSecondary">
-                          {new Date(p.updatedAt).toLocaleDateString()}
-                        </ThemedText>
-                      </View>
-                    </CardContent>
-                  </PressableCard>
-                ))}
+                {playlists.map((playlist) => {
+                  const summary = summaries.get(playlist.id);
+                  const previewChannels = (summary?.previewChannelIds ?? [])
+                    .map((id) => channels?.find((channel) => channel.id === id))
+                    .filter((channel): channel is Channel => channel !== undefined);
+
+                  return (
+                    <PressableCard
+                      key={playlist.id}
+                      variant="elevated"
+                      style={styles.playlistCard}
+                      onPress={() => setActivePlaylistId(playlist.id)}
+                      accessibilityLabel={`Open ${playlist.name}, ${summary?.channelCount ?? 0} channels`}
+                    >
+                      <CardContent style={styles.playlistContent}>
+                        <View
+                          style={[styles.playlistIcon, { backgroundColor: colors.primaryMuted }]}
+                        >
+                          <SymbolView name="list.bullet" size={20} tintColor={colors.primary} />
+                        </View>
+                        <View style={styles.playlistText}>
+                          <ThemedText numberOfLines={1} style={styles.playlistName}>
+                            {playlist.name}
+                          </ThemedText>
+                          <ThemedText variant="caption" themeColor="textSecondary">
+                            {summary?.channelCount ?? 0}{' '}
+                            {(summary?.channelCount ?? 0) === 1 ? 'channel' : 'channels'}
+                          </ThemedText>
+                        </View>
+                        <View style={styles.previewStack}>
+                          {previewChannels.map((channel) => (
+                            <PlaylistAvatar key={channel.id} channel={channel} />
+                          ))}
+                        </View>
+                        <SymbolView
+                          name="chevron.right"
+                          size={16}
+                          tintColor={colors.textTertiary}
+                        />
+                      </CardContent>
+                    </PressableCard>
+                  );
+                })}
               </View>
             ) : (
               <View style={styles.emptyState}>
                 <ThemedText themeColor="textSecondary" style={styles.emptyText}>
-                  No playlists created.
+                  No playlists yet.
                 </ThemedText>
+                <Button variant="outline" size="sm" onPress={() => setCreateVisible(true)}>
+                  <ThemedText themeColor="text">Create a playlist</ThemedText>
+                </Button>
               </View>
             )}
           </View>
         </ScrollView>
       </SafeAreaView>
+      <Modal
+        animationType="fade"
+        transparent
+        visible={createVisible}
+        onRequestClose={() => setCreateVisible(false)}
+        statusBarTranslucent
+      >
+        <View style={styles.modalOverlay}>
+          <Pressable
+            accessibilityLabel="Close create playlist dialog"
+            onPress={() => setCreateVisible(false)}
+            style={StyleSheet.absoluteFill}
+          />
+          <View style={[styles.createDialog, { backgroundColor: colors.backgroundElevated }]}>
+            <ThemedText variant="titleLarge">New playlist</ThemedText>
+            <Input
+              accessibilityLabel="Playlist name"
+              placeholder="Playlist name"
+              value={newPlaylistName}
+              onChangeText={setNewPlaylistName}
+              onSubmitEditing={() => void handleCreatePlaylist()}
+              returnKeyType="done"
+              maxLength={60}
+            />
+            {createError ? (
+              <ThemedText variant="caption" style={{ color: colors.error }}>
+                {createError}
+              </ThemedText>
+            ) : null}
+            <View style={styles.createActions}>
+              <Button variant="ghost" onPress={() => setCreateVisible(false)}>
+                <ThemedText themeColor="text">Cancel</ThemedText>
+              </Button>
+              <Button
+                onPress={() => void handleCreatePlaylist()}
+                loading={createPlaylist.isPending}
+                disabled={createPlaylist.isPending}
+              >
+                <ThemedText style={{ color: colors.primaryText }}>Create</ThemedText>
+              </Button>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </ThemedView>
+  );
+}
+
+function PlaylistAvatar({ channel }: { readonly channel: Channel }) {
+  const { colors } = useTheme();
+  return (
+    <View
+      style={[
+        styles.previewAvatar,
+        { backgroundColor: colors.backgroundElement, borderColor: colors.backgroundElevated },
+      ]}
+    >
+      {channel.logoUrl ? (
+        <Image source={{ uri: channel.logoUrl }} style={styles.previewImage} contentFit="contain" />
+      ) : (
+        <ThemedText variant="caption" style={{ color: colors.textSecondary }}>
+          {channel.name.slice(0, 1).toUpperCase()}
+        </ThemedText>
+      )}
+    </View>
+  );
+}
+
+function PlaylistChannelRow({
+  channel,
+  onRemove,
+}: {
+  readonly channel: Channel;
+  readonly onRemove?: () => void;
+}) {
+  const { colors } = useTheme();
+  return (
+    <View
+      style={[
+        styles.channelRow,
+        { backgroundColor: colors.surface, borderColor: colors.borderMuted },
+      ]}
+    >
+      {channel.logoUrl ? (
+        <Image
+          source={{ uri: channel.logoUrl }}
+          style={[styles.channelLogo, { backgroundColor: colors.backgroundElement }]}
+          contentFit="contain"
+        />
+      ) : (
+        <View
+          style={[
+            styles.channelLogo,
+            styles.channelInitials,
+            { backgroundColor: colors.backgroundElement },
+          ]}
+        >
+          <ThemedText variant="titleSmall" themeColor="textSecondary">
+            {channel.name.slice(0, 2).toUpperCase()}
+          </ThemedText>
+        </View>
+      )}
+      <View style={styles.channelInfo}>
+        <ThemedText numberOfLines={1} variant="titleSmall">
+          {channel.name}
+        </ThemedText>
+        <ThemedText numberOfLines={1} variant="caption" themeColor="textSecondary">
+          {channel.country ?? channel.network ?? 'TV channel'}
+        </ThemedText>
+      </View>
+      {onRemove ? (
+        <Pressable
+          onPress={onRemove}
+          accessibilityRole="button"
+          accessibilityLabel={`Remove ${channel.name} from playlist`}
+          hitSlop={10}
+        >
+          <SymbolView name="minus.circle" size={21} tintColor={colors.textTertiary} />
+        </Pressable>
+      ) : null}
+    </View>
   );
 }
 
@@ -138,11 +409,111 @@ const styles = StyleSheet.create({
   playlistContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.md,
+    gap: Spacing.sm,
     padding: Spacing.md,
+  },
+  playlistIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: Radius.sm,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   playlistText: {
     flex: 1,
+    gap: Spacing.xxs,
+  },
+  playlistName: {
+    fontWeight: '600',
+  },
+  previewStack: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingLeft: Spacing.xs,
+  },
+  previewAvatar: {
+    width: 30,
+    height: 30,
+    marginLeft: -Spacing.xs,
+    borderWidth: 2,
+    borderRadius: Radius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  previewImage: {
+    width: '100%',
+    height: '100%',
+  },
+  detailHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.md,
+    gap: Spacing.md,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  detailHeading: {
+    flex: 1,
+    gap: Spacing.xxs,
+  },
+  detailList: {
+    paddingHorizontal: Spacing.lg,
+    paddingBottom: Spacing.xl,
+    gap: Spacing.sm,
+  },
+  channelRow: {
+    minHeight: 76,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: Radius.md,
+    padding: Spacing.sm,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.md,
+  },
+  channelLogo: {
+    width: 56,
+    height: 56,
+    borderRadius: Radius.sm,
+  },
+  channelInitials: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  channelInfo: {
+    flex: 1,
+    gap: Spacing.xxs,
+  },
+  detailEmpty: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: Spacing.xxl,
+    gap: Spacing.md,
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: Spacing.lg,
+    backgroundColor: 'rgba(0,0,0,0.55)',
+  },
+  createDialog: {
+    width: '100%',
+    maxWidth: 440,
+    borderRadius: Radius.lg,
+    padding: Spacing.lg,
+    gap: Spacing.md,
+  },
+  createActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: Spacing.sm,
   },
   emptyState: {
     padding: Spacing.xl,

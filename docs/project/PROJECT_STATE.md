@@ -88,9 +88,17 @@ Timing presets: `fast` (150ms), `normal` (250ms), `slow` (400ms). Spring configs
 - `src/app/_layout.tsx`
 - `src/app/index.tsx` (Home screen with categorized horizontal lists)
 - `src/app/channels.tsx` (Channels screen with grid, search, and filtering)
-- `src/app/library.tsx` (Library screen with favorites, history, and playlists)
+- `src/app/library.tsx` (Library screen with favorites, history, playlist creation/overview, and playlist detail)
 
 All routes beyond these are planned, not implemented.
+
+## Playlist feature
+
+- Playlists are created from the Library or while adding a channel.
+- Channel cards open a playlist picker to add or remove that channel; a count indicates how many playlists contain it.
+- The Library overview shows each playlist's channel count and up to four channel-logo previews.
+- Opening a playlist shows its channels as rows with remove controls. Playback is not wired yet and remains part of T020/T021.
+- Playlist list, membership, and preview data use shared TanStack Query caches backed by the SQLite playlist repository.
 
 ## Reusable UI Foundation (`src/components/ui/`)
 
@@ -115,7 +123,6 @@ All routes beyond these are planned, not implemented.
 ## Known issues and limitations
 
 - Legacy Spacing aliases and `type` prop in ThemedText are kept for backward compat.
-- Tests have no current test files/configuration.
 - IPTV streams may be unavailable or unsuitable for a given device or jurisdiction; availability is dynamic.
 
 ## Recovery checklist

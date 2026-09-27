@@ -2,10 +2,10 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import {
   favoritesRepository,
-  recentlyWatchedRepository,
   playlistRepository,
+  recentlyWatchedRepository,
 } from '@/data/repositories';
-import type { PlaylistItem, EntityRef } from '@/types/domain';
+import type { EntityRef } from '@/types/domain';
 
 const KEYS = {
   favorites: ['local', 'favorites'] as const,
@@ -51,7 +51,9 @@ export function useToggleFavorite() {
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: KEYS.favorites });
-      queryClient.invalidateQueries({ queryKey: [...KEYS.favorites, variables.entityRef.entityId] });
+      queryClient.invalidateQueries({
+        queryKey: [...KEYS.favorites, variables.entityRef.entityId],
+      });
     },
   });
 }
@@ -104,12 +106,31 @@ export function usePlaylists() {
   });
 }
 
+export function usePlaylistSummaries() {
+  return useQuery({
+    queryKey: [...KEYS.playlists, 'summaries'],
+    queryFn: async () => {
+      const playlists = await playlistRepository.getAll();
+      return Promise.all(
+        playlists.map(async (playlist) => {
+          const items = await playlistRepository.getItems(playlist.id);
+          return {
+            playlistId: playlist.id,
+            channelCount: items.length,
+            previewChannelIds: items.slice(0, 4).map((item) => item.entityRef.entityId),
+          };
+        }),
+      );
+    },
+  });
+}
+
 export function useCreatePlaylist() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async ({ name }: { name: string }) => {
-      await playlistRepository.create(name);
+      return playlistRepository.create(name);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: KEYS.playlists });
@@ -138,21 +159,42 @@ export function usePlaylistItems(playlistId: string) {
   });
 }
 
+export function useChannelPlaylistMemberships(channelId: string) {
+  return useQuery({
+    queryKey: [...KEYS.playlists, 'memberships'],
+    queryFn: async () => {
+      const playlists = await playlistRepository.getAll();
+      const itemsByPlaylist = await Promise.all(
+        playlists.map(async (playlist) => {
+          const items = await playlistRepository.getItems(playlist.id);
+          return { playlistId: playlist.id, items };
+        }),
+      );
+      const memberships: Record<string, string[]> = {};
+      for (const { playlistId, items } of itemsByPlaylist) {
+        for (const item of items) {
+          const channelMemberships = memberships[item.entityRef.entityId] ?? [];
+          channelMemberships.push(playlistId);
+          memberships[item.entityRef.entityId] = channelMemberships;
+        }
+      }
+      return memberships;
+    },
+    select: (memberships) => memberships[channelId] ?? [],
+  });
+}
+
 export function useAddPlaylistItem() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({
-      playlistId,
-      entityRef,
-    }: {
-      playlistId: string;
-      entityRef: EntityRef;
-    }) => {
+    mutationFn: async ({ playlistId, entityRef }: { playlistId: string; entityRef: EntityRef }) => {
       await playlistRepository.addItem(playlistId, entityRef);
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: KEYS.playlistItems(variables.playlistId) });
+      queryClient.invalidateQueries({ queryKey: [...KEYS.playlists, 'memberships'] });
+      queryClient.invalidateQueries({ queryKey: [...KEYS.playlists, 'summaries'] });
     },
   });
 }
@@ -166,6 +208,8 @@ export function useRemovePlaylistItem() {
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: KEYS.playlistItems(variables.playlistId) });
+      queryClient.invalidateQueries({ queryKey: [...KEYS.playlists, 'memberships'] });
+      queryClient.invalidateQueries({ queryKey: [...KEYS.playlists, 'summaries'] });
     },
   });
 }

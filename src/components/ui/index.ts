@@ -14,6 +14,7 @@ export * from './filter-row';
 export * from './horizontal-list';
 export * from './input';
 export * from './modal-picker';
+export * from './playlist-picker';
 export * from './section-header';
 export * from './separator';
 export * from './skeleton';
