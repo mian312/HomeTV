@@ -39,3 +39,38 @@ Docs: https://docs.expo.dev/eas/index.md
 - If `ios/` and `android/` directories do not exist, they are generated (Continuous Native Generation). Never create or edit them by hand — configure native behavior in `app.json` and config plugins.
 - Expo Go only includes its bundled native modules. After adding a library with native code, the app needs a development build: `npx expo run:ios|android` locally, or `eas build --profile development`.
 - Prefer recommended Expo modules over third-party libraries, and check your available skills before adding dependencies. Docs: https://docs.expo.dev/versions/latest/index.md
+
+## HomeTV AI development workflow
+
+This file is the single root operating contract for AI coding agents. Do not create a second root-level instruction file. Antigravity-specific architecture rules, workflow, and skill remain under `.agents/`.
+
+### Before each task
+
+1. Read `docs/project/PROJECT_STATE.md` and `docs/project/tasks.md`.
+2. Inspect `git status` and recent `git log` before editing.
+3. Read relevant source/configuration; source code is authoritative if documentation is stale.
+4. Correct stale tracking docs when discovered. Never describe planned behavior as implemented.
+
+### Scope and continuation
+
+- Implement only the requested task and necessary supporting changes.
+- If asked to continue with the next task, select the next appropriate unfinished task in `docs/project/tasks.md`, mark it `IN_PROGRESS`, implement only that task, validate it, then update the task tracker and state snapshot.
+- Do not repeat completed work, begin unrelated future work, or ask the user to repeat context already recorded unless a real product decision is missing.
+- After meaningful completed work, leave a recoverable checkpoint in the tracker and state snapshot.
+
+### Design and architecture
+
+- Reuse existing components and tokens; extend them when appropriate. Avoid duplicate components and arbitrary design values.
+- Keep responsibilities separated: UI → feature hooks → application/domain logic → repositories → providers/SQLite.
+- TanStack Query owns remote/server state, Zustand owns transient client/UI state, and SQLite owns durable local data.
+- Do not put provider SDK calls, SQL, or substantial business logic directly in route screens.
+- Keep scope aligned with `docs/README.md`; defer M3U/Xtream, backends/auth, ads, analytics, premium features, and error monitoring unless explicitly requested.
+
+### Completion, Git, and documentation
+
+- Run appropriate TypeScript, lint, and relevant tests; perform runtime/build validation only when appropriate and requested. Record blockers/issues in the task and state documents.
+- Before committing, inspect `git status` and run `git diff --check`. Use a meaningful conventional commit (`docs:`, `feat:`, `fix:`, `test:`, `chore:`, etc.). Never commit secrets or unnecessary generated artifacts; never discard user changes with destructive resets.
+- `docs/project/tasks.md` is the task/history record. `docs/project/PROJECT_STATE.md` is the verified current implementation snapshot. `docs/README.md` is the product and architecture guide.
+- Update the state snapshot when implementation, architecture, navigation, providers, persistence, features, limitations, or current work changes. Keep the next task/checkpoint accurate.
+
+The next session must be able to continue using this file, the two project tracking documents, Git history, and source code without relying on conversation memory.
