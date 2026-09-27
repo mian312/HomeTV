@@ -1,12 +1,12 @@
 import React from 'react';
 import { StyleSheet, Pressable, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useThemeStore } from '@/store/theme';
+import { useThemeStore } from '@/stores/theme';
 import { useTheme } from '@/hooks/use-theme';
 
 export function ThemeToggleWrapper({ children }: { children: React.ReactNode }) {
   const { mode, setMode } = useThemeStore();
-  const colors = useTheme();
+  const { colors } = useTheme();
 
   const handleToggle = () => {
     if (mode === 'system') setMode('light');
@@ -15,9 +15,9 @@ export function ThemeToggleWrapper({ children }: { children: React.ReactNode }) 
   };
 
   const getIcon = () => {
-    if (mode === 'system') return 'settings-outline';
-    if (mode === 'light') return 'sunny-outline';
-    return 'moon-outline';
+    if (mode === 'system') return 'settings-outline' as const;
+    if (mode === 'light') return 'sunny-outline' as const;
+    return 'moon-outline' as const;
   };
 
   return (
@@ -29,6 +29,8 @@ export function ThemeToggleWrapper({ children }: { children: React.ReactNode }) 
           styles.floatingButton,
           { backgroundColor: colors.backgroundElement, borderColor: colors.backgroundSelected },
         ]}
+        accessibilityRole="button"
+        accessibilityLabel={`Switch theme. Current: ${mode}`}
       >
         <Ionicons name={getIcon()} size={28} color={colors.text} />
       </Pressable>

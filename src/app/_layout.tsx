@@ -1,23 +1,23 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
+/**
+ * Root layout — Expo Router entry point.
+ *
+ * Composes the application providers and tab navigation.
+ * Business logic, SQL, and feature-specific behavior do not belong here.
+ */
+
 import * as SplashScreen from 'expo-splash-screen';
-import { useColorScheme } from 'react-native';
 
 import { AnimatedSplashOverlay } from '@/components/animated-icon';
 import AppTabs from '@/components/app-tabs';
-import { useThemeStore } from '@/store/theme';
+import { AppProviders } from '@/lib/providers';
 
 SplashScreen.preventAutoHideAsync();
 
-export default function TabLayout() {
-  const systemColorScheme = useColorScheme();
-  const themeMode = useThemeStore((state) => state.mode);
-  
-  const scheme = themeMode === 'system' ? systemColorScheme : themeMode;
-
+export default function RootLayout() {
   return (
-    <ThemeProvider value={scheme === 'dark' ? DarkTheme : DefaultTheme}>
+    <AppProviders>
       <AnimatedSplashOverlay />
       <AppTabs />
-    </ThemeProvider>
+    </AppProviders>
   );
 }

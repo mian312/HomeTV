@@ -9,7 +9,7 @@ Detailed task queue and development history. Current implementation truth is in 
 | ID | Phase | Task | Expected Outcome | Status | Changes Made | Lint/Test Issues | Decisions | Commit | Notes |
 |---|---|---|---|---|---|---|---|---|---|
 | T001 | 0 | Inspect existing Expo workspace | Workspace and current configuration are understood before changes | COMPLETED | Inspected package/configuration/routes and found SDK 57 starter | Not run (inspection only) | Preserve existing app; don't scaffold another | — | Baseline in PROJECT_STATE.md |
-| T002 | 1 | Establish project architecture | Clean feature/domain/data boundaries exist | TODO | | | | | Next implementation task |
+| T002 | 1 | Establish project architecture | Clean feature/domain/data boundaries exist | COMPLETED | Created `src/types/domain.ts` (branded IDs, domain models, AsyncState); `src/data/providers/provider.ts` (IptvProvider interface + ProviderError); `src/data/repositories/repositories.ts` (Favorites/RecentlyWatched/Playlist/Settings interfaces); `src/lib/query-client.ts` (TanStack Query client with cache-first defaults); `src/lib/providers.tsx` (root AppProviders); moved theme store to `src/stores/theme.ts` with stricter ThemeMode type; enhanced `useTheme()` → ThemeResult with colors/scheme/isDark; updated all consumers; wired AppProviders into root layout | `tsc --noEmit` ✓, `expo lint` ✓, `git diff --check` ✓ | Use branded IDs for compile-time safety; widen ThemeColors for `as const` compat; keep AppProviders composition for easy extension | See Git history | |
 | T003 | 1 | Establish theme/design system | Light/dark/system themes and centralized UI tokens work | TODO | | | | | Existing theme is partial |
 | T004 | 1 | Establish reusable UI foundation | Common OTT UI components are reusable and consistent | TODO | | | | | |
 | T005 | 1 | Establish quality tooling | Strict TS, ESLint, Prettier and tests work | TODO | | | | | Jest installed; test config/RTL missing |
@@ -55,10 +55,10 @@ Detailed task queue and development history. Current implementation truth is in 
 
 ## Current Checkpoint
 
-- **Current Phase:** 0 — workspace organization complete; implementation foundation next.
-- **Current Task:** T002
-- **Last Completed Tasks:** T001 and T032
+- **Current Phase:** 1 — project architecture established; theme/design system next.
+- **Current Task:** T003
+- **Last Completed Tasks:** T002
 - **Last Commit:** See Git history.
-- **Next Task:** T002 — establish project architecture.
-- **Known Issues:** Starter UI remains; theme persistence uses AsyncStorage; theme tokens/tests are incomplete.
-- **Next Expected Outcome:** Define and implement minimal application architecture boundaries without adding speculative feature behavior.
+- **Next Task:** T003 — establish theme/design system.
+- **Known Issues:** Starter UI remains; theme persistence uses AsyncStorage; theme tokens are incomplete (only basic colors and spacing). Tests have no configuration.
+- **Next Expected Outcome:** Centralized, complete design tokens (colors, typography, spacing, radii, elevation, motion) with light/dark/system support.

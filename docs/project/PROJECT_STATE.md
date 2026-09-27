@@ -6,38 +6,68 @@ This is a verified implementation snapshot. `tasks.md` is the task/history recor
 
 - Product: HomeTV, a free mobile-first OTT/IPTV app for Android and iOS.
 - Initial catalog source: iptv-org via `@iptv-org/sdk`.
-- Current project: Expo Router starter at the repository root; HomeTV feature implementation is not complete.
+- Current project: Expo Router starter at the repository root with architecture boundaries defined; HomeTV feature implementation is not complete.
 - Expo SDK: `~57.0.25`.
 - React Native: `0.86.3`; React `19.2.3`; TypeScript `~6.0.3`.
 - TypeScript strict mode: enabled.
 
 ## Current milestone and next task
 
-- Phase: 0 — workspace baseline/organization, with implementation foundation next.
-- Last completed task: T001 workspace and dependency inspection, plus T032 documentation organization.
-- Next planned task: T002 establish project architecture.
-- Commit details for the documentation organization are recorded in Git history.
+- Phase: 1 — project architecture established.
+- Last completed task: T002 establish project architecture.
+- Next planned task: T003 establish theme/design system.
 
-## Implemented baseline
+## Implemented architecture
 
-- Expo Router is configured and route files exist under `src/app/` (`_layout.tsx`, `index.tsx`, `explore.tsx`).
-- The Expo starter UI is still present; the Home route is not yet the HomeTV OTT screen.
-- A basic light/dark theme and spacing constants exist in `src/constants/theme.ts`.
-- Theme mode is managed with Zustand in `src/store/theme.ts` and currently persisted using AsyncStorage. This is temporary legacy behavior to migrate to SQLite settings before removing AsyncStorage.
-- Installed dependencies include the Expo/native packages, `@iptv-org/sdk`, TanStack Query, Zustand, Jest, and `jest-expo` listed in the root `package.json`.
-- `tsconfig.json` enables `strict: true`.
-- `.agents/rules/hometv-architecture.md`, `.agents/workflows/hometv-phase.md`, and `.agents/skills/hometv-expo-engineering/SKILL.md` provide workspace-specific AI guidance.
+### Domain types (`src/types/domain.ts`)
 
-## Not implemented yet
+- Branded ID types: `ChannelId`, `CategoryId`, `CountryCode`, `LanguageCode`.
+- Domain models: `Channel`, `Stream`, `Category`, `Country`, `Language`, `GuideEntry`.
+- Local-only entities: `EntityRef` (type+ID for favorites/playlists), `Playlist`, `PlaylistItem`, `RecentlyWatchedEntry`, `Favorite`.
+- `AsyncState<T>` discriminated union for loading/success/empty/error states.
 
-- HomeTV-specific query client/provider and IPTV repository/provider/model mapping.
-- SQLite database client, schema/migrations, and repositories.
-- HomeTV domain types and feature-layer behavior.
-- Home/channel/search/favorites/history/playlist/EPG screens and business logic.
-- Isolated video player, fallback, and player error UX.
-- Full theme tokens (typography, radii, elevation, motion) and consistent token-based components.
-- Jest configuration, test files, and `@testing-library/react-native` setup.
-- Full accessibility/performance/device validation.
+### Provider interface (`src/data/providers/provider.ts`)
+
+- `IptvProvider` interface with methods: `getChannels()`, `getStreams()`, `getAllStreams()`, `getCategories()`, `getCountries()`, `getLanguages()`, `getGuide()`.
+- `ProviderError` class with typed error codes (`NETWORK`, `NOT_FOUND`, `PARSE`, `UNKNOWN`).
+- No concrete implementation yet (T008).
+
+### Repository interfaces (`src/data/repositories/repositories.ts`)
+
+- `FavoritesRepository`: add, remove, isFavorite, getAll.
+- `RecentlyWatchedRepository`: record (capped at 20, deduplicates, moves to top), getAll, clear.
+- `PlaylistRepository`: create, rename, delete, getAll, getById, addItem, removeItem, getItems.
+- `SettingsRepository`: get (with default), set, remove.
+- No concrete implementations yet (T007).
+
+### TanStack Query client (`src/lib/query-client.ts`)
+
+- `createQueryClient()` with cache-first defaults: 5 min stale time, 30 min GC time, 2 retries, refetch on reconnect.
+- Feature-specific query keys and options are defined alongside their feature hooks.
+
+### Root providers (`src/lib/providers.tsx`)
+
+- `AppProviders` composes QueryClientProvider and Expo Router ThemeProvider.
+- Resolves theme mode (light/dark/system) using the theme store.
+- Root `_layout.tsx` uses `AppProviders` instead of inline provider setup.
+
+### Theme store (`src/stores/theme.ts`)
+
+- Moved from `src/store/theme.ts` to `src/stores/theme.ts` (plural, per project structure).
+- `ThemeMode` is now a strict union (`'light' | 'dark' | 'system'`) instead of `ColorSchemeName | 'system'`.
+- Still persisted via AsyncStorage (migration to SQLite SettingsRepository deferred to T007).
+
+### Theme hook (`src/hooks/use-theme.ts`)
+
+- Enhanced to return `ThemeResult` object with `colors`, `scheme` (`ResolvedScheme`), and `isDark`.
+- `ThemeColors` type widened for compatibility with `as const` light/dark palettes.
+- All components updated from `useTheme()` direct color access to `useTheme().colors`.
+
+### Updated components
+
+- `app-tabs.tsx` / `app-tabs.web.tsx`: Use `useTheme()` hook instead of raw `Colors + useColorScheme`.
+- `themed-text.tsx`, `themed-view.tsx`, `theme-toggle.tsx`, `collapsible.tsx`: Destructure `{ colors }` from `useTheme()`.
+- `theme-toggle.tsx`: Added `accessibilityRole` and `accessibilityLabel`.
 
 ## Routes currently present
 
@@ -54,12 +84,25 @@ All routes beyond these are planned, not implemented.
 - SQLite: durable favorites, recently watched (maximum 20), playlists/items, settings, and anonymous local identity.
 - Provider models and SQLite row types must not escape their data boundary into UI.
 
+## Not implemented yet
+
+- Complete theme tokens (typography, radii, elevation, motion).
+- Reusable OTT UI components.
+- SQLite database client, schema/migrations, and repository implementations.
+- iptv-org provider adapter (concrete `IptvProvider` implementation).
+- Domain data mapping from SDK types.
+- HomeTV-specific query hooks and cache policies.
+- Home/channel/search/favorites/history/playlist/EPG screens and business logic.
+- Isolated video player, fallback, and player error UX.
+- Jest configuration, test files, and `@testing-library/react-native` setup.
+- Full accessibility/performance/device validation.
+
 ## Known issues and limitations
 
 - The starter home screen remains.
 - AsyncStorage currently persists theme state and should be migrated as part of local settings work.
-- Theme tokens are incomplete.
-- Tests have no current test files/configuration. Add testing-library/config in the testing foundation task.
+- Theme tokens are incomplete (only basic colors and spacing).
+- Tests have no current test files/configuration.
 - IPTV streams may be unavailable or unsuitable for a given device or jurisdiction; availability is dynamic.
 
 ## Recovery checklist
