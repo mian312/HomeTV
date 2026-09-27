@@ -5,6 +5,11 @@ import { ChannelCard } from '@/components/ui/channel-card';
 import { HorizontalList } from '@/components/ui/horizontal-list';
 import type { Channel } from '@/types/domain';
 
+jest.mock('@/data/queries/local', () => ({
+  useIsFavorite: jest.fn(() => ({ data: false })),
+  useToggleFavorite: jest.fn(() => ({ mutate: jest.fn() })),
+}));
+
 const mockChannel: Channel = {
   id: 'test-1' as any,
   name: 'Test Channel',

@@ -1,32 +1,16 @@
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { FlatList, Platform, StyleSheet, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { SymbolView } from 'expo-symbols';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { ChannelCard, ErrorView, Input, LoadingView, ModalPicker } from '@/components/ui';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
-import { useTheme } from '@/hooks/use-theme';
-import { useChannels, useCategories, useCountries } from '@/data/queries/iptv';
-import { ChannelCard, ErrorView, LoadingView, FilterRow, Input } from '@/components/ui';
+import { useCategories, useChannels, useCountries } from '@/data/queries/iptv';
 import type { CategoryId, CountryCode } from '@/types/domain';
 
 export default function ChannelsScreen() {
-  const safeAreaInsets = useSafeAreaInsets();
-  const { colors } = useTheme();
-  
-  const insets = {
-    ...safeAreaInsets,
-    bottom: safeAreaInsets.bottom + BottomTabInset + Spacing.three,
-  };
-
   const contentPlatformStyle = Platform.select({
-    android: {
-      paddingTop: insets.top,
-      paddingLeft: insets.left,
-      paddingRight: insets.right,
-      paddingBottom: insets.bottom,
-    },
     web: {
       paddingTop: Spacing.six,
       paddingBottom: Spacing.four,
@@ -67,62 +51,62 @@ export default function ChannelsScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      <FlatList
-        data={filteredChannels}
-        keyExtractor={(item) => item.id}
-        numColumns={2}
-        columnWrapperStyle={styles.columnWrapper}
-        contentContainerStyle={[styles.listContent, contentPlatformStyle]}
-        removeClippedSubviews
-        initialNumToRender={12}
-        maxToRenderPerBatch={10}
-        windowSize={5}
-        renderItem={({ item }) => (
-          <View style={styles.cardContainer}>
-            <ChannelCard channel={item} style={styles.gridCard} />
-          </View>
-        )}
-        ListHeaderComponent={
-          <View>
-            <ThemedView style={styles.header}>
-              <ThemedText type="subtitle">All Channels</ThemedText>
-              <ThemedText themeColor="textSecondary" style={styles.subtitle}>
-                Browse the complete catalog
-              </ThemedText>
-              <Input
-                placeholder="Search channels..."
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-                containerStyle={styles.searchContainer}
-              />
-            </ThemedView>
-            
-            {categories && (
-              <FilterRow
-                items={categories.map(c => c.id)}
-                selectedItem={selectedCategory}
-                onSelect={setSelectedCategory}
-                getLabel={(id) => categories.find(c => c.id === id)?.name ?? id}
-                getKey={(id) => id}
-                style={styles.filterRow}
-                emptyLabel="All Categories"
-              />
-            )}
-            
-            {countries && (
-              <FilterRow
-                items={countries.map(c => c.code)}
-                selectedItem={selectedCountry}
-                onSelect={setSelectedCountry}
-                getLabel={(code) => countries.find(c => c.code === code)?.name ?? code}
-                getKey={(code) => code}
-                style={styles.filterRow}
-                emptyLabel="All Countries"
-              />
-            )}
-          </View>
-        }
-      />
+      <SafeAreaView edges={['top', 'left', 'right']}>
+        <FlatList
+          data={filteredChannels}
+          keyExtractor={(item) => item.id}
+          numColumns={2}
+          columnWrapperStyle={styles.columnWrapper}
+          contentContainerStyle={[styles.listContent, contentPlatformStyle]}
+          removeClippedSubviews
+          initialNumToRender={12}
+          maxToRenderPerBatch={10}
+          windowSize={5}
+          renderItem={({ item }) => (
+            <View style={styles.cardContainer}>
+              <ChannelCard channel={item} style={styles.gridCard} />
+            </View>
+          )}
+          ListHeaderComponent={
+            <View style={styles.headerContainer}>
+              <ThemedView style={styles.header}>
+                <ThemedText type="subtitle">All Channels</ThemedText>
+                <ThemedText themeColor="textSecondary" style={styles.subtitle}>
+                  Browse the complete catalog
+                </ThemedText>
+                <Input
+                  placeholder="Search channels..."
+                  value={searchQuery}
+                  onChangeText={setSearchQuery}
+                  containerStyle={styles.searchContainer}
+                />
+              </ThemedView>
+              
+              <View style={styles.filtersRow}>
+                {categories && (
+                  <ModalPicker
+                    title="Select Category"
+                    placeholder="Categories"
+                    items={categories.map(c => ({ label: c.name, value: c.id }))}
+                    selectedValue={selectedCategory}
+                    onValueChange={setSelectedCategory}
+                  />
+                )}
+                
+                {countries && (
+                  <ModalPicker
+                    title="Select Country"
+                    placeholder="Countries"
+                    items={countries.map(c => ({ label: c.name, value: c.code }))}
+                    selectedValue={selectedCountry}
+                    onValueChange={setSelectedCountry}
+                  />
+                )}
+              </View>
+            </View>
+          }
+        />
+      </SafeAreaView>
     </ThemedView>
   );
 }
@@ -130,13 +114,16 @@ export default function ChannelsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  safeArea: {
+    flex: 1,
     alignItems: 'center',
   },
   listContent: {
     width: '100%',
     maxWidth: MaxContentWidth,
     paddingHorizontal: Spacing.four,
-    paddingBottom: Spacing.xl,
+    paddingBottom: BottomTabInset + Spacing.xl,
   },
   columnWrapper: {
     justifyContent: 'space-between',
@@ -150,19 +137,22 @@ const styles = StyleSheet.create({
     width: '100%',
     marginRight: 0,
   },
+  headerContainer: {
+    marginBottom: Spacing.lg,
+  },
   header: {
-    paddingVertical: Spacing.xl,
+    paddingVertical: Spacing.lg,
     gap: Spacing.one,
   },
   subtitle: {
-    marginBottom: Spacing.sm,
+    marginBottom: Spacing.xs,
   },
   searchContainer: {
-    marginTop: Spacing.sm,
+    marginTop: Spacing.xs,
     marginBottom: Spacing.sm,
   },
-  filterRow: {
-    marginBottom: Spacing.md,
-    marginHorizontal: -Spacing.four, // negate parent padding
+  filtersRow: {
+    flexDirection: 'row',
+    gap: Spacing.md,
   },
 });
