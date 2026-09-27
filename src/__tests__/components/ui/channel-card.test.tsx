@@ -2,6 +2,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react-nativ
 
 import { ChannelCard } from '@/components/ui/channel-card';
 import { HorizontalList } from '@/components/ui/horizontal-list';
+import { useGuide } from '@/data/queries/iptv';
 import {
   useAddPlaylistItem,
   useChannelPlaylistMemberships,
@@ -9,7 +10,7 @@ import {
   usePlaylists,
   useRemovePlaylistItem,
 } from '@/data/queries/local';
-import type { Channel } from '@/types/domain';
+import type { Channel, GuideEntry } from '@/types/domain';
 
 jest.mock('@/data/queries/local', () => ({
   useIsFavorite: jest.fn(() => ({ data: false })),
@@ -19,6 +20,10 @@ jest.mock('@/data/queries/local', () => ({
   useCreatePlaylist: jest.fn(() => ({ mutateAsync: jest.fn(), isPending: false })),
   useAddPlaylistItem: jest.fn(() => ({ mutateAsync: jest.fn(), isPending: false })),
   useRemovePlaylistItem: jest.fn(() => ({ mutateAsync: jest.fn(), isPending: false })),
+}));
+
+jest.mock('@/data/queries/iptv', () => ({
+  useGuide: jest.fn(() => ({ data: [], isLoading: false, isError: false, refetch: jest.fn() })),
 }));
 
 const mockChannel: Channel = {
@@ -49,12 +54,19 @@ const mockUseMemberships = jest.mocked(useChannelPlaylistMemberships);
 const mockUseCreatePlaylist = jest.mocked(useCreatePlaylist);
 const mockUseAddPlaylistItem = jest.mocked(useAddPlaylistItem);
 const mockUseRemovePlaylistItem = jest.mocked(useRemovePlaylistItem);
+const mockUseGuide = jest.mocked(useGuide);
 const addPlaylistItem = jest.fn();
 const removePlaylistItem = jest.fn();
 const createPlaylist = jest.fn();
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockUseGuide.mockReturnValue({
+    data: [],
+    isLoading: false,
+    isError: false,
+    refetch: jest.fn(),
+  } as never);
   mockUsePlaylists.mockReturnValue({ data: [mockPlaylist] } as never);
   mockUseMemberships.mockReturnValue({ data: [] } as never);
   mockUseCreatePlaylist.mockReturnValue({ mutateAsync: createPlaylist, isPending: false } as never);
@@ -98,6 +110,82 @@ describe('ChannelCard', () => {
     render(<ChannelCard channel={mockChannel} />);
     fireEvent.press(screen.getByTestId('channel-playlist-action'));
     expect(screen.getByText('Add to playlist')).toBeTruthy();
+  });
+
+  it('opens channel details without loading its guide', () => {
+    render(<ChannelCard channel={mockChannel} />);
+    expect(mockUseGuide).not.toHaveBeenCalled();
+
+    fireEvent.press(screen.getByTestId('channel-details-action'));
+    expect(screen.getByText('Channel details')).toBeTruthy();
+    expect(mockUseGuide).not.toHaveBeenCalled();
+  });
+
+  it('opens the guide slider from the card and supports each date range', () => {
+    render(<ChannelCard channel={mockChannel} />);
+    expect(mockUseGuide).not.toHaveBeenCalled();
+
+    fireEvent.press(screen.getByTestId('channel-guide-action'));
+    expect(mockUseGuide).toHaveBeenCalledWith(mockChannel.id);
+    expect(screen.getByText('Next 24 hours')).toBeTruthy();
+    expect(screen.getByText('Past 3 days')).toBeTruthy();
+    expect(screen.getByText('Next 7 days')).toBeTruthy();
+
+    fireEvent.press(screen.getByTestId('guide-range-past'));
+    expect(screen.getByTestId('guide-range-past').props.accessibilityState.selected).toBe(true);
+    fireEvent.press(screen.getByTestId('guide-range-future'));
+    expect(screen.getByTestId('guide-range-future').props.accessibilityState.selected).toBe(true);
+  });
+
+  it('highlights the live program and filters past and future schedules', () => {
+    const now = Date.now();
+    const entries: GuideEntry[] = [
+      {
+        channelId: mockChannel.id,
+        title: 'Live program',
+        description: null,
+        start: new Date(now - 30 * 60 * 1000),
+        end: new Date(now + 30 * 60 * 1000),
+        icon: null,
+      },
+      {
+        channelId: mockChannel.id,
+        title: 'Past program',
+        description: null,
+        start: new Date(now - 24 * 60 * 60 * 1000),
+        end: new Date(now - 23 * 60 * 60 * 1000),
+        icon: null,
+      },
+      {
+        channelId: mockChannel.id,
+        title: 'Future program',
+        description: null,
+        start: new Date(now + 4 * 24 * 60 * 60 * 1000),
+        end: new Date(now + 4 * 24 * 60 * 60 * 1000 + 60 * 60 * 1000),
+        icon: null,
+      },
+    ];
+    mockUseGuide.mockReturnValue({
+      data: entries,
+      isLoading: false,
+      isError: false,
+      refetch: jest.fn(),
+    } as never);
+
+    render(<ChannelCard channel={mockChannel} />);
+    fireEvent.press(screen.getByTestId('channel-guide-action'));
+
+    expect(screen.getByText('Live program')).toBeTruthy();
+    expect(screen.getByText('LIVE')).toBeTruthy();
+    expect(screen.queryByText('Past program')).toBeNull();
+
+    fireEvent.press(screen.getByTestId('guide-range-past'));
+    expect(screen.getByText('Past program')).toBeTruthy();
+    expect(screen.queryByText('Live program')).toBeNull();
+
+    fireEvent.press(screen.getByTestId('guide-range-future'));
+    expect(screen.getByText('Future program')).toBeTruthy();
+    expect(screen.queryByText('Past program')).toBeNull();
   });
 
   it('adds the channel to a selected playlist', async () => {

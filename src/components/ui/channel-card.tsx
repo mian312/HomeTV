@@ -5,6 +5,7 @@ import { Pressable, StyleProp, StyleSheet, View, ViewStyle } from 'react-native'
 import { ThemedText } from '../themed-text';
 import { CardContent, PressableCard } from './card';
 
+import { Radius, Spacing } from '@/constants/theme';
 import {
   useChannelPlaylistMemberships,
   useIsFavorite,
@@ -13,6 +14,8 @@ import {
 import { useTheme } from '@/hooks/use-theme';
 import type { Channel } from '@/types/domain';
 import { SymbolView } from 'expo-symbols';
+import { ChannelDetails } from './channel-details';
+import { ChannelGuideSlider } from './channel-guide-slider';
 import { PlaylistPicker } from './playlist-picker';
 
 interface ChannelCardProps {
@@ -24,6 +27,8 @@ interface ChannelCardProps {
 export function ChannelCard({ channel, onPress, style }: ChannelCardProps) {
   const { colors } = useTheme();
   const [playlistPickerVisible, setPlaylistPickerVisible] = useState(false);
+  const [detailsVisible, setDetailsVisible] = useState(false);
+  const [guideVisible, setGuideVisible] = useState(false);
 
   const entityRef = { entityType: 'channel' as const, entityId: channel.id };
   const { data: isFavorite } = useIsFavorite(entityRef);
@@ -64,13 +69,44 @@ export function ChannelCard({ channel, onPress, style }: ChannelCardProps) {
             <ThemedText numberOfLines={1} style={styles.name}>
               {channel.name}
             </ThemedText>
-            <ThemedText
-              type="small"
-              numberOfLines={1}
-              style={[styles.category, { color: colors.textSecondary }]}
+            <View style={styles.metaRow}>
+              <ThemedText
+                type="small"
+                numberOfLines={1}
+                style={[styles.category, { color: colors.textSecondary }]}
+              >
+                {channel.country ?? 'Unknown'}
+              </ThemedText>
+              <Pressable
+                onPress={() => setDetailsVisible(true)}
+                style={({ pressed }) => [styles.detailsButton, pressed && { opacity: 0.65 }]}
+                accessibilityRole="button"
+                accessibilityLabel={`Details for ${channel.name}`}
+                testID="channel-details-action"
+                hitSlop={6}
+              >
+                <SymbolView name="info.circle" size={17} tintColor={colors.textTertiary} />
+              </Pressable>
+            </View>
+            <Pressable
+              onPress={() => setGuideVisible(true)}
+              style={({ pressed }) => [
+                styles.guideButton,
+                { backgroundColor: colors.primaryMuted },
+                pressed && { opacity: 0.7 },
+              ]}
+              accessibilityRole="button"
+              accessibilityLabel={`Show guide for ${channel.name}`}
+              testID="channel-guide-action"
             >
-              {channel.country ?? 'Unknown'}
-            </ThemedText>
+              <SymbolView name="calendar" size={15} tintColor={colors.primary} />
+              <ThemedText
+                variant="caption"
+                style={[styles.guideButtonText, { color: colors.primary }]}
+              >
+                Guide
+              </ThemedText>
+            </Pressable>
           </View>
           <Pressable
             onPress={() => setPlaylistPickerVisible(true)}
@@ -112,6 +148,14 @@ export function ChannelCard({ channel, onPress, style }: ChannelCardProps) {
         visible={playlistPickerVisible}
         onClose={() => setPlaylistPickerVisible(false)}
       />
+      <ChannelDetails
+        channel={channel}
+        visible={detailsVisible}
+        onClose={() => setDetailsVisible(false)}
+      />
+      {guideVisible ? (
+        <ChannelGuideSlider channel={channel} onClose={() => setGuideVisible(false)} />
+      ) : null}
     </>
   );
 }
@@ -142,7 +186,34 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   category: {
+    flex: 1,
     textAlign: 'center',
+  },
+  metaRow: {
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 2,
+  },
+  detailsButton: {
+    width: 24,
+    height: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  guideButton: {
+    minHeight: 30,
+    alignSelf: 'stretch',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.xs,
+    paddingHorizontal: Spacing.sm,
+    borderRadius: Radius.sm,
+  },
+  guideButtonText: {
+    fontWeight: '600',
   },
   textContainer: {
     flex: 1,

@@ -9,12 +9,14 @@ import { ThemedView } from '@/components/themed-view';
 import {
   Button,
   CardContent,
+  ChannelAvatarStack,
   ChannelCard,
   HorizontalList,
   Input,
   LoadingView,
   PressableCard,
   SectionHeader,
+  SlideUpSheet,
 } from '@/components/ui';
 import { Radius, Spacing } from '@/constants/theme';
 import { useChannels } from '@/data/queries/iptv';
@@ -93,58 +95,6 @@ export default function LibraryScreen() {
     });
   };
 
-  if (activePlaylistId) {
-    return (
-      <ThemedView style={styles.container}>
-        <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
-          <View style={styles.detailHeader}>
-            <Pressable
-              onPress={() => setActivePlaylistId(null)}
-              accessibilityRole="button"
-              accessibilityLabel="Back to library"
-              hitSlop={10}
-              style={styles.backButton}
-            >
-              <SymbolView name="chevron.left" size={21} tintColor={colors.text} />
-            </Pressable>
-            <View style={styles.detailHeading}>
-              <ThemedText variant="headlineSmall" numberOfLines={1}>
-                {activePlaylist?.name ?? 'Playlist'}
-              </ThemedText>
-              <ThemedText variant="bodySmall" themeColor="textSecondary">
-                {playlistChannels.length} {playlistChannels.length === 1 ? 'channel' : 'channels'}
-              </ThemedText>
-            </View>
-          </View>
-
-          {itemsLoading ? (
-            <LoadingView message="Loading playlist..." />
-          ) : playlistChannels.length > 0 ? (
-            <FlatList
-              data={playlistChannels}
-              keyExtractor={(channel) => channel.id}
-              contentContainerStyle={styles.detailList}
-              renderItem={({ item }) => (
-                <PlaylistChannelRow
-                  channel={item}
-                  onRemove={activePlaylist ? () => removeChannel(activePlaylist, item) : undefined}
-                />
-              )}
-            />
-          ) : (
-            <View style={styles.detailEmpty}>
-              <SymbolView name="text.badge.plus" size={32} tintColor={colors.textTertiary} />
-              <ThemedText variant="titleSmall">No channels yet</ThemedText>
-              <ThemedText themeColor="textSecondary" style={styles.emptyText}>
-                Add channels from the Channels tab using the playlist button on a channel card.
-              </ThemedText>
-            </View>
-          )}
-        </SafeAreaView>
-      </ThemedView>
-    );
-  }
-
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
@@ -222,11 +172,10 @@ export default function LibraryScreen() {
                             {(summary?.channelCount ?? 0) === 1 ? 'channel' : 'channels'}
                           </ThemedText>
                         </View>
-                        <View style={styles.previewStack}>
-                          {previewChannels.map((channel) => (
-                            <PlaylistAvatar key={channel.id} channel={channel} />
-                          ))}
-                        </View>
+                        <ChannelAvatarStack
+                          channels={previewChannels}
+                          totalCount={summary?.channelCount ?? previewChannels.length}
+                        />
                         <SymbolView
                           name="chevron.right"
                           size={16}
@@ -294,27 +243,62 @@ export default function LibraryScreen() {
           </View>
         </View>
       </Modal>
+      {activePlaylist ? (
+        <SlideUpSheet visible onClose={() => setActivePlaylistId(null)}>
+          <View style={styles.playlistSheetContent}>
+            <View style={styles.playlistSheetHeader}>
+              <View style={[styles.playlistIcon, { backgroundColor: colors.primaryMuted }]}>
+                <SymbolView name="list.bullet" size={20} tintColor={colors.primary} />
+              </View>
+              <View style={styles.detailHeading}>
+                <ThemedText variant="headlineSmall" numberOfLines={1}>
+                  {activePlaylist.name}
+                </ThemedText>
+                <ThemedText variant="bodySmall" themeColor="textSecondary">
+                  {playlistChannels.length} {playlistChannels.length === 1 ? 'channel' : 'channels'}
+                </ThemedText>
+              </View>
+              <Pressable
+                onPress={() => setActivePlaylistId(null)}
+                accessibilityRole="button"
+                accessibilityLabel="Close playlist details"
+                style={styles.closeButton}
+              >
+                <SymbolView name="xmark" size={19} tintColor={colors.textSecondary} />
+              </Pressable>
+            </View>
+            {playlistChannels.length > 0 ? (
+              <View style={styles.detailPreview}>
+                <ChannelAvatarStack channels={playlistChannels} />
+              </View>
+            ) : null}
+            {itemsLoading ? (
+              <LoadingView message="Loading playlist..." />
+            ) : playlistChannels.length > 0 ? (
+              <FlatList
+                data={playlistChannels}
+                keyExtractor={(channel) => channel.id}
+                contentContainerStyle={styles.detailList}
+                renderItem={({ item }) => (
+                  <PlaylistChannelRow
+                    channel={item}
+                    onRemove={() => removeChannel(activePlaylist, item)}
+                  />
+                )}
+              />
+            ) : (
+              <View style={styles.detailEmpty}>
+                <SymbolView name="text.badge.plus" size={32} tintColor={colors.textTertiary} />
+                <ThemedText variant="titleSmall">No channels yet</ThemedText>
+                <ThemedText themeColor="textSecondary" style={styles.emptyText}>
+                  Add channels from the Channels tab using the playlist button on a channel card.
+                </ThemedText>
+              </View>
+            )}
+          </View>
+        </SlideUpSheet>
+      ) : null}
     </ThemedView>
-  );
-}
-
-function PlaylistAvatar({ channel }: { readonly channel: Channel }) {
-  const { colors } = useTheme();
-  return (
-    <View
-      style={[
-        styles.previewAvatar,
-        { backgroundColor: colors.backgroundElement, borderColor: colors.backgroundElevated },
-      ]}
-    >
-      {channel.logoUrl ? (
-        <Image source={{ uri: channel.logoUrl }} style={styles.previewImage} contentFit="contain" />
-      ) : (
-        <ThemedText variant="caption" style={{ color: colors.textSecondary }}>
-          {channel.name.slice(0, 1).toUpperCase()}
-        </ThemedText>
-      )}
-    </View>
   );
 }
 
@@ -426,41 +410,31 @@ const styles = StyleSheet.create({
   playlistName: {
     fontWeight: '600',
   },
-  previewStack: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingLeft: Spacing.xs,
+  playlistSheetContent: {
+    flex: 1,
   },
-  previewAvatar: {
-    width: 30,
-    height: 30,
-    marginLeft: -Spacing.xs,
-    borderWidth: 2,
-    borderRadius: Radius.full,
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
-  },
-  previewImage: {
-    width: '100%',
-    height: '100%',
-  },
-  detailHeader: {
+  playlistSheetHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.md,
+    paddingVertical: Spacing.sm,
     gap: Spacing.md,
   },
-  backButton: {
+  detailHeading: {
+    flex: 1,
+    gap: Spacing.xxs,
+  },
+  closeButton: {
     width: 40,
     height: 40,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  detailHeading: {
-    flex: 1,
-    gap: Spacing.xxs,
+  detailPreview: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.sm,
   },
   detailList: {
     paddingHorizontal: Spacing.lg,

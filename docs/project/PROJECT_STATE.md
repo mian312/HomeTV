@@ -89,9 +89,8 @@ Timing presets: `fast` (150ms), `normal` (250ms), `slow` (400ms). Spring configs
 - `src/app/index.tsx` (Home screen with categorized horizontal lists)
 - `src/app/channels.tsx` (Channels screen with grid, search, and filtering)
 - `src/app/library.tsx` (Library screen with favorites, history, playlist creation/overview, and playlist detail)
-- `src/app/guide.tsx` (TV Guide screen with horizontal timelines of programs for each channel)
 
-All routes beyond these are planned, not implemented.
+All routes beyond these are planned, not implemented. TV guide access is a channel-card action, not a separate tab or route.
 
 ## Playlist feature
 
@@ -100,6 +99,19 @@ All routes beyond these are planned, not implemented.
 - The Library overview shows each playlist's channel count and up to four channel-logo previews.
 - Opening a playlist shows its channels as rows with remove controls. Playback is not wired yet and remains part of T020/T021.
 - Playlist list, membership, and preview data use shared TanStack Query caches backed by the SQLite playlist repository.
+
+## Channel details and guide
+
+- Channel cards expose a details action with the channel's available metadata.
+- A labeled Guide button on each channel card opens a draggable bottom sheet; dragging down or tapping outside closes it.
+- The sheet defaults to the next 24 hours and offers completed programs from the past three days and programs in the next seven days.
+- The currently airing program is highlighted with a LIVE badge beside its title.
+- Guide entries are deterministic mock data spanning the selected windows until a live EPG source is integrated.
+
+## Playlist detail presentation
+
+- Opening a playlist uses the same draggable bottom-sheet presentation as the channel guide.
+- Playlist details show the first three channel avatars and a `+N` overflow avatar, followed by the full removable channel list.
 
 ## Reusable UI Foundation (`src/components/ui/`)
 
@@ -123,6 +135,7 @@ All routes beyond these are planned, not implemented.
 ## Known issues and limitations
 
 - Legacy Spacing aliases and `type` prop in ThemedText are kept for backward compat.
+- EPG schedules are deterministic mock data, not listings from a live guide provider.
 - IPTV streams may be unavailable or unsuitable for a given device or jurisdiction; availability is dynamic.
 
 ## Recovery checklist

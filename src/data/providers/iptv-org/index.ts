@@ -149,14 +149,12 @@ function mapLanguage(raw: Types.LanguageData): Language {
 // ---------------------------------------------------------------------------
 
 function generateMockGuide(channelId: ChannelId): GuideEntry[] {
-  // Generate deterministic but realistic-looking program schedules for today
-  const now = new Date();
-  // Start schedule at midnight today
-  const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
-  
+  // Cover the guide's three-day history and seven-day forecast filters.
+  const now = Date.now();
+
   // Use char codes of channel ID to seed the deterministic random
   const seed = Array.from(channelId).reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  
+
   const programTypes = [
     { name: 'Morning News', duration: 120 },
     { name: 'Talk Show', duration: 60 },
@@ -171,17 +169,17 @@ function generateMockGuide(channelId: ChannelId): GuideEntry[] {
   ];
 
   const entries: GuideEntry[] = [];
-  let currentTime = startOfDay.getTime();
-  
-  // Generate 48 hours of programming
-  for (let i = 0; i < 48; i++) {
+  let currentTime = now - 3 * 24 * 60 * 60 * 1000;
+
+  // The varied durations average about 75 minutes per program.
+  for (let i = 0; i < 200; i++) {
     // Deterministic selection based on seed and index
     const pIndex = (seed + i * 13) % programTypes.length;
     const program = programTypes[pIndex];
-    
+
     const startTime = new Date(currentTime);
     const endTime = new Date(currentTime + program.duration * 60 * 1000);
-    
+
     entries.push({
       channelId,
       title: program.name,
@@ -190,9 +188,9 @@ function generateMockGuide(channelId: ChannelId): GuideEntry[] {
       end: endTime,
       icon: null,
     });
-    
+
     currentTime = endTime.getTime();
   }
-  
+
   return entries;
 }

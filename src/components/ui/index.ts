@@ -8,7 +8,10 @@
 export * from './badge';
 export * from './button';
 export * from './card';
+export * from './channel-avatar-stack';
 export * from './channel-card';
+export * from './channel-details';
+export * from './channel-guide-slider';
 export * from './collapsible';
 export * from './filter-row';
 export * from './horizontal-list';
@@ -18,4 +21,5 @@ export * from './playlist-picker';
 export * from './section-header';
 export * from './separator';
 export * from './skeleton';
+export * from './slide-up-sheet';
 export * from './state-views';
