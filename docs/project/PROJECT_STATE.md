@@ -13,9 +13,9 @@ This is a verified implementation snapshot. `tasks.md` is the task/history recor
 
 ## Current milestone and next task
 
-- Phase: 3 — iptv-org catalog integration.
-- Last completed task: T007 establish local repositories.
-- Next planned task: T008 integrate iptv-org SDK.
+- Phase: 4 — UI and core flows.
+- Last completed task: T010 establish TanStack Query layer.
+- Next planned task: T011 build Home screen.
 
 ## Implemented design system (`src/constants/theme.ts`)
 
@@ -74,11 +74,12 @@ Timing presets: `fast` (150ms), `normal` (250ms), `slow` (400ms). Spring configs
 
 - **Domain types** (`src/types/domain.ts`): Branded IDs, domain models, `AsyncState<T>`.
 - **Provider interface** (`src/data/providers/provider.ts`): `IptvProvider` + `ProviderError`.
+- **iptv-org Provider** (`src/data/providers/iptv-org/index.ts`): Concrete implementation and domain mapping logic.
 - **Repository interfaces** (`src/data/repositories/repositories.ts`): Favorites, RecentlyWatched, Playlist, Settings.
 - **SQLite Database** (`src/data/db/index.ts`): Global connection sharing via `expo-sqlite`.
 - **Database Migrations** (`src/data/db/schema.ts`): Explicit versioned initialization (`migrateDbIfNeeded`) creating `settings`, `favorites`, `recently_watched`, `playlists`, and `playlist_items` tables.
 - **Local Repositories** (`src/data/repositories/sqlite-*.ts`): Implementations mapping SQLite rows to domain entities.
-- **Query client** (`src/lib/query-client.ts`): Cache-first defaults.
+- **Query client & hooks** (`src/lib/query-client.ts`, `src/data/queries/iptv.ts`): Cache-first defaults and data hooks like `useChannels`.
 - **Root providers** (`src/lib/providers.tsx`): `AppProviders` (SQLiteProvider + QueryClient + ThemeProvider).
 - **Theme store** (`src/stores/theme.ts`): `ThemeMode` ('light' | 'dark' | 'system'), persisted via custom Zustand adapter backed by the SQLite `SettingsRepository`.
 
@@ -106,9 +107,6 @@ All routes beyond these are planned, not implemented.
 
 ## Not implemented yet
 
-- iptv-org provider adapter (concrete `IptvProvider` implementation).
-- Domain data mapping from SDK types.
-- HomeTV-specific query hooks and cache policies.
 - Home/channel/search/favorites/history/playlist/EPG screens and business logic.
 - Isolated video player, fallback, and player error UX.
 - Full accessibility/performance/device validation.

@@ -15,9 +15,9 @@ Detailed task queue and development history. Current implementation truth is in 
 | T005 | 1 | Establish quality tooling | Strict TS, ESLint, Prettier and tests work | COMPLETED | Installed `@testing-library/react-native`, added `jest.config.js` with RNTL built-in matchers, created manual mocks for `expo-router`/`react-native-reanimated`/`expo-splash-screen`, added `.prettierrc`, added 43 tests across 3 suites | `npm test` ✓, `npm run format:check` ✓ | RNTL v13 built-in matchers used instead of deprecated jest-native. Manual Reanimated mock prevents native-module crashes in Jest. | See Git history | |
 | T006 | 2 | Establish SQLite foundation | Versioned database and migrations work | COMPLETED | Created `src/data/db/schema.ts` with explicit tables for settings, favorites, recently_watched, playlists, and playlist_items. Added SQLiteProvider to AppProviders. | `npm run test` ✓ | SQLite is cache-first local priority for user data. DB initialization happens during app splash screen via useSuspense and expo-sqlite | See Git history | |
 | T007 | 2 | Establish local repositories | Persistent data uses repository boundaries | COMPLETED | Created repository implementations for favorites, playlists, recently_watched, and settings in `src/data/repositories/sqlite-*.ts`. Replaced Zustand's AsyncStorage with SQLite in `src/stores/theme.ts`. | `npm run test` ✓ | Using `openDatabaseSync` enables synchronous global database access inside Zustand stores outside of the React context | See Git history | |
-| T008 | 3 | Integrate iptv-org SDK | IPTV data is accessible through a provider abstraction | TODO | | | | | |
-| T009 | 3 | Establish domain data mapping | UI is independent of raw provider models | TODO | | | | | |
-| T010 | 3 | Establish TanStack Query layer | Cache-first loading and background refresh work | TODO | | | | | |
+| T008 | 3 | Integrate iptv-org SDK | IPTV data is accessible through a provider abstraction | COMPLETED | Created `src/data/providers/iptv-org/index.ts` using raw fetch to circumvent Node-only dependencies in the SDK. | `npx tsc --noEmit` ✓ | Using direct fetch with SDK types instead of `DataManager` to avoid `fs-extra` crash in React Native | See Git history | |
+| T009 | 3 | Establish domain data mapping | UI is independent of raw provider models | COMPLETED | Implemented `mapChannel`, `mapStream`, `mapCategory`, etc., to convert SDK `Types` to `domain.ts` interfaces. | `npx tsc --noEmit` ✓ | Domain types are cleanly separated from the iptv-org payload format | See Git history | |
+| T010 | 3 | Establish TanStack Query layer | Cache-first loading and background refresh work | COMPLETED | Created `src/data/queries/iptv.ts` with standard hooks like `useChannels`, `useStreams`, etc. | `npx tsc --noEmit` ✓ | Used sensible `staleTime`s (1hr to 24hr) since this catalog data changes infrequently | See Git history | |
 | T011 | 4 | Build Home screen | OTT-style reusable home sections work | TODO | | | | | |
 | T012 | 4 | Build channel browsing | Efficient channel browsing works | TODO | | | | | |
 | T013 | 4 | Build channel filters | Country, language and category filters work | TODO | | | | | |
@@ -55,10 +55,10 @@ Detailed task queue and development history. Current implementation truth is in 
 
 ## Current Checkpoint
 
-- **Current Phase:** 3 — iptv-org catalog integration.
-- **Current Task:** T008
-- **Last Completed Tasks:** T007, T006
+- **Current Phase:** 4 — UI and core flows.
+- **Current Task:** T011
+- **Last Completed Tasks:** T010, T009, T008
 - **Last Commit:** See Git history.
-- **Next Task:** T008 — Integrate iptv-org SDK (IPTV data is accessible through a provider abstraction).
+- **Next Task:** T011 — Build Home screen (OTT-style reusable home sections work).
 - **Known Issues:** Starter UI remains.
-- **Next Expected Outcome:** iptv-org provider implementation exposing Channels/Categories to queries.
+- **Next Expected Outcome:** A dynamic home screen fetching channels via TanStack Query and rendering categorized sections.
