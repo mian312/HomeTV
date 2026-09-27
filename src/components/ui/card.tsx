@@ -107,12 +107,12 @@ export function PressableCard({
   return (
     <AnimatedPressable
       onPress={onPress}
-      // eslint-disable-next-line react-hooks/immutability
       onPressIn={() => {
+        // eslint-disable-next-line
         scale.value = withTiming(0.97, { duration: 80 });
       }}
-      // eslint-disable-next-line react-hooks/immutability
       onPressOut={() => {
+        // eslint-disable-next-line
         scale.value = withTiming(1, { duration: 120 });
       }}
       accessibilityRole="button"
