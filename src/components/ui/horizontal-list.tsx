@@ -1,4 +1,4 @@
-import { FlatList, type FlatListProps, StyleSheet } from 'react-native';
+import { FlatList, type FlatListProps, StyleSheet, View } from 'react-native';
 
 import { Spacing } from '@/constants/theme';
 import { SectionHeader } from './section-header';
@@ -11,7 +11,7 @@ interface HorizontalListProps<T> extends Omit<FlatListProps<T>, 'renderItem'> {
 
 export function HorizontalList<T>({ title, onSeeAll, ...flatListProps }: HorizontalListProps<T>) {
   return (
-    <>
+    <View style={styles.wrapper}>
       {title && (
         <SectionHeader
           title={title}
@@ -26,17 +26,20 @@ export function HorizontalList<T>({ title, onSeeAll, ...flatListProps }: Horizon
         contentContainerStyle={styles.listContent}
         {...flatListProps}
       />
-    </>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  wrapper: {
+    gap: Spacing.xs,
+  },
   header: {
-    paddingHorizontal: Spacing.four,
-    marginBottom: Spacing.two,
+    paddingHorizontal: Spacing.lg,
+    marginBottom: 2,
   },
   listContent: {
-    paddingHorizontal: Spacing.four,
-    paddingBottom: Spacing.four,
+    paddingHorizontal: Spacing.lg,
+    paddingBottom: Spacing.sm,
   },
 });

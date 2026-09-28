@@ -108,12 +108,12 @@ export default function LibraryScreen() {
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
         <ScrollView style={styles.content} contentContainerStyle={styles.scrollContent}>
-          <ThemedView style={styles.header}>
-            <ThemedText type="subtitle">My Library</ThemedText>
-            <ThemedText themeColor="textSecondary">
-              Your favorites, history, and playlists
+          <View style={styles.header}>
+            <ThemedText style={[styles.pageTitle, { color: colors.text }]}>My Library</ThemedText>
+            <ThemedText style={{ color: colors.textSecondary, fontSize: 13 }}>
+              Favorites · History · Playlists
             </ThemedText>
-          </ThemedView>
+          </View>
 
           {historyChannels.length > 0 && (
             <View style={styles.section}>
@@ -402,9 +402,15 @@ const styles = StyleSheet.create({
     paddingBottom: Spacing.xl,
   },
   header: {
-    paddingHorizontal: Spacing.four,
-    paddingVertical: Spacing.xl,
-    gap: Spacing.one,
+    paddingHorizontal: Spacing.lg,
+    paddingTop: Spacing.xl,
+    paddingBottom: Spacing.md,
+    gap: Spacing.xs,
+  },
+  pageTitle: {
+    fontSize: 28,
+    fontWeight: '800',
+    letterSpacing: -0.5,
   },
   section: {
     marginBottom: Spacing.xl,

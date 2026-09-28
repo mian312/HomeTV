@@ -1,13 +1,8 @@
 /**
  * SectionHeader — OTT-style section title row.
  *
- * A horizontal row with a title on the left and an optional
- * "See all" action link on the right. Used at the top of every
- * horizontal scroll section on the Home screen.
- *
- * Usage:
- *   <SectionHeader title="Featured" />
- *   <SectionHeader title="Sports" onSeeAll={() => router.push('/channels?category=sports')} />
+ * A horizontal row with a bold title on the left and an optional
+ * "See all" action link on the right.
  */
 
 import React from 'react';
@@ -38,7 +33,9 @@ export function SectionHeader({
 
   return (
     <View style={[styles.container, style]} testID={testID}>
-      <ThemedText variant="headlineSmall" numberOfLines={1} style={styles.title}>
+      {/* Left accent bar */}
+      <View style={[styles.accentBar, { backgroundColor: colors.primary }]} />
+      <ThemedText numberOfLines={1} style={[styles.title, { color: colors.text }]}>
         {title}
       </ThemedText>
 
@@ -50,8 +47,8 @@ export function SectionHeader({
           accessibilityLabel={`See all ${title}`}
           hitSlop={8}
         >
-          <ThemedText variant="titleSmall" style={{ color: colors.primary }}>
-            {seeAllLabel}
+          <ThemedText style={[styles.seeAll, { color: colors.primary }]}>
+            {seeAllLabel} ›
           </ThemedText>
         </Pressable>
       ) : null}
@@ -63,12 +60,24 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.sm,
+    gap: Spacing.sm,
+  },
+  accentBar: {
+    width: 3,
+    height: 18,
+    borderRadius: 2,
   },
   title: {
     flex: 1,
+    fontSize: 17,
+    fontWeight: '700',
+    letterSpacing: -0.2,
+  },
+  seeAll: {
+    fontSize: 13,
+    fontWeight: '600',
   },
   pressed: {
     opacity: 0.6,

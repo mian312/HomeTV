@@ -3,13 +3,12 @@ import { useState } from 'react';
 import { Pressable, StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 
 import { ThemedText } from '../themed-text';
-import { CardContent, PressableCard } from './card';
 
-import { MinTouchTarget, Radius, Spacing } from '@/constants/theme';
+import { Radius, Spacing } from '@/constants/theme';
 import {
-    useChannelPlaylistMemberships,
-    useIsFavorite,
-    useToggleFavorite,
+  useChannelPlaylistMemberships,
+  useIsFavorite,
+  useToggleFavorite,
 } from '@/data/queries/local';
 import { useTheme } from '@/hooks/use-theme';
 import type { Channel } from '@/types/domain';
@@ -54,90 +53,26 @@ export function ChannelCard({ channel, onPress, style }: ChannelCardProps) {
 
   return (
     <>
-      <PressableCard
-        variant="elevated"
+      <Pressable
         onPress={handleChannelPress}
-        style={[styles.card, style]}
-        accessibilityLabel={channel.name}
+        style={({ pressed }) => [styles.card, { opacity: pressed ? 0.85 : 1 }, style]}
+        accessibilityLabel={`Play ${channel.name}`}
       >
-        <CardContent style={styles.content}>
+        {/* Logo thumbnail */}
+        <View style={[styles.logoWrapper, { backgroundColor: colors.backgroundElement }]}>
           <ChannelLogo
             channel={channel}
-            style={[styles.logoPlaceholder, { backgroundColor: colors.backgroundElement }]}
+            style={styles.logo}
           />
-          <View style={styles.textContainer}>
-            <ThemedText numberOfLines={1} style={styles.name}>
-              {channel.name}
-            </ThemedText>
-            <View style={styles.metaRow}>
-              <ThemedText
-                type="small"
-                numberOfLines={1}
-                style={[styles.category, { color: colors.textSecondary }]}
-              >
-                {channel.country ?? 'Unknown'}
-              </ThemedText>
-              <Pressable
-                onPress={() => setDetailsVisible(true)}
-                style={({ pressed }) => [styles.detailsButton, pressed && { opacity: 0.65 }]}
-                accessibilityRole="button"
-                accessibilityLabel={`Details for ${channel.name}`}
-                testID="channel-details-action"
-                hitSlop={6}
-              >
-                <SymbolView
-                  name={{ ios: 'info.circle', android: 'info', web: 'info' }}
-                  size={17}
-                  tintColor={colors.textTertiary}
-                />
-              </Pressable>
-            </View>
-            <Pressable
-              onPress={() => setGuideVisible(true)}
-              style={({ pressed }) => [
-                styles.guideButton,
-                { backgroundColor: colors.primaryMuted },
-                pressed && { opacity: 0.7 },
-              ]}
-              accessibilityRole="button"
-              accessibilityLabel={`Show guide for ${channel.name}`}
-              testID="channel-guide-action"
-            >
-              <SymbolView
-                name={{ ios: 'calendar', android: 'calendar_today', web: 'calendar_today' }}
-                size={15}
-                tintColor={colors.primary}
-              />
-              <ThemedText
-                variant="caption"
-                style={[styles.guideButtonText, { color: colors.primary }]}
-              >
-                Guide
-              </ThemedText>
-            </Pressable>
+          {/* Gradient overlay on logo */}
+          <View style={[styles.logoOverlay, { backgroundColor: colors.scrim }]} pointerEvents="none" />
+
+          {/* LIVE badge on card */}
+          <View style={[styles.liveBadge, { backgroundColor: colors.primary }]}>
+            <ThemedText style={styles.liveBadgeText}>LIVE</ThemedText>
           </View>
-          <Pressable
-            onPress={() => setPlaylistPickerVisible(true)}
-            style={({ pressed }) => [styles.playlistButton, pressed && { opacity: 0.7 }]}
-            hitSlop={8}
-            accessibilityRole="button"
-            accessibilityLabel={`Add ${channel.name} to a playlist. In ${playlistMemberships.length} ${playlistMemberships.length === 1 ? 'playlist' : 'playlists'}.`}
-            accessibilityHint="Opens the playlist picker"
-            testID="channel-playlist-action"
-          >
-            <SymbolView
-              name={{ ios: 'text.badge.plus', android: 'playlist_add', web: 'playlist_add' }}
-              size={18}
-              tintColor={colors.textTertiary}
-            />
-            {playlistMemberships.length > 0 ? (
-              <View style={[styles.playlistCount, { backgroundColor: colors.primary }]}>
-                <ThemedText style={[styles.playlistCountText, { color: colors.primaryText }]}>
-                  {playlistMemberships.length}
-                </ThemedText>
-              </View>
-            ) : null}
-          </Pressable>
+
+          {/* Favorite button top-right */}
           <Pressable
             onPress={handleFavoritePress}
             style={({ pressed }) => [styles.favoriteButton, pressed && { opacity: 0.7 }]}
@@ -153,17 +88,86 @@ export function ChannelCard({ channel, onPress, style }: ChannelCardProps) {
                   ? { ios: 'heart.fill', android: 'favorite', web: 'favorite' }
                   : { ios: 'heart', android: 'favorite_border', web: 'favorite_border' }
               }
-              size={18}
-              tintColor={isFavorite ? colors.primary : colors.textTertiary}
+              size={15}
+              tintColor={isFavorite ? colors.primary : '#FFFFFF'}
               fallback={
-                <ThemedText style={{ color: isFavorite ? colors.primary : colors.textTertiary }}>
+                <ThemedText style={{ color: isFavorite ? colors.primary : '#FFFFFF', fontSize: 14 }}>
                   {isFavorite ? '♥' : '♡'}
                 </ThemedText>
               }
             />
           </Pressable>
-        </CardContent>
-      </PressableCard>
+
+          {/* Playlist button top-left */}
+          <Pressable
+            onPress={() => setPlaylistPickerVisible(true)}
+            style={({ pressed }) => [styles.playlistButton, pressed && { opacity: 0.7 }]}
+            hitSlop={8}
+            accessibilityRole="button"
+            accessibilityLabel={`Add ${channel.name} to a playlist`}
+            testID="channel-playlist-action"
+          >
+            <SymbolView
+              name={{ ios: 'text.badge.plus', android: 'playlist_add', web: 'playlist_add' }}
+              size={15}
+              tintColor="#FFFFFF"
+            />
+            {playlistMemberships.length > 0 ? (
+              <View style={[styles.playlistCount, { backgroundColor: colors.primary }]}>
+                <ThemedText style={styles.playlistCountText}>
+                  {playlistMemberships.length}
+                </ThemedText>
+              </View>
+            ) : null}
+          </Pressable>
+        </View>
+
+        {/* Card footer */}
+        <View style={[styles.footer, { backgroundColor: colors.surface }]}>
+          <ThemedText numberOfLines={1} style={[styles.name, { color: colors.text }]}>
+            {channel.name}
+          </ThemedText>
+          <View style={styles.footerRow}>
+            <ThemedText
+              numberOfLines={1}
+              style={[styles.meta, { color: colors.textTertiary, flex: 1 }]}
+            >
+              {channel.country ?? '—'}
+            </ThemedText>
+
+            {/* Info button */}
+            <Pressable
+              onPress={() => setDetailsVisible(true)}
+              style={({ pressed }) => [styles.infoBtn, pressed && { opacity: 0.65 }]}
+              accessibilityRole="button"
+              accessibilityLabel={`Details for ${channel.name}`}
+              testID="channel-details-action"
+              hitSlop={6}
+            >
+              <SymbolView
+                name={{ ios: 'info.circle', android: 'info', web: 'info' }}
+                size={14}
+                tintColor={colors.textTertiary}
+              />
+            </Pressable>
+
+            {/* Guide button */}
+            <Pressable
+              onPress={() => setGuideVisible(true)}
+              style={({ pressed }) => [
+                styles.guideBtn,
+                { backgroundColor: colors.primaryMuted, opacity: pressed ? 0.7 : 1 },
+              ]}
+              accessibilityRole="button"
+              accessibilityLabel={`Show guide for ${channel.name}`}
+              testID="channel-guide-action"
+            >
+              <ThemedText style={[styles.guideBtnText, { color: colors.primary }]}>Guide</ThemedText>
+            </Pressable>
+          </View>
+        </View>
+      </Pressable>
+
       <PlaylistPicker
         channel={channel}
         visible={playlistPickerVisible}
@@ -183,94 +187,114 @@ export function ChannelCard({ channel, onPress, style }: ChannelCardProps) {
 
 const styles = StyleSheet.create({
   card: {
-    width: 140,
-    marginRight: 12,
+    width: 155,
+    marginRight: Spacing.md,
+    borderRadius: Radius.md,
+    overflow: 'hidden',
   },
-  content: {
-    alignItems: 'center',
-    padding: 12,
-    gap: 8,
-  },
-  logoPlaceholder: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  name: {
-    fontWeight: '600',
-    textAlign: 'center',
-  },
-  category: {
-    flex: 1,
-    textAlign: 'center',
-  },
-  metaRow: {
+  logoWrapper: {
     width: '100%',
-    flexDirection: 'row',
+    height: 100,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 2,
+    position: 'relative',
   },
-  detailsButton: {
-    width: MinTouchTarget,
-    height: MinTouchTarget,
-    alignItems: 'center',
-    justifyContent: 'center',
+  logo: {
+    width: '100%',
+    height: '100%',
   },
-  guideButton: {
-    minHeight: MinTouchTarget,
-    alignSelf: 'stretch',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: Spacing.xs,
-    paddingHorizontal: Spacing.sm,
-    borderRadius: Radius.sm,
+  logoOverlay: {
+    ...StyleSheet.absoluteFill,
+    opacity: 0.15,
   },
-  guideButtonText: {
-    fontWeight: '600',
+  liveBadge: {
+    position: 'absolute',
+    bottom: Spacing.xs,
+    left: Spacing.xs,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: Radius.xs,
   },
-  textContainer: {
-    flex: 1,
-    alignItems: 'center',
+  liveBadgeText: {
+    fontSize: 9,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    letterSpacing: 0.8,
   },
   favoriteButton: {
     position: 'absolute',
-    top: 4,
-    right: 4,
-    width: MinTouchTarget,
-    height: MinTouchTarget,
+    top: Spacing.xs,
+    right: Spacing.xs,
+    width: 28,
+    height: 28,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 16,
-    backgroundColor: 'rgba(0,0,0,0.3)',
+    borderRadius: 14,
+    backgroundColor: 'rgba(0,0,0,0.45)',
   },
   playlistButton: {
     position: 'absolute',
-    top: 4,
-    left: 4,
-    width: MinTouchTarget,
-    height: MinTouchTarget,
+    top: Spacing.xs,
+    left: Spacing.xs,
+    width: 28,
+    height: 28,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 15,
-    backgroundColor: 'rgba(0,0,0,0.3)',
+    borderRadius: 14,
+    backgroundColor: 'rgba(0,0,0,0.45)',
   },
   playlistCount: {
     position: 'absolute',
-    top: -4,
-    right: -5,
-    width: 15,
-    height: 15,
-    borderRadius: 8,
+    top: -3,
+    right: -4,
+    width: 14,
+    height: 14,
+    borderRadius: 7,
     alignItems: 'center',
     justifyContent: 'center',
   },
   playlistCountText: {
-    fontSize: 9,
-    lineHeight: 11,
+    fontSize: 8,
+    lineHeight: 10,
     fontWeight: '700',
+    color: '#FFFFFF',
+  },
+
+  // Footer
+  footer: {
+    paddingHorizontal: Spacing.sm,
+    paddingTop: Spacing.sm,
+    paddingBottom: Spacing.sm,
+    gap: Spacing.xxs,
+  },
+  name: {
+    fontSize: 13,
+    fontWeight: '700',
+    lineHeight: 17,
+  },
+  footerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
+  },
+  meta: {
+    fontSize: 10,
+    fontWeight: '400',
+  },
+  infoBtn: {
+    width: 24,
+    height: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  guideBtn: {
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 3,
+    borderRadius: Radius.xs,
+  },
+  guideBtnText: {
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 0.2,
   },
 });

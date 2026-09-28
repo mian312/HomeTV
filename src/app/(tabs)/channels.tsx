@@ -1,19 +1,22 @@
 import { useDeferredValue, useMemo, useState } from 'react';
-import { FlatList, Platform, StyleSheet, View } from 'react-native';
+import { FlatList, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { ChannelCard, ErrorView, Input, LoadingView, ModalPicker } from '@/components/ui';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+import { BottomTabInset, MaxContentWidth, Radius, Spacing } from '@/constants/theme';
 import { useCategories, useChannels, useCountries } from '@/data/queries/iptv';
+import { useTheme } from '@/hooks/use-theme';
 import type { CategoryId, CountryCode } from '@/types/domain';
 
 export default function ChannelsScreen() {
+  const { colors } = useTheme();
+
   const contentPlatformStyle = Platform.select({
     web: {
-      paddingTop: Spacing.six,
-      paddingBottom: Spacing.four,
+      paddingTop: Spacing.xl,
+      paddingBottom: Spacing.xxl,
     },
   });
 
@@ -75,20 +78,42 @@ export default function ChannelsScreen() {
           )}
           ListHeaderComponent={
             <View style={styles.headerContainer}>
-              <ThemedView style={styles.header}>
-                <ThemedText type="subtitle">All Channels</ThemedText>
-                <ThemedText themeColor="textSecondary" style={styles.subtitle}>
-                  Browse the complete catalog
+              {/* Page title */}
+              <View style={styles.titleRow}>
+                <ThemedText style={[styles.pageTitle, { color: colors.text }]}>Browse</ThemedText>
+                <ThemedText style={[styles.resultCount, { color: colors.textSecondary }]}>
+                  {filteredChannels.length} channels
                 </ThemedText>
+              </View>
+
+              {/* Search bar */}
+              <View
+                style={[
+                  styles.searchWrapper,
+                  { backgroundColor: colors.backgroundElement, borderColor: colors.border },
+                ]}
+              >
+                <ThemedText style={{ color: colors.textTertiary, fontSize: 16 }}>🔍</ThemedText>
                 <Input
                   placeholder="Search channels..."
                   value={searchQuery}
                   onChangeText={setSearchQuery}
-                  containerStyle={styles.searchContainer}
+                  containerStyle={styles.searchInput}
                 />
-              </ThemedView>
+                {searchQuery.length > 0 && (
+                  <Pressable onPress={() => setSearchQuery('')} hitSlop={8}>
+                    <ThemedText style={{ color: colors.textTertiary }}>✕</ThemedText>
+                  </Pressable>
+                )}
+              </View>
 
-              <View style={styles.filtersRow}>
+              {/* Filter pills row */}
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.filterScroll}
+              >
+                {/* Category filter */}
                 {categories && (
                   <ModalPicker
                     title="Select Category"
@@ -99,6 +124,7 @@ export default function ChannelsScreen() {
                   />
                 )}
 
+                {/* Country filter */}
                 {countries && (
                   <ModalPicker
                     title="Select Country"
@@ -108,7 +134,32 @@ export default function ChannelsScreen() {
                     onValueChange={setSelectedCountry}
                   />
                 )}
-              </View>
+
+                {/* Active filters clear */}
+                {(selectedCategory || selectedCountry) && (
+                  <Pressable
+                    onPress={() => {
+                      setSelectedCategory(null);
+                      setSelectedCountry(null);
+                    }}
+                    style={({ pressed }) => [
+                      styles.clearBtn,
+                      { backgroundColor: colors.errorMuted, opacity: pressed ? 0.7 : 1 },
+                    ]}
+                  >
+                    <ThemedText style={[styles.clearBtnText, { color: colors.error }]}>
+                      Clear filters ✕
+                    </ThemedText>
+                  </Pressable>
+                )}
+              </ScrollView>
+            </View>
+          }
+          ListEmptyComponent={
+            <View style={styles.emptyContainer}>
+              <ThemedText style={[styles.emptyText, { color: colors.textSecondary }]}>
+                No channels match your search.
+              </ThemedText>
             </View>
           }
         />
@@ -128,37 +179,82 @@ const styles = StyleSheet.create({
   listContent: {
     width: '100%',
     maxWidth: MaxContentWidth,
-    paddingHorizontal: Spacing.four,
+    paddingHorizontal: Spacing.lg,
     paddingBottom: BottomTabInset + Spacing.xl,
   },
   columnWrapper: {
     justifyContent: 'space-between',
-    marginBottom: Spacing.four,
+    marginBottom: Spacing.md,
   },
   cardContainer: {
     flex: 1,
-    maxWidth: '48%', // Ensure 2 columns fit with spacing
+    maxWidth: '48.5%',
   },
   gridCard: {
     width: '100%',
     marginRight: 0,
   },
+
+  // Header
   headerContainer: {
     marginBottom: Spacing.lg,
-  },
-  header: {
-    paddingVertical: Spacing.lg,
-    gap: Spacing.one,
-  },
-  subtitle: {
-    marginBottom: Spacing.xs,
-  },
-  searchContainer: {
-    marginTop: Spacing.xs,
-    marginBottom: Spacing.sm,
-  },
-  filtersRow: {
-    flexDirection: 'row',
     gap: Spacing.md,
+    paddingTop: Spacing.lg,
+  },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    justifyContent: 'space-between',
+  },
+  pageTitle: {
+    fontSize: 28,
+    fontWeight: '800',
+    letterSpacing: -0.5,
+  },
+  resultCount: {
+    fontSize: 13,
+    fontWeight: '500',
+  },
+
+  // Search
+  searchWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: Radius.md,
+    borderWidth: 1,
+    paddingHorizontal: Spacing.md,
+    gap: Spacing.sm,
+  },
+  searchInput: {
+    flex: 1,
+    borderWidth: 0,
+    backgroundColor: 'transparent',
+  },
+
+  // Filters
+  filterScroll: {
+    gap: Spacing.sm,
+    paddingVertical: Spacing.xxs,
+  },
+  clearBtn: {
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    borderRadius: Radius.xl,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  clearBtnText: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+
+  // Empty
+  emptyContainer: {
+    paddingVertical: Spacing.massive,
+    alignItems: 'center',
+  },
+  emptyText: {
+    fontSize: 15,
+    textAlign: 'center',
   },
 });
