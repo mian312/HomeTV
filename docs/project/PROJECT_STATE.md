@@ -6,16 +6,20 @@ This is a verified implementation snapshot. `tasks.md` is the task/history recor
 
 - Product: HomeTV, a free mobile-first OTT/IPTV app for Android and iOS.
 - Initial catalog source: iptv-org via `@iptv-org/sdk`.
-- Current project: Expo Router starter with architecture boundaries and complete design system; HomeTV feature implementation is not complete.
+- Current project: Expo Router application with architecture boundaries, a complete design system, and the V1 feature set implemented (Home, Browse, Library, channel details, guide, playlists, and playback).
+- V2 (Profiles & Personalization) is planned and tracked as T033–T103 in [tasks.md](tasks.md); none of it is implemented yet.
 - Expo SDK: `~57.0.25`.
 - React Native: `0.86.3`; React `19.2.3`; TypeScript `~6.0.3`.
 - TypeScript strict mode: enabled.
 
 ## Current milestone and next task
 
-- Phase: 8 — End-to-End Integration and Validation.
-- Last completed task: T029 Automated test pass.
-- Next planned task: T031 Final documentation checkpoint.
+- Current Version: V2 — Profiles & Personalization.
+- Current Phase: 9 — Profile Foundation.
+- Current Task: T033 Profile domain model.
+- Last Completed Task: T032 Organize project instructions and documentation.
+- Next Planned Task: T034 Profile SQLite migration.
+- Critical task in the current phase: T037 Profile-scoped data migration.
 
 ## Implemented design system (`src/constants/theme.ts`)
 
@@ -139,6 +143,21 @@ All routes beyond these are planned, not implemented. TV guide access is a chann
 ## Not implemented yet
 
 - Physical device validation for iOS/Android (currently blocked by environment constraints).
+- All of V2: profiles, profile-scoped data, local PIN authentication, onboarding, and personalization (T033–T103).
+- `expo-secure-store` is not yet installed; the PIN verifier store depends on it.
+- Real SQLite migration execution in tests. Jest mocks `expo-sqlite` and Node 20 has no `node:sqlite`, so migration tests must assert the migration plan and backfill mapping rather than running the statements.
+
+## Planned V2 direction (not yet implemented)
+
+Recorded here so the next session does not have to reconstruct the plan from `tasks.md` alone. See ADRs D002–D008 in [tasks.md](tasks.md) for the reasoning.
+
+- **Scoping**: `profile_id` is added to `favorites`, `recently_watched`, and `playlists`; it joins the primary key of the first two. This requires a SQLite table rebuild, so the single-version gate in `src/data/db/schema.ts` becomes a stepwise `user_version` chain.
+- **Legacy data**: an existing V1 install with data is backfilled into a `Main` profile; an install with no V1 rows gets no profile and enters profile creation instead.
+- **Repositories**: every scoped method takes an explicit `profileId` and never reads ambient session state.
+- **Caches**: profile-scoped local query keys carry the profile id, and switching profiles removes the previous profile's local cache. The current keys in `src/data/queries/local.ts` are profile-agnostic and are the main cross-profile leak risk.
+- **Authentication**: a `ProfileAuthenticator` interface fronts PIN verification, so device authentication can be added later without changing screens. The verifier lives in `expo-secure-store`; SQLite holds `pin_enabled` metadata only.
+- **Gating**: the root layout gates on `booting`, `needs-profile`, `locked`, `ready`; profile management remains real routes.
+- **Personalization**: preferences default the user without locking them in; an explicit selection always wins.
 
 ## Known issues and limitations
 
@@ -148,6 +167,7 @@ All routes beyond these are planned, not implemented. TV guide access is a chann
 - Fullscreen and device orientation have static/test validation only; physical Android/iOS behavior still needs device testing.
 - Expo Doctor reports the existing `@types/jest` 30.0.0 differs from the Expo SDK 57 expected 29.5.14; `tsc`, lint, and Jest pass.
 - IPTV streams may be unavailable or unsuitable for a given device or jurisdiction; availability is dynamic.
+- The V2 data migration is the highest-risk change in the plan: it rebuilds three tables and, under the current test setup, cannot be proven by executing real SQL. Treat device validation (T102/T103) as a release gate for V2 rather than an optional step.
 
 ## Recovery checklist
 

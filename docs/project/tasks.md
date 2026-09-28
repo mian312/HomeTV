@@ -4,7 +4,9 @@ Detailed task queue and development history. Current implementation truth is in 
 
 **Statuses:** `TODO` · `IN_PROGRESS` · `BLOCKED` · `COMPLETED` · `FAILED` · `SKIPPED`
 
-## Task Table
+**Versions:** V1 is `T001`–`T032` (complete, retained as the project history). V2 is `T033`–`T103` (Profiles & Personalization). V1 rows are not renumbered or rewritten; V2 continues the same sequence in a separate table.
+
+## V1 — Task Table (T001–T032)
 
 | ID | Phase | Task | Expected Outcome | Status | Changes Made | Lint/Test Issues | Decisions | Commit | Notes |
 |---|---|---|---|---|---|---|---|---|---|
@@ -41,6 +43,84 @@ Detailed task queue and development history. Current implementation truth is in 
 | T031 | 8 | Final documentation checkpoint | Project documentation matches implementation | COMPLETED | Updated tasks.md and PROJECT_STATE.md | `git diff --check` passed | Final pass after feature work | See Git history | |
 | T032 | 0 | Organize project instructions and documentation | AI contract, guide, state snapshot, and task queue have clear canonical locations | COMPLETED | Consolidated AI contract in AGENTS.md; grouped guide/state/tracker under docs | `git diff --check` passed; checked internal Markdown links | Root AGENTS; docs/README; docs/project/* | See Git history | |
 
+## V2 — Task Table (T033–T103)
+
+V2 adds multi-profile support and local personalization. `Phase` continues the V1 numbering. Every V2 row is `TODO` until work begins; T102/T103 are expected to stay environment-blocked for the same reason as T030.
+
+| ID | Phase | Task | Expected Outcome | Status | Changes Made | Lint/Test Issues | Decisions | Commit | Notes |
+|---|---|---|---|---|---|---|---|---|---|
+| T033 | 9 | Profile domain model | `ProfileId` branded ID and a `Profile` domain model (name, avatar, pin state, onboarding state, created/updated) live in `src/types/domain.ts`; no SQLite row shape reaches the UI | TODO | | | | | |
+| T034 | 9 | Profile SQLite migration | `profiles` table is created and `user_version` advances 1→2 through a stepwise migration chain that replaces the current single-version gate in `src/data/db/schema.ts`; each step is transactional | TODO | | | | | |
+| T035 | 9 | Profile repository | `ProfileRepository` contract plus SQLite implementation for create, list, read, rename, delete, and last-active selection; repositories never read ambient profile state | TODO | | | | | |
+| T036 | 9 | Active profile/session state | Zustand session store models `booting`, `needs-profile`, `locked`, and `ready`; the last active profile id is persisted and restored on launch | TODO | | | | | |
+| T037 | 9 | Profile-scoped data migration | Existing `favorites`, `recently_watched`, and `playlists` rows are re-scoped by `profile_id` with zero data loss; a migrated `Main` profile is created only when V1 rows exist | TODO | | | | | Critical task. Rebuild `favorites` and `recently_watched` with `profile_id` in the primary key; add `profile_id` to `playlists` while preserving ids so the `playlist_items` foreign key and `ON DELETE CASCADE` survive; toggle `PRAGMA foreign_keys` outside the transaction because the pragma is a no-op inside one, and run `PRAGMA foreign_key_check` before commit. New installs with no V1 rows create no profile and enter profile creation instead. |
+| T038 | 10 | Profile PIN model | PIN policy (length, attempt allowance) and a `ProfileAuthenticator` interface exist so device authentication can be added later without changing screens | TODO | | | | | |
+| T039 | 10 | Secure PIN storage | The PIN verifier is stored in `expo-secure-store`; no plaintext PIN is written to SQLite, settings, or logs | TODO | | | | | Requires `npx expo install expo-secure-store` and a plugin entry in `app.json`. Derivation is iterated salted SHA-256 via `expo-crypto` (SDK 57 exposes digests and AES-GCM only, no PBKDF2/Argon2/HMAC) with a random salt and constant-time comparison; `pin_enabled` metadata lives in SQLite. Documented limitation: a short PIN is brute-forceable if an extracted verifier is attacked offline, so unlock attempts are rate-limited. |
+| T040 | 10 | Profile unlock flow | A locked profile blocks app content until unlock succeeds; repeated failures are rate-limited and surfaced to the user | TODO | | | | | |
+| T041 | 10 | Profile creation authentication flow | A PIN can be set while creating a profile, and that profile is locked on its next appearance | TODO | | | | | |
+| T042 | 10 | Profile switching authentication | Switching into a PIN-protected profile requires that profile's PIN; unprotected profiles stay one-tap | TODO | | | | | |
+| T043 | 10 | Logout / continue-with-profile behavior | Leaving to the profile picker clears session state without deleting data and never leaves the app in an unreachable locked state | TODO | | | | | Recover explicitly when SQLite reports a PIN but `expo-secure-store` has no verifier (for example after an iOS reinstall); never present a dead end. |
+| T044 | 11 | Profile selector | A fourth tab renders the active profile's avatar, lists all profiles, and ends with an `Add profile` row | TODO | | | | | |
+| T045 | 11 | Profile page | All profiles are listed with lock and avatar state, and the current profile is clearly marked | TODO | | | | | |
+| T046 | 11 | Create profile | Name, avatar, and optional PIN can be set; the new profile enters onboarding | TODO | | | | | |
+| T047 | 11 | Edit profile | Name and avatar can be changed and the change is reflected in the selector and Home immediately | TODO | | | | | |
+| T048 | 11 | Delete profile | Deletion is confirmed explicitly, refuses to remove the last remaining profile, and cascades only that profile's scoped data | TODO | | | | | |
+| T049 | 11 | Change PIN | Changing a PIN requires the current PIN and replaces the verifier and metadata together | TODO | | | | | |
+| T050 | 11 | Remove PIN | Removing a PIN requires the current PIN and clears verifier and metadata together | TODO | | | | | |
+| T051 | 11 | Switch profile | Switching changes the active profile and drops the previous profile's local query cache | TODO | | | | | |
+| T052 | 12 | Profile onboarding flow | A multi-step flow moves through country, languages, categories, home sections, and PIN, and is skippable after first completion | TODO | | | | | |
+| T053 | 12 | Country selection | Preferred countries are chosen from the provider country list and persisted per profile | TODO | | | | | |
+| T054 | 12 | Language preferences | Preferred languages are multi-selected and persisted per profile | TODO | | | | | |
+| T055 | 12 | Category preferences | Preferred categories are multi-selected and drive ranking and Home sections | TODO | | | | | |
+| T056 | 12 | Home section preferences | The user chooses which Home sections appear and in what order | TODO | | | | | |
+| T057 | 12 | PIN setup | A PIN can be set during onboarding without preventing later setup from the profile page | TODO | | | | | |
+| T058 | 12 | Onboarding completion state | Completion is persisted per profile and drives the gate; the migrated `Main` profile starts already completed | TODO | | | | | Returning V1 users are not forced back through onboarding over data they already have. |
+| T059 | 13 | Preference repository | A `profile_preferences` table and repository store preferences scoped by explicit `profileId` | TODO | | | | | |
+| T060 | 13 | Personalization model | A per-profile model is derived from preferences plus scoped history and favorites, entirely locally | TODO | | | | | No analytics, ads, or tracking SDK is introduced; scoring is computed on device. |
+| T061 | 13 | Local recommendation scoring | A deterministic pure scoring function ranks channels and is unit-testable without rendering | TODO | | | | | |
+| T062 | 13 | Personalized channel filtering | Filtering helpers consume preferences without permanently hiding channels the user can still reach | TODO | | | | | |
+| T063 | 13 | Personalized Browse defaults | The preference-derived default filter state model is defined and computed; no filter UX is built here | TODO | | | | | Split from T079. This task owns the state model; T079 owns its presentation. |
+| T064 | 13 | Personalized Home sections | Section descriptors resolve into a render model consumed by the Home screen | TODO | | | | | |
+| T065 | 13 | Preference change propagation | Changing a preference invalidates the dependent queries and recomputes Home without a full catalog refetch | TODO | | | | | |
+| T066 | 14 | Continue Watching carousel | A carousel is built from the active profile's recently watched entries and is hidden when there is nothing to show | TODO | | | | | |
+| T067 | 14 | Personalized Favorites section | Favorites render as a Home section scoped to the active profile | TODO | | | | | |
+| T068 | 14 | Recommended For You | A section renders the local scoring output with a defined empty state | TODO | | | | | |
+| T069 | 14 | Preferred Country section | A section is generated for each preferred country that has channels | TODO | | | | | |
+| T070 | 14 | Preferred Language section | A section is generated for each preferred language that has channels | TODO | | | | | |
+| T071 | 14 | Preferred Category sections | One section is generated per preferred category, bounded to keep Home render cost predictable | TODO | | | | | |
+| T072 | 14 | Dynamic Home section ordering | The user's preferred section order wins and remaining sections follow the default order | TODO | | | | | |
+| T073 | 14 | Home empty states | Each personalized section has an explicit empty state instead of collapsing the screen | TODO | | | | | |
+| T074 | 15 | Profile-scoped favorites | Favorites read and write only for the active profile, completing the scoping introduced in T034/T037 | TODO | | | | | Redefined from a re-implementation task. T034 and T037 already create the profile-scoped reality; this task finishes and verifies the feature layer. |
+| T075 | 15 | Profile-scoped recently watched | History is scoped per profile, including the 20-entry cap applied per profile rather than globally | TODO | | | | | |
+| T076 | 15 | Profile-scoped playlists | Playlists and their items are scoped per profile, with cascade delete proven to touch only the owning profile | TODO | | | | | |
+| T077 | 15 | Profile-scoped saved data | Remaining persisted data is confirmed scoped or intentionally global; theme mode stays application-global | TODO | | | | | |
+| T078 | 15 | Verify profile isolation | Tests prove one profile cannot read another's favorites, history, or playlists | TODO | | | | | The gating task for Phase 15. Covers both SQL scoping and the profile-scoped TanStack Query cache. |
+| T079 | 16 | Personalized Browse defaults | Browse renders the T063 defaults with filter chips that show active state and a reset affordance | TODO | | | | | Split from T063. Presentation only. |
+| T080 | 16 | Country filter UX | Country filtering is operable, labeled, and accessible from the existing filter row | TODO | | | | | |
+| T081 | 16 | Language filter UX | Language filtering is operable, labeled, and accessible | TODO | | | | | |
+| T082 | 16 | Category filter UX | Category filtering is operable, labeled, and accessible | TODO | | | | | |
+| T083 | 16 | Multi-filter behavior | Simultaneous filters intersect with deterministic, stable result ordering | TODO | | | | | |
+| T084 | 16 | Reset personalization filters | Reset returns to the profile's preference defaults rather than to an unfiltered state | TODO | | | | | |
+| T085 | 16 | Explicit search override | An explicit user selection outranks preference defaults and persists for the session; preferences never lock the user in | TODO | | | | | The defining behavior of this phase. |
+| T086 | 17 | Profile transitions | Selector, unlock, and switch transitions are consistent and do not flash intermediate state | TODO | | | | | |
+| T087 | 17 | Profile avatar system | Avatars render from initials and theme color tokens, so no new binary image assets are introduced | TODO | | | | | |
+| T088 | 17 | Profile loading states | Every profile surface models loading explicitly | TODO | | | | | |
+| T089 | 17 | Profile empty states | No-profiles and no-results cases have purposeful empty states | TODO | | | | | |
+| T090 | 17 | Profile error states | Profile read, write, and verification failures are distinguished and retryable | TODO | | | | | |
+| T091 | 17 | PIN UX polish | PIN entry has clear feedback, masked input, and accessible labels | TODO | | | | | |
+| T092 | 17 | Profile accessibility | Profile surfaces carry roles, labels, states, and adequate touch targets | TODO | | | | | |
+| T093 | 17 | Profile performance | Profile switching and Home recomposition stay responsive on large catalogs | TODO | | | | | |
+| T094 | 18 | Profile repository tests | Profile CRUD, last-active selection, and deletion cascade are covered | TODO | | | | | |
+| T095 | 18 | Profile isolation tests | Cross-profile reads, writes, and cache isolation are proven impossible for favorites, history, and playlists | TODO | | | | | |
+| T096 | 18 | PIN/auth tests | Verifier derivation, constant-time comparison, rate limiting, and the missing-verifier recovery path are covered | TODO | | | | | `expo-secure-store` and the extended `expo-crypto` surface need manual Jest mocks; the current `jest.setup.ts` mock exposes only `randomUUID`. |
+| T097 | 18 | Preference tests | Preference persistence and per-profile separation are covered | TODO | | | | | |
+| T098 | 18 | Personalization tests | Scoring and model derivation are deterministic and unit-tested | TODO | | | | | |
+| T099 | 18 | Home personalization tests | Section ordering, generation, and empty states are covered | TODO | | | | | |
+| T100 | 18 | SQLite migration tests | The stepwise migration chain is verified for statement order, PRAGMA handling, and `user_version` progression from a fresh and a V1 database | TODO | | | | | No real SQL execution. Jest mocks `expo-sqlite` and Node 20 has no `node:sqlite`, so these tests assert the migration plan and version handling rather than running the statements. Residual risk stays open until T102/T103. |
+| T101 | 18 | Existing-data migration validation | The legacy backfill mapping is proven lossless by testing it as a pure function over V1 row arrays | TODO | | | | | Pairs with T037's "backfill only when data exists" rule: a V1 database with no rows must produce no profile. |
+| T102 | 18 | Android validation | Core profile, PIN, and migration flows are validated on a real Android device or emulator | TODO | | | | | Expected to be BLOCKED in this environment for the same reason as T030. |
+| T103 | 18 | iOS validation | Core profile, PIN, and migration flows are validated on a real iOS device or simulator | TODO | | | | | Expected to be BLOCKED in this environment for the same reason as T030. |
+
 ## Error and Issue Log
 
 | ID | Task | Type | Error / Issue | Cause | Resolution | Status |
@@ -52,13 +132,21 @@ Detailed task queue and development history. Current implementation truth is in 
 | ID | Date | Decision | Reason | Alternatives | Impact |
 |---|---|---|---|---|---|
 | D001 | 2026-09-27 | Keep a single root `AGENTS.md` as the AI operating contract; keep product guide and progress records under `docs/` | Avoid duplicate instructions and scattered project records while retaining Antigravity-specific rule/workflow/skill discovery | Keep a separate root INSTRUCTIONS.md and state/task files | AI workflow stays at root; human/project tracking docs are grouped under docs |
+| D002 | 2026-09-28 | Scope profile data by adding a `profile_id` column (and including it in the `favorites` and `recently_watched` primary keys) rather than duplicating tables per profile | One schema, one set of queries, and index-level isolation; duplicates the V1 data without a rebuild | Per-profile tables, or a side mapping table that leaves the original rows unscoped | Requires a SQLite table rebuild; the current single-version gate in `src/data/db/schema.ts` must become a stepwise chain |
+| D003 | 2026-09-28 | Backfill legacy V1 rows into a `Main` profile only when favorites, recently watched, or playlists actually contain rows | Keeps "existing V1 user" and "new V2 install" cleanly separated, so new users get profile creation instead of an unexplained empty profile | Always create a default profile, or always run returning users through onboarding | Drives T037 and the T101 assertion that an empty V1 database produces no profile |
+| D004 | 2026-09-28 | Repositories take an explicit `profileId` argument and never read ambient or global active-profile state | Keeps repositories pure and unit-testable, matching the existing pattern of injecting the database handle | A repository that imports the session store to resolve the active profile | Every scoped call site must thread the id explicitly; a missed argument becomes a visible type error rather than a silent leak |
+| D005 | 2026-09-28 | Profile-scoped local TanStack Query keys include the profile id, and switching profiles removes the previous profile's local cache | The current profile-agnostic keys (`['local','favorites']`) are the largest cross-profile leak risk, separate from SQL | Keeping one key and relying on invalidation, or clearing the whole cache on every switch | Isolation tests in T078 and T095 must cover both SQL scoping and cache separation |
+| D006 | 2026-09-28 | Store the PIN verifier in `expo-secure-store` with salted iterated SHA-256 derivation, keep only `pin_enabled` metadata in SQLite, and access it through a `ProfileAuthenticator` interface | Plaintext is never persisted; the interface leaves room for device authentication later. SDK 57 `expo-crypto` offers digests and AES-GCM only, so no real KDF is available | Storing the PIN in SQLite, or adding a KDF dependency, or hand-rolling PBKDF2 in TypeScript | A short PIN remains brute-forceable if an extracted verifier is attacked offline, so unlock attempts are rate-limited; this limitation is recorded rather than hidden |
+| D007 | 2026-09-28 | Gate the app in the root layout on an explicit session state machine (`booting`, `needs-profile`, `locked`, `ready`) and keep profile management as real routes | Avoids Expo Router redirect flicker during boot and keeps selector, unlock, and management screens deep-linkable | Redirect-based routing guards driven by `useSegments` | The splash overlay must stay visible until SQLite is ready and the session resolves |
+| D008 | 2026-09-28 | Personalization defaults the user to their preferences without locking them into them; an explicit selection always wins and reset returns to preference defaults, not to an unfiltered state | Matches the stated product behavior and keeps the catalog browsable | Filtering strictly by preferences, or treating preferences as a hard constraint | Split across T063 (state model) and T079 (presentation), with T085 covering the override |
 
 ## Current Checkpoint
 
-- **Current Phase:** 8 — End-to-End Integration and Validation.
-- **Current Task:** T031
-- **Last Completed Tasks:** T026, T027, T028, T029
+- **Current Version:** V2 — Profiles & Personalization.
+- **Current Phase:** 9 — Profile Foundation.
+- **Current Task:** T033 Profile domain model.
+- **Last Completed Task:** T032 Organize project instructions and documentation.
 - **Last Commit:** See Git history.
-- **Next Task:** T032 is already done, and Phase 8 is completed. Project is ready for any post-MVP tasks.
-- **Known Issues:** Physical device validation (T030) is blocked by environment constraints.
-- **Next Expected Outcome:** Documentation is fully synced with the final codebase.
+- **Next Task:** T033 Profile domain model, then T034 Profile SQLite migration. T037 is the critical task in this phase.
+- **Known Issues:** Physical device validation (T030, and by extension T102/T103) is blocked by environment constraints. V2 migration tests (T100/T101) assert the migration plan and backfill mapping rather than executing real SQL, so the migration remains unproven at runtime until device validation is possible.
+- **Next Expected Outcome:** The V2 phase, task, and decision record exists in this tracker and `PROJECT_STATE.md` reports V2 / Phase 9 / T033 accurately.

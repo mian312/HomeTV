@@ -33,15 +33,27 @@ For the implementation snapshot and task queue, see [project/PROJECT_STATE.md](p
 - Resilient live player using `expo-video`, with loading, errors, retries, and alternate streams when available.
 - Cache-first data behavior, accessible UI, and behavior-focused tests.
 
+### V2 — Profiles & Personalization
+
+- Multiple local profiles with a profile selector, creation, editing, and deletion.
+- All existing local data (favorites, recently watched, playlists) scoped per profile, with existing V1 data migrated rather than lost.
+- Local profile lock using a PIN. The PIN is never stored in plaintext; the verifier lives in secure device storage behind an authentication abstraction so device biometrics/passcode can be added later.
+- Per-profile onboarding for country, language, category, and home-section preferences.
+- Local, on-device personalization: recommendation scoring, a personalized Home, and Browse defaults.
+
+V2 is planned and tracked as T033–T103 in [project/tasks.md](project/tasks.md). None of it is implemented yet; V1 remains the current state of the application.
+
 ### Explicitly deferred
 
 Do not implement or install packages for these unless explicitly requested as scoped work:
 
 - M3U import/provider and Xtream Codes.
-- Custom backend, authentication, cloud sync, Firebase, or Supabase.
+- Custom backend, server-side authentication, accounts, cloud sync, Firebase, or Supabase.
 - Ads, monetization, analytics, Sentry, or other monitoring SDKs.
 - Full Android TV/tvOS UX and remote-control navigation.
 - Unneeded storage libraries such as AsyncStorage (currently present as a theme persistence migration item).
+
+V2's PIN is a **local, device-local profile lock only**. It is not a backend account, not server authentication, and not a cloud identity, and it does not change the deferrals above. Personalization is computed on device from local data only; no analytics or tracking is introduced.
 
 Stream availability is dynamic. Never imply a stream is guaranteed playable, permanently online, or legally usable in every jurisdiction.
 
@@ -191,8 +203,10 @@ Ownership:
 - Use `expo-sqlite` through a centralized database client and repositories.
 - Introduce schema changes with migrations; centralize initialization and handle failures explicitly.
 - Initial tables when their features are implemented: `users`, `favorites`, `recently_watched`, `playlists`, `playlist_items`, `settings`.
+- V2 adds `profiles` and `profile_preferences`, and introduces `profile_id` on `favorites`, `recently_watched`, and `playlists`. That change requires a table rebuild, so migrations must be a stepwise `user_version` chain rather than a single version check.
 - Do not create speculative EPG/catalog cache tables before a real persistence requirement exists.
 - Store IDs and compact app-owned state rather than entire SDK objects. Use parameterized SQL and transactions where needed.
+- Never persist secrets in SQLite. The profile PIN verifier belongs in secure device storage, with only non-secret metadata in the database.
 
 ## Dependency policy
 
