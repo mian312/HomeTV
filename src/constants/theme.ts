@@ -72,42 +72,42 @@ export const Colors = {
   },
   dark: {
     // Core
-    text: '#ECEDEE',
-    textSecondary: '#9BA1A6',
-    textTertiary: '#687076',
-    textInverse: '#11181C',
+    text: '#F0F0F0',
+    textSecondary: '#A8A8B3',
+    textTertiary: '#64646F',
+    textInverse: '#0D0D0D',
 
-    // Backgrounds
-    background: '#0A0A0B',
-    backgroundElement: '#1A1B1E',
-    backgroundSelected: '#262729',
-    backgroundElevated: '#1A1B1E',
+    // Backgrounds — deep cinematic blacks
+    background: '#080808',
+    backgroundElement: '#161618',
+    backgroundSelected: '#222226',
+    backgroundElevated: '#1A1A1E',
 
-    // Primary / accent
-    primary: '#3B9EFF',
+    // Primary / accent — vibrant red OTT accent
+    primary: '#E50914',
     primaryText: '#FFFFFF',
-    primaryMuted: '#0D2847',
+    primaryMuted: '#3D0408',
 
     // Surfaces & cards
-    surface: '#141416',
-    surfaceSecondary: '#1A1B1E',
-    surfaceTertiary: '#222326',
+    surface: '#111113',
+    surfaceSecondary: '#1A1A1E',
+    surfaceTertiary: '#222226',
 
     // Borders & separators
-    border: '#2E3035',
-    borderMuted: '#222326',
+    border: '#2A2A2F',
+    borderMuted: '#1E1E22',
 
     // Semantic states
     success: '#3DD68C',
     successMuted: '#0B2E1A',
     warning: '#F5A623',
     warningMuted: '#2E1F00',
-    error: '#FF6369',
-    errorMuted: '#3C1618',
+    error: '#FF4D4D',
+    errorMuted: '#3C1010',
 
     // Overlays / scrims
-    overlay: 'rgba(0, 0, 0, 0.6)',
-    scrim: 'rgba(0, 0, 0, 0.8)',
+    overlay: 'rgba(0, 0, 0, 0.65)',
+    scrim: 'rgba(0, 0, 0, 0.85)',
 
     // Player
     playerBackground: '#000000',
@@ -115,14 +115,14 @@ export const Colors = {
     playerControl: 'rgba(255, 255, 255, 0.9)',
     playerControlMuted: 'rgba(255, 255, 255, 0.4)',
 
-    // Tab bar
-    tabBarBackground: '#0A0A0B',
-    tabBarActive: '#3B9EFF',
-    tabBarInactive: '#687076',
+    // Tab bar — rich dark bottom nav
+    tabBarBackground: '#0D0D0F',
+    tabBarActive: '#E50914',
+    tabBarInactive: '#5A5A65',
 
     // Icons
-    icon: '#ECEDEE',
-    iconSecondary: '#9BA1A6',
+    icon: '#F0F0F0',
+    iconSecondary: '#A8A8B3',
   },
 } as const;
 

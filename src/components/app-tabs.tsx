@@ -7,9 +7,12 @@ export default function AppTabs() {
 
   return (
     <NativeTabs
-      backgroundColor={colors.background}
-      indicatorColor={colors.backgroundElement}
-      labelStyle={{ selected: { color: colors.text } }}
+      backgroundColor={colors.tabBarBackground}
+      indicatorColor={colors.tabBarActive}
+      labelStyle={{
+        selected: { color: colors.tabBarActive },
+        default: { color: colors.tabBarInactive },
+      }}
     >
       <NativeTabs.Trigger name="index">
         <NativeTabs.Trigger.Label>Home</NativeTabs.Trigger.Label>
@@ -20,7 +23,7 @@ export default function AppTabs() {
       </NativeTabs.Trigger>
 
       <NativeTabs.Trigger name="channels">
-        <NativeTabs.Trigger.Label>Channels</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Label>Browse</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon
           src={require('@/assets/images/tabIcons/explore.png')}
           renderingMode="template"
@@ -37,3 +40,4 @@ export default function AppTabs() {
     </NativeTabs>
   );
 }
+
