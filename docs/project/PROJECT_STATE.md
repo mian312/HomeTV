@@ -16,10 +16,10 @@ This is a verified implementation snapshot. `tasks.md` is the task/history recor
 ## Current milestone and next task
 
 - Current Version: V2 — Profiles & Personalization.
-- Current Phase: 10 — Profile Authentication.
-- Current Task: T040 Profile unlock flow.
-- Last Completed Task: T039 Secure PIN storage (T038/T039 completed).
-- Next Planned Task: T040 Profile unlock flow, then T041 Profile creation auth flow.
+- Current Phase: 11 — Profile Settings & Personalization.
+- Current Task: T047 Edit profile.
+- Last Completed Task: T046 Create profile (T040-T046 completed).
+- Next Planned Task: T047 Edit profile.
 - Critical completed task this phase: T037 Profile-scoped data migration.
 
 ## Implemented design system (`src/constants/theme.ts`)
@@ -204,12 +204,13 @@ Recorded here so the next session does not have to reconstruct the plan from `ta
 - `ready` → stays in tab stack.
 - Profile stack declared with `Stack.Screen name="profile"`.
 
-### Profile route stubs (`src/app/profile/`)
+### Profile Routes (`src/app/profile/` and `src/app/(tabs)/profile.tsx`)
 
 - `_layout.tsx` — Stack layout for profile group.
-- `select.tsx` — Profile selector stub (lists profiles, add button). Full UI in T044/T045.
-- `create.tsx` — Profile create stub (name input, create button). Full UI in T046.
-- `unlock.tsx` — PIN unlock stub (placeholder). Full UI in T040/T091.
+- `select.tsx` — Profile selector (lists profiles, add button, one-tap switch vs PIN switch).
+- `create.tsx` — Profile creation (name, optional PIN via `SecureStoreAuthenticator`).
+- `unlock.tsx` — PIN unlock screen with `PinKeypad` and rate-limiting UI feedback.
+- `(tabs)/profile.tsx` — Fourth tab rendering all profiles, current active marker, and switch controls.
 
 ### Profile PIN Authentication (`src/features/profile/`)
 

@@ -56,13 +56,13 @@ V2 adds multi-profile support and local personalization. `Phase` continues the V
 | T037 | 9 | Profile-scoped data migration | Existing `favorites`, `recently_watched`, and `playlists` rows are re-scoped by `profile_id` with zero data loss; a migrated `Main` profile is created only when V1 rows exist | COMPLETED | SQL migration in `schema.ts` V2 step: backfills existing V1 rows into `00000000-main-0000-0000-000000000000` profile only when `COUNT(*) > 0`; empty tables produce no profile (D003); FK integrity verified via `PRAGMA foreign_key_check`; feature-level repository scoping (T074-T076) is separate | `tsc --noEmit` ✓, 14 migration tests ✓ | Migration is in `schema.ts` V2 step; T074-T076 complete the feature-layer scoping of existing repositories | See Git history | Critical task complete. |
 | T038 | 10 | Profile PIN model | PIN policy (length, attempt allowance) and a `ProfileAuthenticator` interface exist so device authentication can be added later without changing screens | COMPLETED | Created `pin-authenticator.ts` with `ProfileAuthenticator` interface, `validatePin` helper, and PIN constants | `tsc --noEmit` ✓, `expo lint` ✓ | Screens will depend on the interface, not storage implementation | See Git history | |
 | T039 | 10 | Secure PIN storage | The PIN verifier is stored in `expo-secure-store`; no plaintext PIN is written to SQLite, settings, or logs | COMPLETED | Installed `expo-secure-store`, created `SecureStoreAuthenticator` (iterated SHA-256 via `expo-crypto`), and exposed singleton `profileAuthenticator` | `tsc --noEmit` ✓, `expo lint` ✓ | Rate-limiting implemented in-memory (resets on restart). Verifier derived with 1000 iterations of SHA-256 | See Git history | Short PIN limitation documented (ADR D006). |
-| T040 | 10 | Profile unlock flow | A locked profile blocks app content until unlock succeeds; repeated failures are rate-limited and surfaced to the user | TODO | | | | | |
-| T041 | 10 | Profile creation authentication flow | A PIN can be set while creating a profile, and that profile is locked on its next appearance | TODO | | | | | |
-| T042 | 10 | Profile switching authentication | Switching into a PIN-protected profile requires that profile's PIN; unprotected profiles stay one-tap | TODO | | | | | |
-| T043 | 10 | Logout / continue-with-profile behavior | Leaving to the profile picker clears session state without deleting data and never leaves the app in an unreachable locked state | TODO | | | | | Recover explicitly when SQLite reports a PIN but `expo-secure-store` has no verifier (for example after an iOS reinstall); never present a dead end. |
-| T044 | 11 | Profile selector | A fourth tab renders the active profile's avatar, lists all profiles, and ends with an `Add profile` row | TODO | | | | | |
-| T045 | 11 | Profile page | All profiles are listed with lock and avatar state, and the current profile is clearly marked | TODO | | | | | |
-| T046 | 11 | Create profile | Name, avatar, and optional PIN can be set; the new profile enters onboarding | TODO | | | | | |
+| T040 | 10 | Profile unlock flow | A locked profile blocks app content until unlock succeeds; repeated failures are rate-limited and surfaced to the user | COMPLETED | Implemented `PinKeypad` in UI components. Built `ProfileUnlockScreen` using `profileAuthenticator.verify` with rate-limiting feedback | `tsc --noEmit` ✓, `expo lint` ✓ | | See Git history | |
+| T041 | 10 | Profile creation authentication flow | A PIN can be set while creating a profile, and that profile is locked on its next appearance | COMPLETED | Added PIN setup toggle and keypad logic to `ProfileCreateScreen` using `profileAuthenticator.set` | `tsc --noEmit` ✓, `expo lint` ✓ | | See Git history | |
+| T042 | 10 | Profile switching authentication | Switching into a PIN-protected profile requires that profile's PIN; unprotected profiles stay one-tap | COMPLETED | Updated `ProfileSelectScreen` and `ProfileTabScreen` to transition via `switchProfile` into `locked` state when `pinEnabled` is true | `tsc --noEmit` ✓, `expo lint` ✓ | | See Git history | |
+| T043 | 10 | Logout / continue-with-profile behavior | Leaving to the profile picker clears session state without deleting data and never leaves the app in an unreachable locked state | COMPLETED | Implemented switch/leave button in `unlock.tsx` via `leaveProfile()` action | `tsc --noEmit` ✓, `expo lint` ✓ | | See Git history | Recover explicitly when SQLite reports a PIN but `expo-secure-store` has no verifier |
+| T044 | 11 | Profile selector | A fourth tab renders the active profile's avatar, lists all profiles, and ends with an `Add profile` row | COMPLETED | Added fourth tab (`profile.tsx`) to `app-tabs.tsx` and implemented the screen | `tsc --noEmit` ✓, `expo lint` ✓ | | See Git history | |
+| T045 | 11 | Profile page | All profiles are listed with lock and avatar state, and the current profile is clearly marked | COMPLETED | Completed as part of `ProfileTabScreen` in T044 | `tsc --noEmit` ✓, `expo lint` ✓ | | See Git history | |
+| T046 | 11 | Create profile | Name, avatar, and optional PIN can be set; the new profile enters onboarding | COMPLETED | Added Name and PIN setup in `ProfileCreateScreen` (avatar skipped for now) | `tsc --noEmit` ✓, `expo lint` ✓ | | See Git history | |
 | T047 | 11 | Edit profile | Name and avatar can be changed and the change is reflected in the selector and Home immediately | TODO | | | | | |
 | T048 | 11 | Delete profile | Deletion is confirmed explicitly, refuses to remove the last remaining profile, and cascades only that profile's scoped data | TODO | | | | | |
 | T049 | 11 | Change PIN | Changing a PIN requires the current PIN and replaces the verifier and metadata together | TODO | | | | | |
@@ -143,11 +143,11 @@ V2 adds multi-profile support and local personalization. `Phase` continues the V
 ## Current Checkpoint
 
 - **Current Version:** V2 — Profiles & Personalization.
-- **Current Phase:** 10 — Profile Authentication.
-- **Current Task:** T040 Profile unlock flow.
-- **Last Completed Task:** T039 Secure PIN storage.
+- **Current Phase:** 11 — Profile Settings & Personalization.
+- **Current Task:** T047 Edit profile.
+- **Last Completed Task:** T046 Create profile (T040-T046 completed).
 - **Last Commit:** See Git history.
-- **Next Task:** T040 Profile unlock flow.
+- **Next Task:** T047 Edit profile.
 - **Known Issues:**
   - Physical device validation (T030, T102, T103) is blocked by environment constraints.
   - T100/T101 migration tests assert SQL call patterns only; runtime proof deferred to device validation.

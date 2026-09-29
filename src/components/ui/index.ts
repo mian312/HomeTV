@@ -18,9 +18,11 @@ export * from './filter-row';
 export * from './horizontal-list';
 export * from './input';
 export * from './modal-picker';
+export * from './pin-keypad';
 export * from './playlist-picker';
 export * from './section-header';
 export * from './separator';
 export * from './skeleton';
 export * from './slide-up-sheet';
 export * from './state-views';
+

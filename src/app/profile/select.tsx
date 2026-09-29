@@ -16,7 +16,7 @@ import type { Profile } from '@/types/domain';
 
 export default function ProfileSelectScreen() {
   const { colors, spacing } = useTheme();
-  const boot = useSessionStore((s) => s.boot);
+  const { switchProfile } = useSessionStore();
   const [profiles, setProfiles] = useState<readonly Profile[] | null>(null);
 
   useEffect(() => {
@@ -24,11 +24,10 @@ export default function ProfileSelectScreen() {
   }, []);
 
   async function handleSelectProfile(profile: Profile) {
+    switchProfile(profile);
     if (profile.pinEnabled) {
-      boot({ status: 'locked', profile });
       router.replace('/profile/unlock' as any);
     } else {
-      boot({ status: 'ready', profile });
       await profileRepository.saveLastActiveId(profile.id);
       router.replace('/' as any);
     }
