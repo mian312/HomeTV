@@ -48,6 +48,8 @@ export function useBootSession(): void {
         result = { status: 'needs-profile' };
       } else if (profile.pinEnabled) {
         result = { status: 'locked', profile };
+      } else if (!profile.onboardingCompleted) {
+        result = { status: 'onboarding', profile };
       } else {
         result = { status: 'ready', profile };
       }

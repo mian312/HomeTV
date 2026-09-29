@@ -9,4 +9,5 @@ export {
   recentlyWatchedRepository,
   playlistRepository,
   profileRepository,
+  preferenceRepository,
 } from '../db';

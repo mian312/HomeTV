@@ -13,11 +13,8 @@ import { ThemedText } from '@/components/themed-text';
 import { PIN_LENGTH } from '@/features/profile/pin-authenticator';
 import { profileAuthenticator } from '@/features/profile/secure-store-authenticator';
 import { profileRepository } from '@/data/repositories';
-import { useSessionStore } from '@/stores/session';
-
 export default function ProfileCreateScreen() {
   const { colors, spacing, radius } = useTheme();
-  const boot = useSessionStore((s) => s.boot);
   
   const [name, setName] = useState('');
   const [avatarKey, setAvatarKey] = useState('');

@@ -68,14 +68,14 @@ V2 adds multi-profile support and local personalization. `Phase` continues the V
 | T049 | 11 | Change PIN | Changing a PIN requires the current PIN and replaces the verifier and metadata together | COMPLETED | Implemented in `src/app/profile/pin.tsx` with action `change`. Verifies current, accepts new, updates DB and store | `tsc --noEmit` ✓, `expo lint` ✓ | | See Git history | |
 | T050 | 11 | Remove PIN | Removing a PIN requires the current PIN and clears verifier and metadata together | COMPLETED | Implemented in `src/app/profile/pin.tsx` with action `remove`. Verifies current, removes verifier, updates DB and store | `tsc --noEmit` ✓, `expo lint` ✓ | | See Git history | |
 | T051 | 11 | Switch profile | Switching changes the active profile and drops the previous profile's local query cache | COMPLETED | Implemented in `src/lib/providers.tsx` by using `activeProfileId` as dependency for `useMemo` creating `QueryClient` | `tsc --noEmit` ✓, `expo lint` ✓ | | See Git history | |
-| T052 | 12 | Profile onboarding flow | A multi-step flow moves through country, languages, categories, home sections, and PIN, and is skippable after first completion | TODO | | | | | |
+| T052 | 12 | Profile onboarding flow | A multi-step flow moves through country, languages, categories, home sections, and PIN, and is skippable after first completion | COMPLETED | Implemented scaffold in `src/app/profile/onboarding.tsx` | `tsc --noEmit` ✓ | | See Git history | UI stubbed; steps to be filled in subsequent tasks |
 | T053 | 12 | Country selection | Preferred countries are chosen from the provider country list and persisted per profile | TODO | | | | | |
 | T054 | 12 | Language preferences | Preferred languages are multi-selected and persisted per profile | TODO | | | | | |
 | T055 | 12 | Category preferences | Preferred categories are multi-selected and drive ranking and Home sections | TODO | | | | | |
 | T056 | 12 | Home section preferences | The user chooses which Home sections appear and in what order | TODO | | | | | |
 | T057 | 12 | PIN setup | A PIN can be set during onboarding without preventing later setup from the profile page | TODO | | | | | |
-| T058 | 12 | Onboarding completion state | Completion is persisted per profile and drives the gate; the migrated `Main` profile starts already completed | TODO | | | | | Returning V1 users are not forced back through onboarding over data they already have. |
-| T059 | 13 | Preference repository | A `profile_preferences` table and repository store preferences scoped by explicit `profileId` | TODO | | | | | |
+| T058 | 12 | Onboarding completion state | Completion is persisted per profile and drives the gate; the migrated `Main` profile starts already completed | COMPLETED | Implemented in `session.ts` and `_layout.tsx` | `tsc --noEmit` ✓ | | See Git history | Returning V1 users are not forced back through onboarding over data they already have. |
+| T059 | 13 | Preference repository | A `profile_preferences` table and repository store preferences scoped by explicit `profileId` | COMPLETED | Implemented `sqlite-preferences.ts` and Migration 4 | `tsc --noEmit` ✓ | | See Git history | Moved to Phase 12 to support T053-T056 persistence |
 | T060 | 13 | Personalization model | A per-profile model is derived from preferences plus scoped history and favorites, entirely locally | TODO | | | | | No analytics, ads, or tracking SDK is introduced; scoring is computed on device. |
 | T061 | 13 | Local recommendation scoring | A deterministic pure scoring function ranks channels and is unit-testable without rendering | TODO | | | | | |
 | T062 | 13 | Personalized channel filtering | Filtering helpers consume preferences without permanently hiding channels the user can still reach | TODO | | | | | |
@@ -144,10 +144,10 @@ V2 adds multi-profile support and local personalization. `Phase` continues the V
 
 - **Current Version:** V2 — Profiles & Personalization.
 - **Current Phase:** 12 — Profile Onboarding & Content Preferences.
-- **Current Task:** T052 Profile onboarding flow.
-- **Last Completed Task:** T051 Switch profile.
+- **Current Task:** T053 Country selection.
+- **Last Completed Task:** T059 Preference repository (T052, T058, T059 completed).
 - **Last Commit:** See Git history.
-- **Next Task:** T052 Profile onboarding flow.
+- **Next Task:** T053 Country selection.
 - **Known Issues:**
   - Physical device validation (T030, T102, T103) is blocked by environment constraints.
   - T100/T101 migration tests assert SQL call patterns only; runtime proof deferred to device validation.

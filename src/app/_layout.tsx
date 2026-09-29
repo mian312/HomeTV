@@ -34,6 +34,11 @@ function SessionGate() {
       router.replace('/profile/select' as any);
     } else if (phase === 'locked') {
       router.replace('/profile/unlock' as any);
+    } else if (phase === 'onboarding') {
+      const activeId = useSessionStore.getState().activeProfile?.id;
+      if (activeId) {
+        router.replace(`/profile/onboarding?id=${activeId}` as any);
+      }
     }
     // 'ready' — stay in the normal tab stack (no redirect needed)
   }, [phase]);

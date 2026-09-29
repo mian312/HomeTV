@@ -30,13 +30,13 @@ import type { Profile, ProfileId } from '@/types/domain';
 // State machine types
 // ---------------------------------------------------------------------------
 
-export type SessionPhase = 'booting' | 'needs-profile' | 'locked' | 'ready';
+export type SessionPhase = 'booting' | 'needs-profile' | 'onboarding' | 'locked' | 'ready';
 
 export interface SessionState {
   /** Current boot/auth phase. */
   phase: SessionPhase;
 
-  /** The active profile when phase is 'locked' or 'ready'. Null otherwise. */
+  /** The active profile when phase is 'locked', 'onboarding', or 'ready'. Null otherwise. */
   activeProfile: Profile | null;
 
   /**
@@ -90,6 +90,7 @@ export interface SessionState {
 export type BootResult =
   | { status: 'needs-profile' }
   | { status: 'locked'; profile: Profile }
+  | { status: 'onboarding'; profile: Profile }
   | { status: 'ready'; profile: Profile };
 
 // ---------------------------------------------------------------------------
@@ -113,6 +114,9 @@ export const useSessionStore = create<SessionState>((set, get) => ({
           lockedProfileId: result.profile.id,
         });
         break;
+      case 'onboarding':
+        set({ phase: 'onboarding', activeProfile: result.profile, lockedProfileId: null });
+        break;
       case 'ready':
         set({ phase: 'ready', activeProfile: result.profile, lockedProfileId: null });
         break;
@@ -122,13 +126,19 @@ export const useSessionStore = create<SessionState>((set, get) => ({
   switchProfile(profile) {
     if (profile.pinEnabled) {
       set({ phase: 'locked', activeProfile: profile, lockedProfileId: profile.id });
+    } else if (!profile.onboardingCompleted) {
+      set({ phase: 'onboarding', activeProfile: profile, lockedProfileId: null });
     } else {
       set({ phase: 'ready', activeProfile: profile, lockedProfileId: null });
     }
   },
 
   unlock(profile) {
-    set({ phase: 'ready', activeProfile: profile, lockedProfileId: null });
+    if (!profile.onboardingCompleted) {
+      set({ phase: 'onboarding', activeProfile: profile, lockedProfileId: null });
+    } else {
+      set({ phase: 'ready', activeProfile: profile, lockedProfileId: null });
+    }
   },
 
   lock() {

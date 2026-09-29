@@ -139,3 +139,18 @@ export interface ProfileRepository {
   /** Load the last-active profile ID from settings, or null if none. */
   loadLastActiveId(): Promise<ProfileId | null>;
 }
+
+// ---------------------------------------------------------------------------
+// Profile Preferences (V2)
+// ---------------------------------------------------------------------------
+
+export interface PreferenceRepository {
+  /** Get a preference value. */
+  get<T>(profileId: ProfileId, key: string): Promise<T | null>;
+
+  /** Set a preference value. */
+  set<T>(profileId: ProfileId, key: string, value: T): Promise<void>;
+
+  /** Remove a preference. */
+  remove(profileId: ProfileId, key: string): Promise<void>;
+}

@@ -17,9 +17,9 @@ This is a verified implementation snapshot. `tasks.md` is the task/history recor
 
 - Current Version: V2 — Profiles & Personalization.
 - Current Phase: 12 — Profile Onboarding & Content Preferences.
-- Current Task: T052 Profile onboarding flow.
-- Last Completed Task: T051 Switch profile.
-- Next Planned Task: T052 Profile onboarding flow.
+- Current Task: T053 Country selection.
+- Last Completed Task: T059 Preference repository.
+- Next Planned Task: T053 Country selection.
 - Critical completed task this phase: T037 Profile-scoped data migration.
 
 ## Implemented design system (`src/constants/theme.ts`)
