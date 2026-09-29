@@ -39,10 +39,8 @@ export default function HomeScreen() {
       const preferredCountries = Array.from(model.preferredCountries);
       result = result.filter(c => c.country && preferredCountries.includes(c.country));
     }
-    if (model.preferredLanguages.size > 0) {
-      const preferredLanguages = Array.from(model.preferredLanguages);
-      result = result.filter(c => c.languages.some(lang => preferredLanguages.includes(lang as any)));
-    }
+    // Note: Channel.languages is not populated by iptv-org channels.json, so filtering
+    // by language here would result in an empty list. Skip language filtering.
     return result;
   }, [channels, model]);
 
@@ -88,11 +86,15 @@ export default function HomeScreen() {
 
           {/* ── Sections ── */}
           <View style={styles.sectionsContainer}>
-            {model && filteredChannels && sections.map((descriptor, index) => (
+            {model && channels && sections.map((descriptor, index) => (
               <HomeSectionRenderer
                 key={`${descriptor.type}-${index}`}
                 descriptor={descriptor}
-                channels={filteredChannels}
+                channels={
+                  descriptor.type === 'recently-watched' || descriptor.type === 'favorites' 
+                    ? channels 
+                    : filteredChannels
+                }
                 model={model}
               />
             ))}
