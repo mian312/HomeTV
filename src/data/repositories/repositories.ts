@@ -14,6 +14,8 @@ import type {
   Favorite,
   Playlist,
   PlaylistItem,
+  Profile,
+  ProfileId,
   RecentlyWatchedEntry,
 } from '@/types/domain';
 
@@ -97,4 +99,43 @@ export interface SettingsRepository {
 
   /** Remove a setting. */
   remove(key: string): Promise<void>;
+}
+
+// ---------------------------------------------------------------------------
+// Profiles (V2)
+// ---------------------------------------------------------------------------
+
+export interface ProfileRepository {
+  /** Create a new profile and return it. */
+  create(params: {
+    name: string;
+    avatarKey?: string | null;
+  }): Promise<Profile>;
+
+  /** Return all profiles, ordered by creation time ascending. */
+  getAll(): Promise<readonly Profile[]>;
+
+  /** Return a single profile by ID, or null if not found. */
+  getById(profileId: ProfileId): Promise<Profile | null>;
+
+  /** Rename a profile and optionally change its avatar. */
+  update(
+    profileId: ProfileId,
+    params: { name?: string; avatarKey?: string | null },
+  ): Promise<void>;
+
+  /** Delete a profile and all its scoped data (CASCADE on FK). */
+  delete(profileId: ProfileId): Promise<void>;
+
+  /** Record that pin_enabled = true for a profile (verifier lives in secure-store). */
+  setPinEnabled(profileId: ProfileId, enabled: boolean): Promise<void>;
+
+  /** Mark onboarding as completed for a profile. */
+  setOnboardingCompleted(profileId: ProfileId, completed: boolean): Promise<void>;
+
+  /** Persist the last-active profile ID in settings. */
+  saveLastActiveId(profileId: ProfileId): Promise<void>;
+
+  /** Load the last-active profile ID from settings, or null if none. */
+  loadLastActiveId(): Promise<ProfileId | null>;
 }

@@ -8,4 +8,5 @@ export {
   favoritesRepository,
   recentlyWatchedRepository,
   playlistRepository,
+  profileRepository,
 } from '../db';

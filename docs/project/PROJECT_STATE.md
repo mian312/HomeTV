@@ -2,12 +2,13 @@
 
 This is a verified implementation snapshot. `tasks.md` is the task/history record; `../README.md` is the product and architecture guide.
 
+
 ## Overview
 
 - Product: HomeTV, a free mobile-first OTT/IPTV app for Android and iOS.
 - Initial catalog source: iptv-org via `@iptv-org/sdk`.
-- Current project: Expo Router application with architecture boundaries, a complete design system, and the V1 feature set implemented (Home, Browse, Library, channel details, guide, playlists, and playback).
-- V2 (Profiles & Personalization) is planned and tracked as T033–T103 in [tasks.md](tasks.md); none of it is implemented yet.
+- Current project: Expo Router application with architecture boundaries, a complete design system, V1 features implemented, and V2 Phase 9 (Profile Foundation) now complete.
+- V2 (Profiles & Personalization) is tracked as T033–T103; Phase 9 (T033–T037) is done; Phase 10 (T038+) is next.
 - Expo SDK: `~57.0.25`.
 - React Native: `0.86.3`; React `19.2.3`; TypeScript `~6.0.3`.
 - TypeScript strict mode: enabled.
@@ -15,11 +16,11 @@ This is a verified implementation snapshot. `tasks.md` is the task/history recor
 ## Current milestone and next task
 
 - Current Version: V2 — Profiles & Personalization.
-- Current Phase: 9 — Profile Foundation.
-- Current Task: T033 Profile domain model.
-- Last Completed Task: T032 Organize project instructions and documentation.
-- Next Planned Task: T034 Profile SQLite migration.
-- Critical task in the current phase: T037 Profile-scoped data migration.
+- Current Phase: 10 — Profile Authentication.
+- Current Task: T038 Profile PIN model.
+- Last Completed Task: T037 Profile-scoped data migration (critical path). Phase 9 (T033–T037 + T094/T100/T101 tests) fully completed.
+- Next Planned Task: T038 PIN model and `ProfileAuthenticator` interface, then T039 secure PIN storage.
+- Critical completed task this phase: T037 Profile-scoped data migration.
 
 ## Implemented design system (`src/constants/theme.ts`)
 
@@ -159,6 +160,57 @@ Recorded here so the next session does not have to reconstruct the plan from `ta
 - **Gating**: the root layout gates on `booting`, `needs-profile`, `locked`, `ready`; profile management remains real routes.
 - **Personalization**: preferences default the user without locking them in; an explicit selection always wins.
 
+## V2 Implementation — Phase 9 complete (Profile Foundation)
+
+### Profile domain types (`src/types/domain.ts`)
+
+- `ProfileId` branded type (compile-time safety).
+- `ProfileAvatarKey = string` (emoji or initials key, null = use initials).
+- `Profile` — full profile model with `id`, `name`, `avatarKey`, `pinEnabled`, `onboardingCompleted`, `createdAt`, `updatedAt`. ISO 8601 strings for timestamps (aligns with SQLite TEXT).
+- `ProfileSummary` — lightweight identity model for selector/header rendering.
+
+### SQLite migration chain (`src/data/db/schema.ts`)
+
+- Stepwise `user_version` chain: 0→1 (V1 schema), 1→2 (V2 profile scoping).
+- V2 migration: creates `profiles` table; rebuilds `favorites` and `recently_watched` tables with `profile_id` in primary key; adds `profile_id` to `playlists` preserving `playlist_items` FK cascade.
+- `PRAGMA foreign_keys` toggled **outside** transactions (SQLite semantics — no-op inside).
+- `PRAGMA foreign_key_check` runs before V2 transaction commits.
+- Backfill: creates deterministic `00000000-main-0000-0000-000000000000` profile only when V1 rows exist. New installs produce no profile and enter profile creation.
+
+### Profile repository (`src/data/repositories/sqlite-profile.ts`)
+
+- `ProfileRepository` interface in `src/data/repositories/repositories.ts`.
+- `SqliteProfileRepository`: create, getAll, getById, update, delete, setPinEnabled, setOnboardingCompleted, saveLastActiveId, loadLastActiveId.
+- Registered as `profileRepository` singleton in `src/data/db/index.ts`.
+- Every method takes explicit `profileId` — no ambient session state read (ADR D004).
+
+### Session store (`src/stores/session.ts`)
+
+- Zustand store: `SessionPhase` (`booting` | `needs-profile` | `locked` | `ready`).
+- `SessionState`: `phase`, `activeProfile`, `lockedProfileId`, `boot()`, `switchProfile()`, `unlock()`, `lock()`, `leaveProfile()`, `refreshActiveProfile()`.
+- `BootResult` discriminated union passed to `boot()`.
+
+### Boot hook (`src/features/profile/use-boot-session.ts`)
+
+- `useBootSession()`: runs once after SQLite initialises inside the Suspense boundary.
+- Reads last-active profile ID from `profileRepository`, loads profile, calls `boot()` with correct phase.
+- Falls back to first available profile if stored ID is gone.
+
+### Root layout session gate (`src/app/_layout.tsx`)
+
+- `SessionGate` component runs `useBootSession()` and watches `phase`.
+- `needs-profile` → navigates to `/profile/select`.
+- `locked` → navigates to `/profile/unlock`.
+- `ready` → stays in tab stack.
+- Profile stack declared with `Stack.Screen name="profile"`.
+
+### Profile route stubs (`src/app/profile/`)
+
+- `_layout.tsx` — Stack layout for profile group.
+- `select.tsx` — Profile selector stub (lists profiles, add button). Full UI in T044/T045.
+- `create.tsx` — Profile create stub (name input, create button). Full UI in T046.
+- `unlock.tsx` — PIN unlock stub (placeholder). Full UI in T040/T091.
+
 ## Known issues and limitations
 
 - Legacy Spacing aliases and `type` prop in ThemedText are kept for backward compat.
@@ -167,7 +219,10 @@ Recorded here so the next session does not have to reconstruct the plan from `ta
 - Fullscreen and device orientation have static/test validation only; physical Android/iOS behavior still needs device testing.
 - Expo Doctor reports the existing `@types/jest` 30.0.0 differs from the Expo SDK 57 expected 29.5.14; `tsc`, lint, and Jest pass.
 - IPTV streams may be unavailable or unsuitable for a given device or jurisdiction; availability is dynamic.
-- The V2 data migration is the highest-risk change in the plan: it rebuilds three tables and, under the current test setup, cannot be proven by executing real SQL. Treat device validation (T102/T103) as a release gate for V2 rather than an optional step.
+- **6 pre-existing test failures** in `channel-card.test.tsx` and `ui-components.test.tsx` caused by the `feat: modern OTT UI overhaul` commit changing accessibility labels and rendered text. These tests need selectors updated to match the new UI — they are NOT caused by V2 work.
+- V2 migration tests (T100/T101) assert SQL call patterns, not real execution. Migration runtime correctness requires device validation (T102/T103).
+- Profile route strings in `router.replace()` are cast with `as any` because Expo Router's typed routes haven't been regenerated yet to include the new `/profile/*` routes.
+- T095 (profile isolation tests) depends on T074–T076 repository scoping completion.
 
 ## Recovery checklist
 

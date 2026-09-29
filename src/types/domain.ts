@@ -132,6 +132,54 @@ export interface Favorite {
 }
 
 // ---------------------------------------------------------------------------
+// Profiles – V2 multi-profile support
+// ---------------------------------------------------------------------------
+
+/** Unique identifier for a user profile (local, not a backend tenant ID). */
+export type ProfileId = Brand<string, 'ProfileId'>;
+
+/** The avatar of a profile — either a named emoji/icon key or initials-derived. */
+export type ProfileAvatarKey = string;
+
+/**
+ * A local user profile.
+ *
+ * Profiles are stored in SQLite. Authentication credentials (PIN verifier) are
+ * stored separately in expo-secure-store — never in this model.
+ *
+ * `pinEnabled` is metadata only: it records whether a verifier exists in secure
+ * storage. The actual verifier is never stored in or returned from this model.
+ */
+export interface Profile {
+  readonly id: ProfileId;
+  readonly name: string;
+  /** Avatar key — an emoji string or a short initials-derived key. Null = use initials. */
+  readonly avatarKey: ProfileAvatarKey | null;
+  /** Whether a PIN verifier has been stored for this profile. */
+  readonly pinEnabled: boolean;
+  /**
+   * Whether this profile has completed onboarding.
+   * Migrated V1 profiles start as `true` to avoid forcing existing users back through onboarding.
+   */
+  readonly onboardingCompleted: boolean;
+  /** ISO 8601 timestamp string of profile creation. */
+  readonly createdAt: string;
+  /** ISO 8601 timestamp string of last modification (name, avatar, preferences). */
+  readonly updatedAt: string;
+}
+
+/**
+ * A lightweight profile summary used in selectors and headers where only
+ * identity/avatar rendering is needed — no auth or onboarding state.
+ */
+export interface ProfileSummary {
+  readonly id: ProfileId;
+  readonly name: string;
+  readonly avatarKey: ProfileAvatarKey | null;
+  readonly pinEnabled: boolean;
+}
+
+// ---------------------------------------------------------------------------
 // Async data state – used by feature hooks to model loading/success/empty/error
 // ---------------------------------------------------------------------------
 
