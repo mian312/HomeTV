@@ -21,7 +21,7 @@ export function resolveHomeSections(model: PersonalizationModel): HomeSectionDes
   ];
 
   // Expand categories, bounded to 3 max to prevent giant lists
-  const cats = Array.from(model.preferredCategories).slice(0, 3);
+  const cats = Array.from(model.preferredCategories);
   for (const cat of cats) {
     sections.push({ type: 'category', categoryId: cat });
   }
