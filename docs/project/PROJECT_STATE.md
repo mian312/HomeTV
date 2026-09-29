@@ -16,10 +16,10 @@ This is a verified implementation snapshot. `tasks.md` is the task/history recor
 ## Current milestone and next task
 
 - Current Version: V2 — Profiles & Personalization.
-- Current Phase: 11 — Profile Settings & Personalization.
-- Current Task: T051 Switch profile.
-- Last Completed Task: T050 Remove PIN.
-- Next Planned Task: T051 Switch profile.
+- Current Phase: 12 — Profile Onboarding & Content Preferences.
+- Current Task: T052 Profile onboarding flow.
+- Last Completed Task: T051 Switch profile.
+- Next Planned Task: T052 Profile onboarding flow.
 - Critical completed task this phase: T037 Profile-scoped data migration.
 
 ## Implemented design system (`src/constants/theme.ts`)

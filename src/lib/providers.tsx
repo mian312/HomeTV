@@ -18,6 +18,7 @@ import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { SQLiteProvider } from 'expo-sqlite';
 
+import { useSessionStore } from '@/stores/session';
 import { createQueryClient } from '@/lib/query-client';
 import { useThemeStore } from '@/stores/theme';
 import { migrateDbIfNeeded } from '@/data/db/schema';
@@ -27,7 +28,9 @@ interface AppProvidersProps {
 }
 
 export function AppProviders({ children }: AppProvidersProps) {
-  const queryClient = useMemo(() => createQueryClient(), []);
+  const activeProfileId = useSessionStore((state) => state.activeProfile?.id);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const queryClient = useMemo(() => createQueryClient(), [activeProfileId]);
   const systemColorScheme = useColorScheme();
   const themeMode = useThemeStore((state) => state.mode);
 

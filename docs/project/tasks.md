@@ -67,7 +67,7 @@ V2 adds multi-profile support and local personalization. `Phase` continues the V
 | T048 | 11 | Delete profile | Deletion is confirmed explicitly, refuses to remove the last remaining profile, and cascades only that profile's scoped data | TODO | | | | | |
 | T049 | 11 | Change PIN | Changing a PIN requires the current PIN and replaces the verifier and metadata together | COMPLETED | Implemented in `src/app/profile/pin.tsx` with action `change`. Verifies current, accepts new, updates DB and store | `tsc --noEmit` ✓, `expo lint` ✓ | | See Git history | |
 | T050 | 11 | Remove PIN | Removing a PIN requires the current PIN and clears verifier and metadata together | COMPLETED | Implemented in `src/app/profile/pin.tsx` with action `remove`. Verifies current, removes verifier, updates DB and store | `tsc --noEmit` ✓, `expo lint` ✓ | | See Git history | |
-| T051 | 11 | Switch profile | Switching changes the active profile and drops the previous profile's local query cache | TODO | | | | | |
+| T051 | 11 | Switch profile | Switching changes the active profile and drops the previous profile's local query cache | COMPLETED | Implemented in `src/lib/providers.tsx` by using `activeProfileId` as dependency for `useMemo` creating `QueryClient` | `tsc --noEmit` ✓, `expo lint` ✓ | | See Git history | |
 | T052 | 12 | Profile onboarding flow | A multi-step flow moves through country, languages, categories, home sections, and PIN, and is skippable after first completion | TODO | | | | | |
 | T053 | 12 | Country selection | Preferred countries are chosen from the provider country list and persisted per profile | TODO | | | | | |
 | T054 | 12 | Language preferences | Preferred languages are multi-selected and persisted per profile | TODO | | | | | |
@@ -143,11 +143,11 @@ V2 adds multi-profile support and local personalization. `Phase` continues the V
 ## Current Checkpoint
 
 - **Current Version:** V2 — Profiles & Personalization.
-- **Current Phase:** 11 — Profile Settings & Personalization.
-- **Current Task:** T051 Switch profile.
-- **Last Completed Task:** T050 Remove PIN (T048-T050 completed).
+- **Current Phase:** 12 — Profile Onboarding & Content Preferences.
+- **Current Task:** T052 Profile onboarding flow.
+- **Last Completed Task:** T051 Switch profile.
 - **Last Commit:** See Git history.
-- **Next Task:** T051 Switch profile.
+- **Next Task:** T052 Profile onboarding flow.
 - **Known Issues:**
   - Physical device validation (T030, T102, T103) is blocked by environment constraints.
   - T100/T101 migration tests assert SQL call patterns only; runtime proof deferred to device validation.
