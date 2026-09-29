@@ -47,7 +47,6 @@ function createMockDb({
     await cb();
   });
 
-  let versionCallCount = 0;
 
   const getFirstAsync = jest.fn().mockImplementation((sql: string) => {
     if (sql === 'PRAGMA user_version') {
@@ -212,7 +211,7 @@ describe('migrateDbIfNeeded', () => {
       );
       expect(insertCall).toBeDefined();
       // First parameter after SQL is the profile ID
-      const params = insertCall?.[1] as string[];
+      const params = insertCall?.[1] as unknown as string[];
       expect(params?.[0]).toBe('00000000-main-0000-0000-000000000000');
     });
 

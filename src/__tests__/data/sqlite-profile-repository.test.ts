@@ -145,7 +145,7 @@ describe('SqliteProfileRepository', () => {
 
       await repo.update(MOCK_PROFILE_ID, { name: 'Alice Updated' });
 
-      const [sql, params] = db.runAsync.mock.calls[0] as [string, string[]];
+      const [sql, params] = db.runAsync.mock.calls[0] as unknown as [string, string[]];
       expect(sql).toContain('name = ?');
       expect(params).toContain('Alice Updated');
     });
@@ -156,7 +156,7 @@ describe('SqliteProfileRepository', () => {
 
       await repo.update(MOCK_PROFILE_ID, { avatarKey: '🦊' });
 
-      const [sql, params] = db.runAsync.mock.calls[0] as [string, string[]];
+      const [sql, params] = db.runAsync.mock.calls[0] as unknown as [string, string[]];
       expect(sql).toContain('avatar_key = ?');
       expect(params).toContain('🦊');
     });
@@ -167,7 +167,7 @@ describe('SqliteProfileRepository', () => {
 
       await repo.update(MOCK_PROFILE_ID, { name: 'Bob', avatarKey: '🐱' });
 
-      const [sql] = db.runAsync.mock.calls[0] as [string, string[]];
+      const [sql] = db.runAsync.mock.calls[0] as unknown as [string, string[]];
       expect(sql).toContain('name = ?');
       expect(sql).toContain('avatar_key = ?');
     });
@@ -194,7 +194,7 @@ describe('SqliteProfileRepository', () => {
 
       await repo.setPinEnabled(MOCK_PROFILE_ID, true);
 
-      const [sql, params] = db.runAsync.mock.calls[0] as [string, (string | number)[]];
+      const [sql, params] = db.runAsync.mock.calls[0] as unknown as [string, (string | number)[]];
       expect(sql).toContain('pin_enabled = ?');
       expect(params[0]).toBe(1);
     });
@@ -205,7 +205,7 @@ describe('SqliteProfileRepository', () => {
 
       await repo.setPinEnabled(MOCK_PROFILE_ID, false);
 
-      const [, params] = db.runAsync.mock.calls[0] as [string, (string | number)[]];
+      const [, params] = db.runAsync.mock.calls[0] as unknown as [string, (string | number)[]];
       expect(params[0]).toBe(0);
     });
   });
@@ -217,7 +217,7 @@ describe('SqliteProfileRepository', () => {
 
       await repo.setOnboardingCompleted(MOCK_PROFILE_ID, true);
 
-      const [sql, params] = db.runAsync.mock.calls[0] as [string, (string | number)[]];
+      const [sql, params] = db.runAsync.mock.calls[0] as unknown as [string, (string | number)[]];
       expect(sql).toContain('onboarding_completed = ?');
       expect(params[0]).toBe(1);
     });

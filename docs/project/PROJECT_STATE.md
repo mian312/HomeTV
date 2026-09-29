@@ -17,9 +17,9 @@ This is a verified implementation snapshot. `tasks.md` is the task/history recor
 
 - Current Version: V2 — Profiles & Personalization.
 - Current Phase: 10 — Profile Authentication.
-- Current Task: T038 Profile PIN model.
-- Last Completed Task: T037 Profile-scoped data migration (critical path). Phase 9 (T033–T037 + T094/T100/T101 tests) fully completed.
-- Next Planned Task: T038 PIN model and `ProfileAuthenticator` interface, then T039 secure PIN storage.
+- Current Task: T040 Profile unlock flow.
+- Last Completed Task: T039 Secure PIN storage (T038/T039 completed).
+- Next Planned Task: T040 Profile unlock flow, then T041 Profile creation auth flow.
 - Critical completed task this phase: T037 Profile-scoped data migration.
 
 ## Implemented design system (`src/constants/theme.ts`)
@@ -210,6 +210,13 @@ Recorded here so the next session does not have to reconstruct the plan from `ta
 - `select.tsx` — Profile selector stub (lists profiles, add button). Full UI in T044/T045.
 - `create.tsx` — Profile create stub (name input, create button). Full UI in T046.
 - `unlock.tsx` — PIN unlock stub (placeholder). Full UI in T040/T091.
+
+### Profile PIN Authentication (`src/features/profile/`)
+
+- `pin-authenticator.ts`: Defines `ProfileAuthenticator` interface, `validatePin` pure function, and PIN policy (length 4, max 5 attempts, 30s lockout).
+- `secure-store-authenticator.ts`: Concrete implementation using `expo-secure-store` and `expo-crypto` for iterated salted SHA-256 verification.
+- Implements in-memory rate limiting and handles constant-time string comparison.
+- Exports `profileAuthenticator` singleton for use across the application.
 
 ## Known issues and limitations
 
