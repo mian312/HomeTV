@@ -14,7 +14,6 @@ export default function ProfileLayout() {
       <Stack.Screen name="create" />
       <Stack.Screen name="unlock" />
       <Stack.Screen name="edit" />
-      <Stack.Screen name="pin" />
     </Stack>
   );
 }
