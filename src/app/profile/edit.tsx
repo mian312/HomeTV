@@ -7,6 +7,7 @@ import { Button, Input, LoadingView } from '@/components/ui';
 import { ThemedText } from '@/components/themed-text';
 import { useSessionStore } from '@/stores/session';
 import { profileRepository } from '@/data/repositories';
+import { profileAuthenticator } from '@/features/profile/secure-store-authenticator';
 import type { Profile, ProfileId } from '@/types/domain';
 
 export default function ProfileEditScreen() {
@@ -70,6 +71,52 @@ export default function ProfileEditScreen() {
     }
   }
 
+  async function handleDelete() {
+    if (!profile) return;
+    
+    // Check if it's the last profile
+    const allProfiles = await profileRepository.getAll();
+    if (allProfiles.length <= 1) {
+      Alert.alert('Cannot Delete', 'You must have at least one profile.');
+      return;
+    }
+
+    Alert.alert(
+      'Delete Profile',
+      `Are you sure you want to delete "${profile.name}"? This will permanently erase this profile's favorites, playlists, and watch history.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            setLoading(true);
+            try {
+              await profileRepository.delete(profile.id);
+              
+              // Clear PIN from secure store if it exists
+              try {
+                await profileAuthenticator.forceRemove(profile.id);
+              } catch {}
+
+              // If the active profile was deleted, log out
+              if (activeProfile?.id === profile.id) {
+                // We need leaveProfile from session store
+                useSessionStore.getState().leaveProfile();
+                router.replace('/profile/select' as any);
+              } else {
+                router.back();
+              }
+            } catch {
+              Alert.alert('Error', 'Failed to delete profile.');
+              setLoading(false);
+            }
+          },
+        },
+      ]
+    );
+  }
+
   if (initialising) {
     return <LoadingView message="Loading profile…" />;
   }
@@ -117,6 +164,16 @@ export default function ProfileEditScreen() {
       >
         <ThemedText variant="button">Cancel</ThemedText>
       </Button>
+
+      <View style={{ marginTop: spacing.xxl }}>
+        <Button
+          variant="destructive"
+          onPress={() => void handleDelete()}
+          disabled={loading}
+        >
+          <ThemedText variant="button" style={{ color: 'white' }}>Delete Profile</ThemedText>
+        </Button>
+      </View>
     </View>
   );
 }
