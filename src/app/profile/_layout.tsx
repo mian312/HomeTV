@@ -13,7 +13,7 @@ export default function ProfileLayout() {
       <Stack.Screen name="select" />
       <Stack.Screen name="create" />
       <Stack.Screen name="unlock" />
-      <Stack.Screen name="[profileId]" />
+      <Stack.Screen name="edit" />
     </Stack>
   );
 }

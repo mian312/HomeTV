@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 import { useTheme } from '@/hooks/use-theme';
@@ -20,10 +20,11 @@ export default function ProfileTabScreen() {
     setProfiles(list);
   }
 
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    void loadProfiles();
-  }, [activeProfile]);
+  useFocusEffect(
+    useCallback(() => {
+      void loadProfiles();
+    }, [])
+  );
 
   async function handleSelectProfile(profile: Profile) {
     if (profile.id === activeProfile?.id) return;
@@ -63,13 +64,22 @@ export default function ProfileTabScreen() {
                 ) : (
                   <View style={[styles.placeholderAvatar, { backgroundColor: colors.border }]} />
                 )}
-                <ThemedText variant="body" style={{ marginLeft: spacing.md }}>
+                <ThemedText variant="body" style={{ marginLeft: spacing.md, flex: 1 }}>
                   {p.name}
                 </ThemedText>
               </View>
-              {p.pinEnabled && (
-                <MaterialCommunityIcons name="lock" size={20} color={isActive ? colors.primaryText : colors.text} />
-              )}
+              <View style={styles.actions}>
+                {p.pinEnabled && (
+                  <MaterialCommunityIcons name="lock" size={20} color={isActive ? colors.primaryText : colors.text} />
+                )}
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  onPress={() => router.push(`/profile/edit?id=${p.id}` as any)}
+                >
+                  <MaterialCommunityIcons name="pencil" size={20} color={isActive ? colors.primaryText : colors.text} />
+                </Button>
+              </View>
             </Button>
           );
         })}
@@ -94,8 +104,14 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   profileInfo: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
+  },
+  actions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
   placeholderAvatar: {
     width: 32,

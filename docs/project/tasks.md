@@ -63,7 +63,7 @@ V2 adds multi-profile support and local personalization. `Phase` continues the V
 | T044 | 11 | Profile selector | A fourth tab renders the active profile's avatar, lists all profiles, and ends with an `Add profile` row | COMPLETED | Added fourth tab (`profile.tsx`) to `app-tabs.tsx` and implemented the screen | `tsc --noEmit` ✓, `expo lint` ✓ | | See Git history | |
 | T045 | 11 | Profile page | All profiles are listed with lock and avatar state, and the current profile is clearly marked | COMPLETED | Completed as part of `ProfileTabScreen` in T044 | `tsc --noEmit` ✓, `expo lint` ✓ | | See Git history | |
 | T046 | 11 | Create profile | Name, avatar, and optional PIN can be set; the new profile enters onboarding | COMPLETED | Added Name and PIN setup in `ProfileCreateScreen` (avatar skipped for now) | `tsc --noEmit` ✓, `expo lint` ✓ | | See Git history | |
-| T047 | 11 | Edit profile | Name and avatar can be changed and the change is reflected in the selector and Home immediately | TODO | | | | | |
+| T047 | 11 | Edit profile | Name and avatar can be changed and the change is reflected in the selector and Home immediately | COMPLETED | Created `src/app/profile/edit.tsx`. Uses `useLocalSearchParams` for id. Updates DB and calls `refreshActiveProfile()` | `tsc --noEmit` ✓, `expo lint` ✓ | | See Git history | |
 | T048 | 11 | Delete profile | Deletion is confirmed explicitly, refuses to remove the last remaining profile, and cascades only that profile's scoped data | TODO | | | | | |
 | T049 | 11 | Change PIN | Changing a PIN requires the current PIN and replaces the verifier and metadata together | TODO | | | | | |
 | T050 | 11 | Remove PIN | Removing a PIN requires the current PIN and clears verifier and metadata together | TODO | | | | | |
@@ -144,10 +144,10 @@ V2 adds multi-profile support and local personalization. `Phase` continues the V
 
 - **Current Version:** V2 — Profiles & Personalization.
 - **Current Phase:** 11 — Profile Settings & Personalization.
-- **Current Task:** T047 Edit profile.
-- **Last Completed Task:** T046 Create profile (T040-T046 completed).
+- **Current Task:** T048 Delete profile.
+- **Last Completed Task:** T047 Edit profile.
 - **Last Commit:** See Git history.
-- **Next Task:** T047 Edit profile.
+- **Next Task:** T048 Delete profile.
 - **Known Issues:**
   - Physical device validation (T030, T102, T103) is blocked by environment constraints.
   - T100/T101 migration tests assert SQL call patterns only; runtime proof deferred to device validation.
