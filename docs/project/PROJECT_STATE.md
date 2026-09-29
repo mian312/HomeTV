@@ -16,10 +16,10 @@ This is a verified implementation snapshot. `tasks.md` is the task/history recor
 ## Current milestone and next task
 
 - Current Version: V2 — Profiles & Personalization.
-- Current Phase: 14 — Personalized UI Rendering.
-- Current Task: T066 Continue Watching carousel.
-- Last Completed Task: T065 Preference change propagation.
-- Next Planned Task: T066 Continue Watching carousel.
+- Current Phase: 15 — Profile Scoping Verification.
+- Current Task: T074 Profile-scoped favorites.
+- Last Completed Task: T073 Home empty states.
+- Next Planned Task: T074 Profile-scoped favorites.
 - Critical completed task this phase: T037 Profile-scoped data migration.
 
 ## Implemented design system (`src/constants/theme.ts`)

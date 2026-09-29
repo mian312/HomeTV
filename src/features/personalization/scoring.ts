@@ -52,7 +52,7 @@ export function scoreChannel(channel: Channel, model: PersonalizationModel): Cha
   return { score, reasons };
 }
 
-export function sortChannelsByScore(channels: Channel[], model: PersonalizationModel): Channel[] {
+export function sortChannelsByScore(channels: readonly Channel[], model: PersonalizationModel): Channel[] {
   const scored = channels.map(c => ({ channel: c, scoreInfo: scoreChannel(c, model) }));
   scored.sort((a, b) => {
     // Primary sort: descending by score

@@ -12,11 +12,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { ChannelCard, ErrorView, HorizontalList, LoadingView } from '@/components/ui';
+import { ErrorView, LoadingView } from '@/components/ui';
 import { ChannelLogo } from '@/components/ui/channel-logo';
 import { BottomTabInset, Radius, Spacing } from '@/constants/theme';
 import { useChannels } from '@/data/queries/iptv';
 import { useTheme } from '@/hooks/use-theme';
+import { usePersonalizationModel, resolveHomeSections, sortChannelsByScore } from '@/features/personalization';
+import { HomeSectionRenderer } from '@/features/personalization/ui/HomeSectionRenderer';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const HERO_HEIGHT = 280;
@@ -24,29 +26,23 @@ const HERO_HEIGHT = 280;
 export default function HomeScreen() {
   const router = useRouter();
   const { colors } = useTheme();
-  const { data: channels, isLoading, isError, refetch } = useChannels();
+  const { data: channels, isLoading: isChannelsLoading, isError, refetch } = useChannels();
+  const { data: model, isLoading: isModelLoading } = usePersonalizationModel();
 
-  const featured = useMemo(() => channels?.slice(0, 12) ?? [], [channels]);
-  const heroChannel = useMemo(() => channels?.[0] ?? null, [channels]);
-  const news = useMemo(
-    () => channels?.filter((c) => c.categories.includes('news' as any)).slice(0, 12) ?? [],
-    [channels],
-  );
-  const sports = useMemo(
-    () => channels?.filter((c) => c.categories.includes('sports' as any)).slice(0, 12) ?? [],
-    [channels],
-  );
-  const entertainment = useMemo(
-    () => channels?.filter((c) => c.categories.includes('entertainment' as any)).slice(0, 12) ?? [],
-    [channels],
-  );
-  const music = useMemo(
-    () => channels?.filter((c) => c.categories.includes('music' as any)).slice(0, 12) ?? [],
-    [channels],
-  );
+  const heroChannel = useMemo(() => {
+    if (!channels || channels.length === 0) return null;
+    if (!model) return channels[0];
+    // T068: Hero channel is the #1 recommended channel
+    return sortChannelsByScore(channels, model)[0] ?? channels[0];
+  }, [channels, model]);
 
-  if (isLoading) {
-    return <LoadingView message="Loading channels..." />;
+  const sections = useMemo(() => {
+    if (!model) return [];
+    return resolveHomeSections(model);
+  }, [model]);
+
+  if (isChannelsLoading || isModelLoading) {
+    return <LoadingView message="Loading personalized home..." />;
   }
 
   if (isError) {
@@ -111,48 +107,14 @@ export default function HomeScreen() {
 
           {/* ── Sections ── */}
           <View style={styles.sectionsContainer}>
-            <HorizontalList
-              title="Featured Channels"
-              data={featured}
-              keyExtractor={(item) => item.id}
-              renderItem={({ item }) => <ChannelCard channel={item} />}
-            />
-
-            {sports.length > 0 && (
-              <HorizontalList
-                title="Sports"
-                data={sports}
-                keyExtractor={(item) => item.id}
-                renderItem={({ item }) => <ChannelCard channel={item} />}
+            {model && channels && sections.map((descriptor, index) => (
+              <HomeSectionRenderer
+                key={`${descriptor.type}-${index}`}
+                descriptor={descriptor}
+                channels={channels}
+                model={model}
               />
-            )}
-
-            {news.length > 0 && (
-              <HorizontalList
-                title="News"
-                data={news}
-                keyExtractor={(item) => item.id}
-                renderItem={({ item }) => <ChannelCard channel={item} />}
-              />
-            )}
-
-            {entertainment.length > 0 && (
-              <HorizontalList
-                title="Entertainment"
-                data={entertainment}
-                keyExtractor={(item) => item.id}
-                renderItem={({ item }) => <ChannelCard channel={item} />}
-              />
-            )}
-
-            {music.length > 0 && (
-              <HorizontalList
-                title="Music"
-                data={music}
-                keyExtractor={(item) => item.id}
-                renderItem={({ item }) => <ChannelCard channel={item} />}
-              />
-            )}
+            ))}
           </View>
         </ScrollView>
       </SafeAreaView>
