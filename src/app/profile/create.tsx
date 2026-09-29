@@ -4,25 +4,36 @@
  */
 
 import React, { useState } from 'react';
-import { View, StyleSheet, Alert } from 'react-native';
+import { View, StyleSheet, Alert, Switch } from 'react-native';
 import { router } from 'expo-router';
 
 import { useTheme } from '@/hooks/use-theme';
 import { Button, Input } from '@/components/ui';
 import { ThemedText } from '@/components/themed-text';
+import { PIN_LENGTH } from '@/features/profile/pin-authenticator';
+import { profileAuthenticator } from '@/features/profile/secure-store-authenticator';
 import { profileRepository } from '@/data/repositories';
+import { useSessionStore } from '@/stores/session';
 
 export default function ProfileCreateScreen() {
   const { colors, spacing, radius } = useTheme();
+  const boot = useSessionStore((s) => s.boot);
   
   const [name, setName] = useState('');
   const [avatarKey, setAvatarKey] = useState('');
+  const [pinEnabled, setPinEnabled] = useState(false);
+  const [pin, setPin] = useState('');
   const [loading, setLoading] = useState(false);
 
   async function handleCreate() {
     const trimmedName = name.trim();
     if (!trimmedName) {
       Alert.alert('Name required', 'Please enter a profile name.');
+      return;
+    }
+    
+    if (pinEnabled && pin.length !== PIN_LENGTH) {
+      Alert.alert('Invalid PIN', `PIN must be exactly ${PIN_LENGTH} digits.`);
       return;
     }
     
@@ -34,10 +45,22 @@ export default function ProfileCreateScreen() {
         avatarKey: finalAvatarKey
       });
       
+      if (pinEnabled) {
+        const setResult = await profileAuthenticator.set(profile.id, pin);
+        if (setResult.status !== 'success') {
+          await profileRepository.delete(profile.id);
+          Alert.alert('Error', 'Failed to set PIN. Profile creation aborted.');
+          setLoading(false);
+          return;
+        }
+        await profileRepository.setPinEnabled(profile.id, true);
+      }
+      
       // Navigate to onboarding flow
       router.replace(`/profile/onboarding?id=${profile.id}` as any);
-    } catch {
-      Alert.alert('Error', 'Could not create profile. Please try again.');
+    } catch (e) {
+      console.error('Profile creation error:', e);
+      Alert.alert('Error', `Could not create profile. ${e instanceof Error ? e.message : String(e)}`);
       setLoading(false);
     }
   }
@@ -76,10 +99,33 @@ export default function ProfileCreateScreen() {
           containerStyle={styles.input}
         />
 
+        <View style={styles.switchRow}>
+          <ThemedText variant="body">Require PIN to access</ThemedText>
+          <Switch
+            value={pinEnabled}
+            onValueChange={setPinEnabled}
+            trackColor={{ false: colors.border, true: colors.primary }}
+            thumbColor={colors.surface}
+          />
+        </View>
+
+        {pinEnabled && (
+          <Input
+            label="PIN"
+            placeholder={`${PIN_LENGTH}-digit PIN`}
+            value={pin}
+            onChangeText={setPin}
+            keyboardType="numeric"
+            secureTextEntry
+            maxLength={PIN_LENGTH}
+            containerStyle={styles.input}
+          />
+        )}
+
         <View style={[styles.actions, { marginTop: spacing.xl }]}>
           <Button
             onPress={() => void handleCreate()}
-            disabled={loading || name.trim().length === 0}
+            disabled={loading || name.trim().length === 0 || (pinEnabled && pin.length !== PIN_LENGTH)}
             loading={loading}
             style={styles.button}
           >
@@ -115,6 +161,12 @@ const styles = StyleSheet.create({
   },
   avatarText: { fontSize: 40 },
   input: { marginBottom: 16 },
+  switchRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
   actions: { alignItems: 'center' },
   button: { alignSelf: 'stretch', marginBottom: 12 },
   cancelButton: { alignSelf: 'stretch' },
