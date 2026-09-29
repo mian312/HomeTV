@@ -12,6 +12,10 @@ jest.mock('@/data/repositories', () => ({
   recentlyWatchedRepository: {},
 }));
 
+jest.mock('@/stores/session', () => ({
+  useSessionStore: (selector: any) => selector({ activeProfile: { id: 'mock-profile-id' } }),
+}));
+
 const mockGetAllFavorites = jest.mocked(favoritesRepository.getAll);
 
 describe('useIsFavorite', () => {

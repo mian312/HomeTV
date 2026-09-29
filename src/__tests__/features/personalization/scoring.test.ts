@@ -1,5 +1,5 @@
 import { scoreChannel, sortChannelsByScore } from '@/features/personalization/scoring';
-import type { Channel } from '@/types/domain';
+import type { Channel, ChannelId, CountryCode, LanguageCode, CategoryId } from '@/types/domain';
 import type { PersonalizationModel } from '@/features/personalization/model';
 
 describe('Local recommendation scoring', () => {
@@ -8,12 +8,12 @@ describe('Local recommendation scoring', () => {
     preferredLanguages: new Set(['eng']),
     preferredCategories: new Set(['news']),
     preferredHomeSections: ['favorites', 'recently-watched', 'categories'],
-    favorites: new Set(['chan1']),
-    recentChannels: ['chan2']
+    favorites: new Set(['chan1' as ChannelId]),
+    recentChannels: ['chan2' as ChannelId]
   };
 
   const createChannel = (id: string, name: string, country: string | null, languages: string[], categories: string[]): Channel => ({
-    id, name, country, languages, categories, isAdult: false, streamUrl: 'http://test'
+    id: id as ChannelId, name, country: country as CountryCode | null, languages: languages as unknown as LanguageCode[], categories: categories as unknown as CategoryId[], streamUrl: 'http://test'
   });
 
   const c1 = createChannel('chan1', 'A', 'uk', ['eng'], []); // Fav (100) + Lang (20) = 120

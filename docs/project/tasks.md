@@ -90,11 +90,11 @@ V2 adds multi-profile support and local personalization. `Phase` continues the V
 | T071 | 14 | Preferred Category sections | One section is generated per preferred category, bounded to keep Home render cost predictable | COMPLETED | Implemented in `HomeSectionRenderer.tsx` | `tsc --noEmit` ✓, `expo lint` ✓ | | See Git history | |
 | T072 | 14 | Dynamic Home section ordering | The user's preferred section order wins and remaining sections follow the default order | COMPLETED | Implemented in `home-sections.ts` | `tsc --noEmit` ✓, `expo lint` ✓ | | See Git history | |
 | T073 | 14 | Home empty states | Each personalized section has an explicit empty state instead of collapsing the screen | COMPLETED | Added `ListEmptyComponent` in `HomeSectionRenderer.tsx` | `tsc --noEmit` ✓, `expo lint` ✓ | | See Git history | |
-| T074 | 15 | Profile-scoped favorites | Favorites read and write only for the active profile, completing the scoping introduced in T034/T037 | TODO | | | | | Redefined from a re-implementation task. T034 and T037 already create the profile-scoped reality; this task finishes and verifies the feature layer. |
-| T075 | 15 | Profile-scoped recently watched | History is scoped per profile, including the 20-entry cap applied per profile rather than globally | TODO | | | | | |
-| T076 | 15 | Profile-scoped playlists | Playlists and their items are scoped per profile, with cascade delete proven to touch only the owning profile | TODO | | | | | |
-| T077 | 15 | Profile-scoped saved data | Remaining persisted data is confirmed scoped or intentionally global; theme mode stays application-global | TODO | | | | | |
-| T078 | 15 | Verify profile isolation | Tests prove one profile cannot read another's favorites, history, or playlists | TODO | | | | | The gating task for Phase 15. Covers both SQL scoping and the profile-scoped TanStack Query cache. |
+| T074 | 15 | Profile-scoped favorites | Favorites read and write only for the active profile, completing the scoping introduced in T034/T037 | COMPLETED | Updated FavoritesRepository and local queries | | | See Git history | Redefined from a re-implementation task. T034 and T037 already create the profile-scoped reality; this task finishes and verifies the feature layer. |
+| T075 | 15 | Profile-scoped recently watched | History is scoped per profile, including the 20-entry cap applied per profile rather than globally | COMPLETED | Updated RecentlyWatchedRepository | | | See Git history | |
+| T076 | 15 | Profile-scoped playlists | Playlists and their items are scoped per profile, with cascade delete proven to touch only the owning profile | COMPLETED | Updated PlaylistRepository and local queries | | | See Git history | |
+| T077 | 15 | Profile-scoped saved data | Remaining persisted data is confirmed scoped or intentionally global; theme mode stays application-global | COMPLETED | Verified SettingsRepository remains global | | | See Git history | |
+| T078 | 15 | Verify profile isolation | Tests prove one profile cannot read another's favorites, history, or playlists | COMPLETED | Added profile-isolation.test.ts | | | See Git history | The gating task for Phase 15. Covers both SQL scoping and the profile-scoped TanStack Query cache. |
 | T079 | 16 | Personalized Browse defaults | Browse renders the T063 defaults with filter chips that show active state and a reset affordance | TODO | | | | | Split from T063. Presentation only. |
 | T080 | 16 | Country filter UX | Country filtering is operable, labeled, and accessible from the existing filter row | TODO | | | | | |
 | T081 | 16 | Language filter UX | Language filtering is operable, labeled, and accessible | TODO | | | | | |
@@ -143,11 +143,11 @@ V2 adds multi-profile support and local personalization. `Phase` continues the V
 ## Current Checkpoint
 
 - **Current Version:** V2 — Profiles & Personalization.
-- **Current Phase:** 12 — Profile Onboarding & Content Preferences.
-- **Current Task:** T056 Home section preferences.
-- **Last Completed Task:** T055 Category preferences.
+- **Current Phase:** 16 — Personalized Browse Defaults & Filters.
+- **Current Task:** T079 Personalized Browse defaults.
+- **Last Completed Task:** T078 Verify profile isolation.
 - **Last Commit:** See Git history.
-- **Next Task:** T056 Home section preferences.
+- **Next Task:** T079 Personalized Browse defaults.
 - **Known Issues:**
   - Physical device validation (T030, T102, T103) is blocked by environment constraints.
   - T100/T101 migration tests assert SQL call patterns only; runtime proof deferred to device validation.

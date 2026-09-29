@@ -27,8 +27,8 @@ export async function buildPersonalizationModel(profileId: ProfileId): Promise<P
     preferenceRepository.get<string[]>(profileId, 'languages'),
     preferenceRepository.get<string[]>(profileId, 'categories'),
     preferenceRepository.get<string[]>(profileId, 'home_sections'),
-    favoritesRepository.getAll(),
-    recentlyWatchedRepository.getAll()
+    favoritesRepository.getAll(profileId),
+    recentlyWatchedRepository.getAll(profileId)
   ]);
 
   return {

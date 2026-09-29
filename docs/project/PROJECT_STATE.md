@@ -16,11 +16,11 @@ This is a verified implementation snapshot. `tasks.md` is the task/history recor
 ## Current milestone and next task
 
 - Current Version: V2 — Profiles & Personalization.
-- Current Phase: 15 — Profile Scoping Verification.
-- Current Task: T074 Profile-scoped favorites.
-- Last Completed Task: T073 Home empty states.
-- Next Planned Task: T074 Profile-scoped favorites.
-- Critical completed task this phase: T037 Profile-scoped data migration.
+- **Current Phase**: 16 — Personalized Browse Defaults & Filters.
+- **Current Task**: T079 Personalized Browse defaults.
+- **Last Completed Task**: T078 Verify profile isolation.
+- **Next Planned Task**: T079 Personalized Browse defaults.
+- **Critical completed task this phase**: T078 Verify profile isolation.
 
 ## Implemented design system (`src/constants/theme.ts`)
 
@@ -232,7 +232,7 @@ Recorded here so the next session does not have to reconstruct the plan from `ta
 - **6 pre-existing test failures** in `channel-card.test.tsx` and `ui-components.test.tsx` caused by the `feat: modern OTT UI overhaul` commit changing accessibility labels and rendered text. These tests need selectors updated to match the new UI — they are NOT caused by V2 work.
 - V2 migration tests (T100/T101) assert SQL call patterns, not real execution. Migration runtime correctness requires device validation (T102/T103).
 - Profile route strings in `router.replace()` are cast with `as any` because Expo Router's typed routes haven't been regenerated yet to include the new `/profile/*` routes.
-- T095 (profile isolation tests) depends on T074–T076 repository scoping completion.
+- T095 (profile isolation tests) is effectively completed/superseded by T078.
 
 ## Recovery checklist
 

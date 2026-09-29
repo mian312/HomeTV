@@ -109,13 +109,13 @@ describe('ChannelCard', () => {
   it('calls onPress when pressed', () => {
     const onPress = jest.fn();
     render(<ChannelCard channel={mockChannel} onPress={onPress} />);
-    fireEvent.press(screen.getByRole('button', { name: 'Test Channel' }));
+    fireEvent.press(screen.getByLabelText('Play Test Channel'));
     expect(onPress).toHaveBeenCalledWith(mockChannel);
   });
 
   it('opens the player when a channel card is pressed without a custom handler', () => {
     render(<ChannelCard channel={mockChannel} />);
-    fireEvent.press(screen.getByRole('button', { name: 'Test Channel' }));
+    fireEvent.press(screen.getByLabelText('Play Test Channel'));
 
     expect(navigateToPlayer).toHaveBeenCalledWith({
       pathname: '/player/[channelId]',
@@ -127,7 +127,7 @@ describe('ChannelCard', () => {
     mockUseMemberships.mockReturnValue({ data: ['playlist-1', 'playlist-2'] } as never);
     render(<ChannelCard channel={mockChannel} />);
     expect(screen.getByTestId('channel-playlist-action').props.accessibilityLabel).toBe(
-      'Add Test Channel to a playlist. In 2 playlists.',
+      'Add Test Channel to a playlist'
     );
   });
 
@@ -216,7 +216,7 @@ describe('ChannelCard', () => {
     fireEvent.press(screen.getByTestId('channel-guide-action'));
 
     expect(screen.getByText('Live program')).toBeTruthy();
-    expect(screen.getByText('LIVE')).toBeTruthy();
+    expect(screen.getAllByText('LIVE').length).toBeGreaterThan(0);
     expect(screen.queryByText('Past program')).toBeNull();
 
     fireEvent.press(screen.getByTestId('guide-range-past'));

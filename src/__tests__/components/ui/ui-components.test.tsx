@@ -40,12 +40,12 @@ describe('SectionHeader', () => {
 
   it('renders "See all" when onSeeAll is provided', () => {
     render(<SectionHeader title="Sports" onSeeAll={() => {}} />);
-    expect(screen.getByText('See all')).toBeTruthy();
+    expect(screen.getByText('See all ›')).toBeTruthy();
   });
 
   it('does not render "See all" when onSeeAll is absent', () => {
     render(<SectionHeader title="Sports" />);
-    expect(screen.queryByText('See all')).toBeNull();
+    expect(screen.queryByText('See all ›')).toBeNull();
   });
 
   it('calls onSeeAll when pressed', () => {
@@ -57,7 +57,7 @@ describe('SectionHeader', () => {
 
   it('renders custom seeAllLabel', () => {
     render(<SectionHeader title="Top" seeAllLabel="View more" onSeeAll={() => {}} />);
-    expect(screen.getByText('View more')).toBeTruthy();
+    expect(screen.getByText('View more ›')).toBeTruthy();
   });
 });
 

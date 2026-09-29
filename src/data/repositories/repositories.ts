@@ -25,16 +25,16 @@ import type {
 
 export interface FavoritesRepository {
   /** Add an entity to favorites. No-op if already present. */
-  add(ref: EntityRef): Promise<void>;
+  add(profileId: ProfileId, ref: EntityRef): Promise<void>;
 
   /** Remove an entity from favorites. No-op if not present. */
-  remove(ref: EntityRef): Promise<void>;
+  remove(profileId: ProfileId, ref: EntityRef): Promise<void>;
 
   /** Check whether an entity is a favorite. */
-  isFavorite(ref: EntityRef): Promise<boolean>;
+  isFavorite(profileId: ProfileId, ref: EntityRef): Promise<boolean>;
 
   /** Return all favorites, most recent first. */
-  getAll(): Promise<readonly Favorite[]>;
+  getAll(profileId: ProfileId): Promise<readonly Favorite[]>;
 }
 
 // ---------------------------------------------------------------------------
@@ -47,13 +47,13 @@ export interface RecentlyWatchedRepository {
    * If the entity already exists, its timestamp is updated and it moves to
    * the top. The list is capped at 20 entries — the oldest is trimmed.
    */
-  record(ref: EntityRef): Promise<void>;
+  record(profileId: ProfileId, ref: EntityRef): Promise<void>;
 
   /** Return the recently-watched list, most recent first. */
-  getAll(): Promise<readonly RecentlyWatchedEntry[]>;
+  getAll(profileId: ProfileId): Promise<readonly RecentlyWatchedEntry[]>;
 
   /** Clear the entire history. */
-  clear(): Promise<void>;
+  clear(profileId: ProfileId): Promise<void>;
 }
 
 // ---------------------------------------------------------------------------
@@ -62,28 +62,28 @@ export interface RecentlyWatchedRepository {
 
 export interface PlaylistRepository {
   /** Create a new playlist and return it. */
-  create(name: string): Promise<Playlist>;
+  create(profileId: ProfileId, name: string): Promise<Playlist>;
 
   /** Rename an existing playlist. */
-  rename(playlistId: string, name: string): Promise<void>;
+  rename(profileId: ProfileId, playlistId: string, name: string): Promise<void>;
 
   /** Delete a playlist and all its items. */
-  delete(playlistId: string): Promise<void>;
+  delete(profileId: ProfileId, playlistId: string): Promise<void>;
 
   /** Return all playlists, ordered by most recently updated. */
-  getAll(): Promise<readonly Playlist[]>;
+  getAll(profileId: ProfileId): Promise<readonly Playlist[]>;
 
   /** Return a single playlist by ID, or null if not found. */
-  getById(playlistId: string): Promise<Playlist | null>;
+  getById(profileId: ProfileId, playlistId: string): Promise<Playlist | null>;
 
   /** Add an entity to a playlist. */
-  addItem(playlistId: string, ref: EntityRef): Promise<void>;
+  addItem(profileId: ProfileId, playlistId: string, ref: EntityRef): Promise<void>;
 
   /** Remove an entity from a playlist. */
-  removeItem(playlistId: string, ref: EntityRef): Promise<void>;
+  removeItem(profileId: ProfileId, playlistId: string, ref: EntityRef): Promise<void>;
 
   /** Return all items in a playlist, in order. */
-  getItems(playlistId: string): Promise<readonly PlaylistItem[]>;
+  getItems(profileId: ProfileId, playlistId: string): Promise<readonly PlaylistItem[]>;
 }
 
 // ---------------------------------------------------------------------------

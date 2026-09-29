@@ -1,7 +1,6 @@
-import React from 'react';
-import { render, screen } from '@testing-library/react-native';
 import { HeroCarousel } from '@/components/ui/hero-carousel';
-import type { Channel } from '@/types/domain';
+import type { CategoryId, Channel, ChannelId, CountryCode, LanguageCode } from '@/types/domain';
+import { render, screen } from '@testing-library/react-native';
 
 // Mock expo-router
 jest.mock('expo-router', () => ({
@@ -18,8 +17,8 @@ jest.mock('expo-image', () => {
 
 describe('HeroCarousel', () => {
   const createChannel = (id: string, name: string): Channel => ({
-    id, name, country: 'us', languages: ['eng'], categories: ['news'], isAdult: false, streamUrl: 'http://test'
-  });
+    id: id as ChannelId, name, country: 'us' as CountryCode, languages: ['eng'] as unknown as LanguageCode[], categories: ['news'] as unknown as CategoryId[]
+  } as unknown as Channel);
 
   it('renders nothing when channels array is empty', () => {
     const { toJSON } = render(<HeroCarousel channels={[]} />);

@@ -1,18 +1,18 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 import * as Crypto from 'expo-crypto';
 
-import type { EntityRef, Playlist, PlaylistItem } from '@/types/domain';
+import type { EntityRef, Playlist, PlaylistItem, ProfileId } from '@/types/domain';
 import type { PlaylistRepository } from './repositories';
 
 export class SqlitePlaylistRepository implements PlaylistRepository {
   constructor(private db: SQLiteDatabase) {}
 
-  async create(name: string): Promise<Playlist> {
+  async create(profileId: ProfileId, name: string): Promise<Playlist> {
     const id = Crypto.randomUUID();
     const now = Date.now();
     await this.db.runAsync(
-      'INSERT INTO playlists (id, name, created_at, updated_at) VALUES (?, ?, ?, ?)',
-      [id, name, now, now],
+      'INSERT INTO playlists (id, profile_id, name, created_at, updated_at) VALUES (?, ?, ?, ?, ?)',
+      [id, profileId, name, now, now],
     );
 
     return {
@@ -23,26 +23,27 @@ export class SqlitePlaylistRepository implements PlaylistRepository {
     };
   }
 
-  async rename(playlistId: string, name: string): Promise<void> {
-    await this.db.runAsync('UPDATE playlists SET name = ?, updated_at = ? WHERE id = ?', [
+  async rename(profileId: ProfileId, playlistId: string, name: string): Promise<void> {
+    await this.db.runAsync('UPDATE playlists SET name = ?, updated_at = ? WHERE id = ? AND profile_id = ?', [
       name,
       Date.now(),
       playlistId,
+      profileId,
     ]);
   }
 
-  async delete(playlistId: string): Promise<void> {
+  async delete(profileId: ProfileId, playlistId: string): Promise<void> {
     // ON DELETE CASCADE will handle playlist_items
-    await this.db.runAsync('DELETE FROM playlists WHERE id = ?', [playlistId]);
+    await this.db.runAsync('DELETE FROM playlists WHERE id = ? AND profile_id = ?', [playlistId, profileId]);
   }
 
-  async getAll(): Promise<readonly Playlist[]> {
+  async getAll(profileId: ProfileId): Promise<readonly Playlist[]> {
     const rows = await this.db.getAllAsync<{
       id: string;
       name: string;
       created_at: number;
       updated_at: number;
-    }>('SELECT * FROM playlists ORDER BY updated_at DESC');
+    }>('SELECT * FROM playlists WHERE profile_id = ? ORDER BY updated_at DESC', [profileId]);
 
     return rows.map((row) => ({
       id: row.id,
@@ -52,13 +53,13 @@ export class SqlitePlaylistRepository implements PlaylistRepository {
     }));
   }
 
-  async getById(playlistId: string): Promise<Playlist | null> {
+  async getById(profileId: ProfileId, playlistId: string): Promise<Playlist | null> {
     const row = await this.db.getFirstAsync<{
       id: string;
       name: string;
       created_at: number;
       updated_at: number;
-    }>('SELECT * FROM playlists WHERE id = ?', [playlistId]);
+    }>('SELECT * FROM playlists WHERE id = ? AND profile_id = ?', [playlistId, profileId]);
 
     if (!row) return null;
 
@@ -70,7 +71,10 @@ export class SqlitePlaylistRepository implements PlaylistRepository {
     };
   }
 
-  async addItem(playlistId: string, ref: EntityRef): Promise<void> {
+  async addItem(profileId: ProfileId, playlistId: string, ref: EntityRef): Promise<void> {
+    const playlist = await this.getById(profileId, playlistId);
+    if (!playlist) return;
+
     const maxPosRow = await this.db.getFirstAsync<{ max_pos: number | null }>(
       'SELECT MAX(position) as max_pos FROM playlist_items WHERE playlist_id = ?',
       [playlistId],
@@ -88,7 +92,10 @@ export class SqlitePlaylistRepository implements PlaylistRepository {
     });
   }
 
-  async removeItem(playlistId: string, ref: EntityRef): Promise<void> {
+  async removeItem(profileId: ProfileId, playlistId: string, ref: EntityRef): Promise<void> {
+    const playlist = await this.getById(profileId, playlistId);
+    if (!playlist) return;
+
     await this.db.withTransactionAsync(async () => {
       await this.db.runAsync(
         'DELETE FROM playlist_items WHERE playlist_id = ? AND entity_type = ? AND entity_id = ?',
@@ -101,7 +108,10 @@ export class SqlitePlaylistRepository implements PlaylistRepository {
     });
   }
 
-  async getItems(playlistId: string): Promise<readonly PlaylistItem[]> {
+  async getItems(profileId: ProfileId, playlistId: string): Promise<readonly PlaylistItem[]> {
+    const playlist = await this.getById(profileId, playlistId);
+    if (!playlist) return [];
+
     const rows = await this.db.getAllAsync<{
       playlist_id: string;
       entity_type: string;

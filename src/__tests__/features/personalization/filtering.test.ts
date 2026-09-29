@@ -1,10 +1,10 @@
 import { filterChannels } from '@/features/personalization/filtering';
-import type { Channel } from '@/types/domain';
+import type { Channel, ChannelId, CountryCode, LanguageCode, CategoryId } from '@/types/domain';
 
 describe('Channel filtering helpers', () => {
   const createChannel = (id: string, name: string, country: string | null, languages: string[], categories: string[]): Channel => ({
-    id, name, country, languages, categories, isAdult: false, streamUrl: 'http://test'
-  });
+    id: id as ChannelId, name, country: country as CountryCode | null, languages: languages as unknown as LanguageCode[], categories: categories as unknown as CategoryId[]
+  } as unknown as Channel);
 
   const channels = [
     createChannel('1', 'BBC News', 'uk', ['eng'], ['news']),

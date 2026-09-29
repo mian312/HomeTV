@@ -6,7 +6,7 @@ import { ThemedText } from '@/components/themed-text';
 import { Radius, Spacing } from '@/constants/theme';
 import type { Channel } from '@/types/domain';
 import type { HomeSectionDescriptor, PersonalizationModel } from '../index';
-import { sortChannelsByScore } from '../scoring';
+import { scoreChannel } from '../scoring';
 
 interface HomeSectionRendererProps {
   descriptor: HomeSectionDescriptor;
@@ -30,8 +30,22 @@ export function HomeSectionRenderer({ descriptor, channels, model }: HomeSection
           .filter((c): c is Channel => c !== undefined);
 
       case 'recommended': {
-        const channelsToScore = channels.length > 500 ? channels.slice(0, 500) : channels;
-        return sortChannelsByScore(channelsToScore, model).slice(0, 20);
+        // Exclude channels they already know about
+        const candidates = channels.filter(
+          c => !model.favorites.has(c.id) && !model.recentChannels.includes(c.id)
+        );
+        
+        // Score all remaining channels (Set lookups are fast enough for 10k items)
+        const scored = candidates.map(c => ({ 
+          channel: c, 
+          score: scoreChannel(c, model).score 
+        }));
+        
+        // Sort by score descending
+        scored.sort((a, b) => b.score - a.score);
+        
+        // If there are personalized matches (>0), prefer them. Otherwise fallback to top.
+        return scored.slice(0, 20).map(s => s.channel);
       }
 
       case 'category':

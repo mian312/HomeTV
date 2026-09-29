@@ -1,17 +1,20 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import {
-    favoritesRepository,
-    playlistRepository,
-    recentlyWatchedRepository,
+  favoritesRepository,
+  playlistRepository,
+  recentlyWatchedRepository,
 } from '@/data/repositories';
-import type { EntityRef } from '@/types/domain';
+import { useSessionStore } from '@/stores/session';
+import type { EntityRef, ProfileId } from '@/types/domain';
 
 const KEYS = {
-  favorites: ['local', 'favorites'] as const,
-  recentlyWatched: ['local', 'recentlyWatched'] as const,
-  playlists: ['local', 'playlists'] as const,
-  playlistItems: (playlistId: string) => ['local', 'playlists', playlistId, 'items'] as const,
+  favorites: (profileId: ProfileId) => ['local', 'favorites', profileId] as const,
+  recentlyWatched: (profileId: ProfileId) => ['local', 'recentlyWatched', profileId] as const,
+  playlists: (profileId: ProfileId) => ['local', 'playlists', profileId] as const,
+  playlistItems: (profileId: ProfileId, playlistId: string) => ['local', 'playlists', profileId, playlistId, 'items'] as const,
+  playlistSummaries: (profileId: ProfileId) => ['local', 'playlists', profileId, 'summaries'] as const,
+  playlistMemberships: (profileId: ProfileId) => ['local', 'playlists', profileId, 'memberships'] as const,
 };
 
 // ---------------------------------------------------------------------------
@@ -19,16 +22,20 @@ const KEYS = {
 // ---------------------------------------------------------------------------
 
 export function useFavorites() {
+  const profileId = useSessionStore((state) => state.activeProfile?.id);
   return useQuery({
-    queryKey: KEYS.favorites,
-    queryFn: () => favoritesRepository.getAll(),
+    queryKey: profileId ? KEYS.favorites(profileId) : [],
+    queryFn: () => favoritesRepository.getAll(profileId!),
+    enabled: !!profileId,
   });
 }
 
 export function useIsFavorite(entityRef: EntityRef) {
+  const profileId = useSessionStore((state) => state.activeProfile?.id);
   return useQuery({
-    queryKey: KEYS.favorites,
-    queryFn: () => favoritesRepository.getAll(),
+    queryKey: profileId ? KEYS.favorites(profileId) : [],
+    queryFn: () => favoritesRepository.getAll(profileId!),
+    enabled: !!profileId,
     select: (favorites) =>
       favorites.some(
         (favorite) =>
@@ -40,6 +47,7 @@ export function useIsFavorite(entityRef: EntityRef) {
 
 export function useToggleFavorite() {
   const queryClient = useQueryClient();
+  const profileId = useSessionStore((state) => state.activeProfile?.id);
 
   return useMutation({
     mutationFn: async ({
@@ -49,14 +57,18 @@ export function useToggleFavorite() {
       entityRef: EntityRef;
       isFavorite: boolean;
     }) => {
+      if (!profileId) throw new Error('No active profile');
       if (isFavorite) {
-        await favoritesRepository.remove(entityRef);
+        await favoritesRepository.remove(profileId, entityRef);
       } else {
-        await favoritesRepository.add(entityRef);
+        await favoritesRepository.add(profileId, entityRef);
       }
     },
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: KEYS.favorites });
+    onSuccess: () => {
+      if (profileId) {
+        queryClient.invalidateQueries({ queryKey: KEYS.favorites(profileId) });
+        queryClient.invalidateQueries({ queryKey: ['personalization', profileId] });
+      }
     },
   });
 }
@@ -66,34 +78,46 @@ export function useToggleFavorite() {
 // ---------------------------------------------------------------------------
 
 export function useRecentlyWatched() {
+  const profileId = useSessionStore((state) => state.activeProfile?.id);
   return useQuery({
-    queryKey: KEYS.recentlyWatched,
-    queryFn: () => recentlyWatchedRepository.getAll(),
+    queryKey: profileId ? KEYS.recentlyWatched(profileId) : [],
+    queryFn: () => recentlyWatchedRepository.getAll(profileId!),
+    enabled: !!profileId,
   });
 }
 
 export function useAddRecentlyWatched() {
   const queryClient = useQueryClient();
+  const profileId = useSessionStore((state) => state.activeProfile?.id);
 
   return useMutation({
     mutationFn: async (entityRef: EntityRef) => {
-      await recentlyWatchedRepository.record(entityRef);
+      if (!profileId) return; // Ignore if no profile
+      await recentlyWatchedRepository.record(profileId, entityRef);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: KEYS.recentlyWatched });
+      if (profileId) {
+        queryClient.invalidateQueries({ queryKey: KEYS.recentlyWatched(profileId) });
+        queryClient.invalidateQueries({ queryKey: ['personalization', profileId] });
+      }
     },
   });
 }
 
 export function useClearRecentlyWatched() {
   const queryClient = useQueryClient();
+  const profileId = useSessionStore((state) => state.activeProfile?.id);
 
   return useMutation({
     mutationFn: async () => {
-      await recentlyWatchedRepository.clear();
+      if (!profileId) throw new Error('No active profile');
+      await recentlyWatchedRepository.clear(profileId);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: KEYS.recentlyWatched });
+      if (profileId) {
+        queryClient.invalidateQueries({ queryKey: KEYS.recentlyWatched(profileId) });
+        queryClient.invalidateQueries({ queryKey: ['personalization', profileId] });
+      }
     },
   });
 }
@@ -103,20 +127,23 @@ export function useClearRecentlyWatched() {
 // ---------------------------------------------------------------------------
 
 export function usePlaylists() {
+  const profileId = useSessionStore((state) => state.activeProfile?.id);
   return useQuery({
-    queryKey: KEYS.playlists,
-    queryFn: () => playlistRepository.getAll(),
+    queryKey: profileId ? KEYS.playlists(profileId) : [],
+    queryFn: () => playlistRepository.getAll(profileId!),
+    enabled: !!profileId,
   });
 }
 
 export function usePlaylistSummaries() {
+  const profileId = useSessionStore((state) => state.activeProfile?.id);
   return useQuery({
-    queryKey: [...KEYS.playlists, 'summaries'],
+    queryKey: profileId ? KEYS.playlistSummaries(profileId) : [],
     queryFn: async () => {
-      const playlists = await playlistRepository.getAll();
+      const playlists = await playlistRepository.getAll(profileId!);
       return Promise.all(
         playlists.map(async (playlist) => {
-          const items = await playlistRepository.getItems(playlist.id);
+          const items = await playlistRepository.getItems(profileId!, playlist.id);
           return {
             playlistId: playlist.id,
             channelCount: items.length,
@@ -125,51 +152,64 @@ export function usePlaylistSummaries() {
         }),
       );
     },
+    enabled: !!profileId,
   });
 }
 
 export function useCreatePlaylist() {
   const queryClient = useQueryClient();
+  const profileId = useSessionStore((state) => state.activeProfile?.id);
 
   return useMutation({
     mutationFn: async ({ name }: { name: string }) => {
-      return playlistRepository.create(name);
+      if (!profileId) throw new Error('No active profile');
+      return playlistRepository.create(profileId, name);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: KEYS.playlists });
+      if (profileId) {
+        queryClient.invalidateQueries({ queryKey: KEYS.playlists(profileId) });
+      }
     },
   });
 }
 
 export function useDeletePlaylist() {
   const queryClient = useQueryClient();
+  const profileId = useSessionStore((state) => state.activeProfile?.id);
 
   return useMutation({
     mutationFn: async (id: string) => {
-      await playlistRepository.delete(id);
+      if (!profileId) throw new Error('No active profile');
+      await playlistRepository.delete(profileId, id);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: KEYS.playlists });
+      if (profileId) {
+        queryClient.invalidateQueries({ queryKey: KEYS.playlists(profileId) });
+        queryClient.invalidateQueries({ queryKey: KEYS.playlistSummaries(profileId) });
+        queryClient.invalidateQueries({ queryKey: KEYS.playlistMemberships(profileId) });
+      }
     },
   });
 }
 
 export function usePlaylistItems(playlistId: string) {
+  const profileId = useSessionStore((state) => state.activeProfile?.id);
   return useQuery({
-    queryKey: KEYS.playlistItems(playlistId),
-    queryFn: () => playlistRepository.getItems(playlistId),
-    enabled: !!playlistId,
+    queryKey: profileId ? KEYS.playlistItems(profileId, playlistId) : [],
+    queryFn: () => playlistRepository.getItems(profileId!, playlistId),
+    enabled: !!profileId && !!playlistId,
   });
 }
 
 export function useChannelPlaylistMemberships(channelId: string) {
+  const profileId = useSessionStore((state) => state.activeProfile?.id);
   return useQuery({
-    queryKey: [...KEYS.playlists, 'memberships'],
+    queryKey: profileId ? KEYS.playlistMemberships(profileId) : [],
     queryFn: async () => {
-      const playlists = await playlistRepository.getAll();
+      const playlists = await playlistRepository.getAll(profileId!);
       const itemsByPlaylist = await Promise.all(
         playlists.map(async (playlist) => {
-          const items = await playlistRepository.getItems(playlist.id);
+          const items = await playlistRepository.getItems(profileId!, playlist.id);
           return { playlistId: playlist.id, items };
         }),
       );
@@ -184,35 +224,44 @@ export function useChannelPlaylistMemberships(channelId: string) {
       return memberships;
     },
     select: (memberships) => memberships[channelId] ?? [],
+    enabled: !!profileId && !!channelId,
   });
 }
 
 export function useAddPlaylistItem() {
   const queryClient = useQueryClient();
+  const profileId = useSessionStore((state) => state.activeProfile?.id);
 
   return useMutation({
     mutationFn: async ({ playlistId, entityRef }: { playlistId: string; entityRef: EntityRef }) => {
-      await playlistRepository.addItem(playlistId, entityRef);
+      if (!profileId) throw new Error('No active profile');
+      await playlistRepository.addItem(profileId, playlistId, entityRef);
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: KEYS.playlistItems(variables.playlistId) });
-      queryClient.invalidateQueries({ queryKey: [...KEYS.playlists, 'memberships'] });
-      queryClient.invalidateQueries({ queryKey: [...KEYS.playlists, 'summaries'] });
+      if (profileId) {
+        queryClient.invalidateQueries({ queryKey: KEYS.playlistItems(profileId, variables.playlistId) });
+        queryClient.invalidateQueries({ queryKey: KEYS.playlistMemberships(profileId) });
+        queryClient.invalidateQueries({ queryKey: KEYS.playlistSummaries(profileId) });
+      }
     },
   });
 }
 
 export function useRemovePlaylistItem() {
   const queryClient = useQueryClient();
+  const profileId = useSessionStore((state) => state.activeProfile?.id);
 
   return useMutation({
     mutationFn: async ({ playlistId, entityRef }: { playlistId: string; entityRef: EntityRef }) => {
-      await playlistRepository.removeItem(playlistId, entityRef);
+      if (!profileId) throw new Error('No active profile');
+      await playlistRepository.removeItem(profileId, playlistId, entityRef);
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: KEYS.playlistItems(variables.playlistId) });
-      queryClient.invalidateQueries({ queryKey: [...KEYS.playlists, 'memberships'] });
-      queryClient.invalidateQueries({ queryKey: [...KEYS.playlists, 'summaries'] });
+      if (profileId) {
+        queryClient.invalidateQueries({ queryKey: KEYS.playlistItems(profileId, variables.playlistId) });
+        queryClient.invalidateQueries({ queryKey: KEYS.playlistMemberships(profileId) });
+        queryClient.invalidateQueries({ queryKey: KEYS.playlistSummaries(profileId) });
+      }
     },
   });
 }
