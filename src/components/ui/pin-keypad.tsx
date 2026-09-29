@@ -56,7 +56,7 @@ export function PinKeypad({ pin, pinLength, onPinChange, disabled }: PinKeypadPr
       <View style={styles.keypad}>
         {KEYS.map((key, index) => {
           if (key === '') {
-            return <View key={index} style={{ width: 80, height: 80 }} />;
+            return <View key="empty" style={{ width: 80, height: 80 }} />;
           }
 
           return (
