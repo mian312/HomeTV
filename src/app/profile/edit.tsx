@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, StyleSheet, Alert } from 'react-native';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams, useFocusEffect } from 'expo-router';
 
 import { useTheme } from '@/hooks/use-theme';
 import { Button, Input, LoadingView } from '@/components/ui';
@@ -22,22 +22,27 @@ export default function ProfileEditScreen() {
   const [loading, setLoading] = useState(false);
   const [initialising, setInitialising] = useState(true);
 
-  useEffect(() => {
-    if (!id) {
-      router.back();
-      return;
-    }
-    void profileRepository.getById(id as ProfileId).then((p) => {
-      if (p) {
-        setProfile(p);
-        setName(p.name);
-        setAvatarKey(p.avatarKey || '');
-      } else {
+  useFocusEffect(
+    useCallback(() => {
+      if (!id) {
         router.back();
+        return;
       }
-      setInitialising(false);
-    });
-  }, [id]);
+      void profileRepository.getById(id as ProfileId).then((p) => {
+        if (p) {
+          setProfile(p);
+          // Only override inputs on first load to prevent erasing active unsaved edits
+          if (initialising) {
+            setName(p.name);
+            setAvatarKey(p.avatarKey || '');
+            setInitialising(false);
+          }
+        } else {
+          router.back();
+        }
+      });
+    }, [id, initialising])
+  );
 
   async function handleSave() {
     if (!profile) return;
@@ -164,6 +169,36 @@ export default function ProfileEditScreen() {
       >
         <ThemedText variant="button">Cancel</ThemedText>
       </Button>
+
+      <View style={{ marginTop: spacing.xl }}>
+        {profile?.pinEnabled ? (
+          <>
+            <Button
+              variant="outline"
+              onPress={() => router.push(`/profile/pin?id=${profile?.id}&action=change` as any)}
+              disabled={loading}
+              style={{ marginBottom: 12 }}
+            >
+              <ThemedText variant="button">Change PIN</ThemedText>
+            </Button>
+            <Button
+              variant="outline"
+              onPress={() => router.push(`/profile/pin?id=${profile?.id}&action=remove` as any)}
+              disabled={loading}
+            >
+              <ThemedText variant="button">Remove PIN</ThemedText>
+            </Button>
+          </>
+        ) : (
+          <Button
+            variant="outline"
+            onPress={() => router.push(`/profile/pin?id=${profile?.id}&action=setup` as any)}
+            disabled={loading}
+          >
+            <ThemedText variant="button">Set up PIN</ThemedText>
+          </Button>
+        )}
+      </View>
 
       <View style={{ marginTop: spacing.xxl }}>
         <Button

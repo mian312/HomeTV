@@ -17,9 +17,9 @@ This is a verified implementation snapshot. `tasks.md` is the task/history recor
 
 - Current Version: V2 — Profiles & Personalization.
 - Current Phase: 11 — Profile Settings & Personalization.
-- Current Task: T048 Delete profile.
-- Last Completed Task: T047 Edit profile.
-- Next Planned Task: T048 Delete profile.
+- Current Task: T051 Switch profile.
+- Last Completed Task: T050 Remove PIN.
+- Next Planned Task: T051 Switch profile.
 - Critical completed task this phase: T037 Profile-scoped data migration.
 
 ## Implemented design system (`src/constants/theme.ts`)
@@ -209,7 +209,8 @@ Recorded here so the next session does not have to reconstruct the plan from `ta
 - `_layout.tsx` — Stack layout for profile group.
 - `select.tsx` — Profile selector (lists profiles, add button, one-tap switch vs PIN switch).
 - `create.tsx` — Profile creation (name, optional PIN via `SecureStoreAuthenticator`).
-- `edit.tsx` — Profile edit screen (name and avatar modification).
+- `edit.tsx` — Profile edit screen (name and avatar modification, PIN actions, delete profile).
+- `pin.tsx` — Profile PIN management (set up, change, remove PIN flows).
 - `unlock.tsx` — PIN unlock screen with `PinKeypad` and rate-limiting UI feedback.
 - `(tabs)/profile.tsx` — Fourth tab rendering all profiles, current active marker, and switch controls.
 

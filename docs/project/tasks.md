@@ -65,8 +65,8 @@ V2 adds multi-profile support and local personalization. `Phase` continues the V
 | T046 | 11 | Create profile | Name, avatar, and optional PIN can be set; the new profile enters onboarding | COMPLETED | Added Name and PIN setup in `ProfileCreateScreen` (avatar skipped for now) | `tsc --noEmit` ✓, `expo lint` ✓ | | See Git history | |
 | T047 | 11 | Edit profile | Name and avatar can be changed and the change is reflected in the selector and Home immediately | COMPLETED | Created `src/app/profile/edit.tsx`. Uses `useLocalSearchParams` for id. Updates DB and calls `refreshActiveProfile()` | `tsc --noEmit` ✓, `expo lint` ✓ | | See Git history | |
 | T048 | 11 | Delete profile | Deletion is confirmed explicitly, refuses to remove the last remaining profile, and cascades only that profile's scoped data | TODO | | | | | |
-| T049 | 11 | Change PIN | Changing a PIN requires the current PIN and replaces the verifier and metadata together | TODO | | | | | |
-| T050 | 11 | Remove PIN | Removing a PIN requires the current PIN and clears verifier and metadata together | TODO | | | | | |
+| T049 | 11 | Change PIN | Changing a PIN requires the current PIN and replaces the verifier and metadata together | COMPLETED | Implemented in `src/app/profile/pin.tsx` with action `change`. Verifies current, accepts new, updates DB and store | `tsc --noEmit` ✓, `expo lint` ✓ | | See Git history | |
+| T050 | 11 | Remove PIN | Removing a PIN requires the current PIN and clears verifier and metadata together | COMPLETED | Implemented in `src/app/profile/pin.tsx` with action `remove`. Verifies current, removes verifier, updates DB and store | `tsc --noEmit` ✓, `expo lint` ✓ | | See Git history | |
 | T051 | 11 | Switch profile | Switching changes the active profile and drops the previous profile's local query cache | TODO | | | | | |
 | T052 | 12 | Profile onboarding flow | A multi-step flow moves through country, languages, categories, home sections, and PIN, and is skippable after first completion | TODO | | | | | |
 | T053 | 12 | Country selection | Preferred countries are chosen from the provider country list and persisted per profile | TODO | | | | | |
@@ -144,10 +144,10 @@ V2 adds multi-profile support and local personalization. `Phase` continues the V
 
 - **Current Version:** V2 — Profiles & Personalization.
 - **Current Phase:** 11 — Profile Settings & Personalization.
-- **Current Task:** T048 Delete profile.
-- **Last Completed Task:** T047 Edit profile.
+- **Current Task:** T051 Switch profile.
+- **Last Completed Task:** T050 Remove PIN (T048-T050 completed).
 - **Last Commit:** See Git history.
-- **Next Task:** T048 Delete profile.
+- **Next Task:** T051 Switch profile.
 - **Known Issues:**
   - Physical device validation (T030, T102, T103) is blocked by environment constraints.
   - T100/T101 migration tests assert SQL call patterns only; runtime proof deferred to device validation.
