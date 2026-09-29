@@ -12,6 +12,10 @@ import type { ProfileId } from '@/types/domain';
 import { CountryStep } from '@/features/profile/onboarding/CountryStep';
 import { LanguageStep } from '@/features/profile/onboarding/LanguageStep';
 import { CategoryStep } from '@/features/profile/onboarding/CategoryStep';
+import { HomeStep } from '@/features/profile/onboarding/HomeStep';
+import { PinStep } from '@/features/profile/onboarding/PinStep';
+import { profileAuthenticator } from '@/features/profile/secure-store-authenticator';
+import { PIN_LENGTH } from '@/features/profile/pin-authenticator';
 
 type Step = 'welcome' | 'country' | 'language' | 'category' | 'home' | 'pin';
 const STEPS: Step[] = ['welcome', 'country', 'language', 'category', 'home', 'pin'];
@@ -28,6 +32,8 @@ export default function ProfileOnboardingScreen() {
   const [countries, setCountries] = useState<string[]>([]);
   const [languages, setLanguages] = useState<string[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
+  const [homeSections, setHomeSections] = useState<string[]>([]);
+  const [pin, setPin] = useState('');
 
   const currentStep = STEPS[stepIndex];
 
@@ -35,14 +41,25 @@ export default function ProfileOnboardingScreen() {
     if (!id) return;
     setLoading(true);
     try {
+      const profileId = id as ProfileId;
+
       // Save preferences
-      await preferenceRepository.set(id as ProfileId, 'countries', countries);
-      await preferenceRepository.set(id as ProfileId, 'languages', languages);
-      await preferenceRepository.set(id as ProfileId, 'categories', categories);
+      await preferenceRepository.set(profileId, 'countries', countries);
+      await preferenceRepository.set(profileId, 'languages', languages);
+      await preferenceRepository.set(profileId, 'categories', categories);
+      await preferenceRepository.set(profileId, 'home_sections', homeSections);
+
+      // Save PIN if provided
+      if (pin.length === PIN_LENGTH) {
+        const setResult = await profileAuthenticator.set(profileId, pin);
+        if (setResult.status === 'success') {
+          await profileRepository.setPinEnabled(profileId, true);
+        }
+      }
 
       // Mark onboarding complete
-      await profileRepository.setOnboardingCompleted(id as ProfileId, true);
-      const profile = await profileRepository.getById(id as ProfileId);
+      await profileRepository.setOnboardingCompleted(profileId, true);
+      const profile = await profileRepository.getById(profileId);
       
       if (profile) {
         boot({ status: 'ready', profile });
@@ -86,7 +103,7 @@ export default function ProfileOnboardingScreen() {
         {currentStep === 'welcome' && (
           <View style={styles.center}>
             <ThemedText style={{ textAlign: 'center' }}>
-              Let's set up your profile preferences so we can recommend the best content for you.
+              Let&apos;s set up your profile preferences so we can recommend the best content for you.
             </ThemedText>
           </View>
         )}
@@ -103,10 +120,12 @@ export default function ProfileOnboardingScreen() {
           <CategoryStep selectedCategories={categories} onChange={setCategories} />
         )}
 
-        {['home', 'pin'].includes(currentStep) && (
-          <View style={styles.center}>
-            <ThemedText style={{ opacity: 0.7 }}>(Placeholder for {currentStep})</ThemedText>
-          </View>
+        {currentStep === 'home' && (
+          <HomeStep selectedSections={homeSections} onChange={setHomeSections} />
+        )}
+
+        {currentStep === 'pin' && (
+          <PinStep pin={pin} onChange={setPin} />
         )}
       </View>
 

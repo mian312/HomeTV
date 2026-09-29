@@ -35,11 +35,30 @@ export class SqliteProfileRepository implements ProfileRepository {
     const id = Crypto.randomUUID() as ProfileId;
     const now = new Date().toISOString();
 
-    await this.db.runAsync(
-      `INSERT INTO profiles (id, name, avatar_key, pin_enabled, onboarding_completed, created_at, updated_at)
-       VALUES (?, ?, ?, 0, 0, ?, ?)`,
-      [id, params.name, params.avatarKey ?? null, now, now],
-    );
+    // Workaround: older Android SQLite (<3.35) cannot DROP COLUMN, so we must satisfy legacy NOT NULLs if they exist.
+    const tableInfo = await this.db.getAllAsync<{ name: string }>('PRAGMA table_info(profiles)');
+    const hasInitials = tableInfo.some((c) => c.name === 'avatar_initials');
+    const hasColorToken = tableInfo.some((c) => c.name === 'avatar_color_token');
+
+    let query = `INSERT INTO profiles (id, name, avatar_key, pin_enabled, onboarding_completed, created_at, updated_at`;
+    let values = `VALUES (?, ?, ?, 0, 0, ?, ?`;
+    const bindParams: any[] = [id, params.name, params.avatarKey ?? null, now, now];
+
+    if (hasInitials) {
+      query += `, avatar_initials`;
+      values += `, ?`;
+      bindParams.push(params.name.charAt(0).toUpperCase() || '?');
+    }
+    if (hasColorToken) {
+      query += `, avatar_color_token`;
+      values += `, ?`;
+      bindParams.push('primary'); // Dummy value
+    }
+
+    query += `)`;
+    values += `)`;
+
+    await this.db.runAsync(`${query} ${values}`, bindParams);
 
     return {
       id,
