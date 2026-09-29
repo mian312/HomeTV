@@ -20,7 +20,7 @@
 
 import { type SQLiteDatabase } from 'expo-sqlite';
 
-const TARGET_VERSION = 4;
+const TARGET_VERSION = 5;
 
 export async function migrateDbIfNeeded(db: SQLiteDatabase): Promise<void> {
   // Enable WAL and foreign keys at every open, not just on creation.
@@ -278,7 +278,18 @@ export async function migrateDbIfNeeded(db: SQLiteDatabase): Promise<void> {
     currentVersion = 4;
   }
 
-  // Future migrations: add `if (currentVersion === 4) { … }` blocks here.
+  // ── Version 4 → 5: Drop avatar_initials if it exists ──────────────────────
+  if (currentVersion === 4) {
+    try {
+      await db.execAsync(`ALTER TABLE profiles DROP COLUMN avatar_initials`);
+    } catch {
+      // Ignore if the column doesn't exist (e.g., fresh installs that skipped V1/V2)
+    }
+    await db.execAsync(`PRAGMA user_version = 5`);
+    currentVersion = 5;
+  }
+
+  // Future migrations: add `if (currentVersion === 5) { … }` blocks here.
   // The final user_version set happens inside each step to allow resuming
   // partial migrations on restart (each step is idempotent via IF NOT EXISTS).
   void currentVersion; // satisfies "variable declared but never read" lint rule.

@@ -69,9 +69,9 @@ V2 adds multi-profile support and local personalization. `Phase` continues the V
 | T050 | 11 | Remove PIN | Removing a PIN requires the current PIN and clears verifier and metadata together | COMPLETED | Implemented in `src/app/profile/pin.tsx` with action `remove`. Verifies current, removes verifier, updates DB and store | `tsc --noEmit` ✓, `expo lint` ✓ | | See Git history | |
 | T051 | 11 | Switch profile | Switching changes the active profile and drops the previous profile's local query cache | COMPLETED | Implemented in `src/lib/providers.tsx` by using `activeProfileId` as dependency for `useMemo` creating `QueryClient` | `tsc --noEmit` ✓, `expo lint` ✓ | | See Git history | |
 | T052 | 12 | Profile onboarding flow | A multi-step flow moves through country, languages, categories, home sections, and PIN, and is skippable after first completion | COMPLETED | Implemented scaffold in `src/app/profile/onboarding.tsx` | `tsc --noEmit` ✓ | | See Git history | UI stubbed; steps to be filled in subsequent tasks |
-| T053 | 12 | Country selection | Preferred countries are chosen from the provider country list and persisted per profile | TODO | | | | | |
-| T054 | 12 | Language preferences | Preferred languages are multi-selected and persisted per profile | TODO | | | | | |
-| T055 | 12 | Category preferences | Preferred categories are multi-selected and drive ranking and Home sections | TODO | | | | | |
+| T053 | 12 | Country selection | Preferred countries are chosen from the provider country list and persisted per profile | COMPLETED | Implemented in `CountryStep.tsx` and persisted via `preferenceRepository` | `tsc --noEmit` ✓ | | See Git history | |
+| T054 | 12 | Language preferences | Preferred languages are multi-selected and persisted per profile | COMPLETED | Implemented in `LanguageStep.tsx` and persisted via `preferenceRepository` | `tsc --noEmit` ✓ | | See Git history | |
+| T055 | 12 | Category preferences | Preferred categories are multi-selected and drive ranking and Home sections | COMPLETED | Implemented in `CategoryStep.tsx` and persisted via `preferenceRepository` | `tsc --noEmit` ✓ | | See Git history | |
 | T056 | 12 | Home section preferences | The user chooses which Home sections appear and in what order | TODO | | | | | |
 | T057 | 12 | PIN setup | A PIN can be set during onboarding without preventing later setup from the profile page | TODO | | | | | |
 | T058 | 12 | Onboarding completion state | Completion is persisted per profile and drives the gate; the migrated `Main` profile starts already completed | COMPLETED | Implemented in `session.ts` and `_layout.tsx` | `tsc --noEmit` ✓ | | See Git history | Returning V1 users are not forced back through onboarding over data they already have. |
@@ -144,10 +144,10 @@ V2 adds multi-profile support and local personalization. `Phase` continues the V
 
 - **Current Version:** V2 — Profiles & Personalization.
 - **Current Phase:** 12 — Profile Onboarding & Content Preferences.
-- **Current Task:** T053 Country selection.
-- **Last Completed Task:** T059 Preference repository (T052, T058, T059 completed).
+- **Current Task:** T056 Home section preferences.
+- **Last Completed Task:** T055 Category preferences.
 - **Last Commit:** See Git history.
-- **Next Task:** T053 Country selection.
+- **Next Task:** T056 Home section preferences.
 - **Known Issues:**
   - Physical device validation (T030, T102, T103) is blocked by environment constraints.
   - T100/T101 migration tests assert SQL call patterns only; runtime proof deferred to device validation.
