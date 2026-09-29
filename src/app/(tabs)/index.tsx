@@ -29,11 +29,21 @@ export default function HomeScreen() {
   const { data: channels, isLoading: isChannelsLoading, isError, refetch } = useChannels();
   const { data: model, isLoading: isModelLoading } = usePersonalizationModel();
 
-  const heroChannel = useMemo(() => {
-    if (!channels || channels.length === 0) return null;
-    if (!model) return channels[0];
-    // T068: Hero channel is the #1 recommended channel
-    return sortChannelsByScore(channels, model)[0] ?? channels[0];
+  const filteredChannels = useMemo(() => {
+    if (!channels || channels.length === 0) return [];
+    if (!model) return channels;
+    if (model.preferredCountries.size === 0 && model.preferredLanguages.size === 0) return channels;
+    
+    let result = channels;
+    if (model.preferredCountries.size > 0) {
+      const preferredCountries = Array.from(model.preferredCountries);
+      result = result.filter(c => c.country && preferredCountries.includes(c.country));
+    }
+    if (model.preferredLanguages.size > 0) {
+      const preferredLanguages = Array.from(model.preferredLanguages);
+      result = result.filter(c => c.languages.some(lang => preferredLanguages.includes(lang as any)));
+    }
+    return result;
   }, [channels, model]);
 
   const sections = useMemo(() => {
@@ -56,62 +66,33 @@ export default function HomeScreen() {
           contentContainerStyle={[styles.scrollContent, { paddingBottom: BottomTabInset + Spacing.xxl }]}
           showsVerticalScrollIndicator={false}
         >
-          {/* ── Hero Banner ── */}
-          {heroChannel && (
-            <Pressable
-              onPress={() =>
-                router.push({ pathname: '/player/[channelId]', params: { channelId: heroChannel.id } })
-              }
-              style={styles.heroContainer}
+          {/* ── Active Filters ── */}
+          {model && (model.preferredCountries.size > 0 || model.preferredLanguages.size > 0) && (
+            <ScrollView 
+              horizontal 
+              showsHorizontalScrollIndicator={false} 
+              contentContainerStyle={{ paddingHorizontal: Spacing.lg, paddingBottom: Spacing.lg, gap: Spacing.sm }}
             >
-              <View style={[styles.heroBg, { backgroundColor: colors.backgroundElement }]}>
-                <ChannelLogo
-                  channel={heroChannel}
-                  style={styles.heroLogo}
-                />
-              </View>
-
-              {/* Gradient overlay */}
-              <LinearGradient
-                colors={['transparent', 'rgba(0,0,0,0.5)', colors.background]}
-                locations={[0, 0.55, 1]}
-                style={StyleSheet.absoluteFill}
-              />
-
-              {/* LIVE badge */}
-              <View style={styles.heroContent}>
-                <View style={[styles.liveBadge, { backgroundColor: colors.primary }]}>
-                  <ThemedText style={styles.liveBadgeText}>● LIVE</ThemedText>
+              {Array.from(model.preferredCountries).map(country => (
+                <View key={`country-${country}`} style={[styles.filterBadge, { backgroundColor: colors.backgroundElement, borderColor: colors.primary }]}>
+                  <ThemedText variant="bodySmall">📍 {country.toUpperCase()}</ThemedText>
                 </View>
-                <ThemedText style={styles.heroTitle} numberOfLines={2}>
-                  {heroChannel.name}
-                </ThemedText>
-                <ThemedText style={[styles.heroSubtitle, { color: colors.textSecondary }]} numberOfLines={1}>
-                  {heroChannel.country ?? 'International'} · Live Broadcast
-                </ThemedText>
-
-                <Pressable
-                  onPress={() =>
-                    router.push({ pathname: '/player/[channelId]', params: { channelId: heroChannel.id } })
-                  }
-                  style={({ pressed }) => [
-                    styles.watchNowBtn,
-                    { backgroundColor: colors.primary, opacity: pressed ? 0.8 : 1 },
-                  ]}
-                >
-                  <ThemedText style={styles.watchNowText}>▶  Watch Now</ThemedText>
-                </Pressable>
-              </View>
-            </Pressable>
+              ))}
+              {Array.from(model.preferredLanguages).map(lang => (
+                <View key={`lang-${lang}`} style={[styles.filterBadge, { backgroundColor: colors.backgroundElement, borderColor: colors.primary }]}>
+                  <ThemedText variant="bodySmall">🗣 {lang.toUpperCase()}</ThemedText>
+                </View>
+              ))}
+            </ScrollView>
           )}
 
           {/* ── Sections ── */}
           <View style={styles.sectionsContainer}>
-            {model && channels && sections.map((descriptor, index) => (
+            {model && filteredChannels && sections.map((descriptor, index) => (
               <HomeSectionRenderer
                 key={`${descriptor.type}-${index}`}
                 descriptor={descriptor}
-                channels={channels}
+                channels={filteredChannels}
                 model={model}
               />
             ))}
@@ -199,8 +180,15 @@ const styles = StyleSheet.create({
     letterSpacing: 0.3,
   },
 
-  // Sections
   sectionsContainer: {
     gap: Spacing.lg,
   },
+  filterBadge: {
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.xs,
+    borderRadius: Radius.full,
+    borderWidth: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+  }
 });

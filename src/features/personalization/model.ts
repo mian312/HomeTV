@@ -35,7 +35,7 @@ export async function buildPersonalizationModel(profileId: ProfileId): Promise<P
     preferredCountries: new Set(countries ?? []),
     preferredLanguages: new Set(languages ?? []),
     preferredCategories: new Set(categories ?? []),
-    preferredHomeSections: homeSections ?? ['recently-watched', 'favorites', 'categories'],
+    preferredHomeSections: homeSections ?? ['favorites', 'recently-watched', 'categories'],
     favorites: new Set(favs.filter(f => f.entityRef.entityType === 'channel').map(f => f.entityRef.entityId as ChannelId)),
     recentChannels: recents.filter(r => r.entityRef.entityType === 'channel').map(r => r.entityRef.entityId as ChannelId)
   };

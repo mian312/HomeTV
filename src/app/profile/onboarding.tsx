@@ -1,27 +1,29 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, Alert } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
+import { useQueryClient } from '@tanstack/react-query';
 
 import { useTheme } from '@/hooks/use-theme';
 import { Button, LoadingView } from '@/components/ui';
 import { ThemedText } from '@/components/themed-text';
 import { useSessionStore } from '@/stores/session';
 import { profileRepository, preferenceRepository } from '@/data/repositories';
+import { PERSONALIZATION_QUERY_KEY } from '@/features/personalization';
 import type { ProfileId } from '@/types/domain';
 
 import { CountryStep } from '@/features/profile/onboarding/CountryStep';
 import { LanguageStep } from '@/features/profile/onboarding/LanguageStep';
 import { CategoryStep } from '@/features/profile/onboarding/CategoryStep';
-import { HomeStep } from '@/features/profile/onboarding/HomeStep';
 
-type Step = 'welcome' | 'country' | 'language' | 'category' | 'home';
-const STEPS: Step[] = ['welcome', 'country', 'language', 'category', 'home'];
+type Step = 'welcome' | 'country' | 'language' | 'category';
+const STEPS: Step[] = ['welcome', 'country', 'language', 'category'];
 
 export default function ProfileOnboardingScreen() {
   const { colors, spacing } = useTheme();
   const { id } = useLocalSearchParams<{ id: string }>();
   const boot = useSessionStore((s) => s.boot);
   
+  const queryClient = useQueryClient();
   const [stepIndex, setStepIndex] = useState(0);
   const [loading, setLoading] = useState(false);
 
@@ -29,7 +31,21 @@ export default function ProfileOnboardingScreen() {
   const [countries, setCountries] = useState<string[]>([]);
   const [languages, setLanguages] = useState<string[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
-  const [homeSections, setHomeSections] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (!id) return;
+    const profileId = id as ProfileId;
+    async function loadExisting() {
+      const existingCountries = await preferenceRepository.get<string[]>(profileId, 'countries');
+      const existingLangs = await preferenceRepository.get<string[]>(profileId, 'languages');
+      const existingCats = await preferenceRepository.get<string[]>(profileId, 'categories');
+      
+      if (existingCountries) setCountries(existingCountries);
+      if (existingLangs) setLanguages(existingLangs);
+      if (existingCats) setCategories(existingCats);
+    }
+    void loadExisting();
+  }, [id]);
 
   const currentStep = STEPS[stepIndex];
 
@@ -43,7 +59,8 @@ export default function ProfileOnboardingScreen() {
       await preferenceRepository.set(profileId, 'countries', countries);
       await preferenceRepository.set(profileId, 'languages', languages);
       await preferenceRepository.set(profileId, 'categories', categories);
-      await preferenceRepository.set(profileId, 'home_sections', homeSections);
+
+      queryClient.invalidateQueries({ queryKey: PERSONALIZATION_QUERY_KEY(profileId) });
 
       // Mark onboarding complete
       await profileRepository.setOnboardingCompleted(profileId, true);
@@ -107,7 +124,6 @@ export default function ProfileOnboardingScreen() {
           {currentStep === 'country' && 'Select Countries'}
           {currentStep === 'language' && 'Select Languages'}
           {currentStep === 'category' && 'Select Categories'}
-          {currentStep === 'home' && 'Configure Home'}
         </ThemedText>
 
         {currentStep === 'welcome' && (
@@ -128,10 +144,6 @@ export default function ProfileOnboardingScreen() {
 
         {currentStep === 'category' && (
           <CategoryStep selectedCategories={categories} onChange={setCategories} />
-        )}
-
-        {currentStep === 'home' && (
-          <HomeStep selectedSections={homeSections} onChange={setHomeSections} />
         )}
       </View>
 

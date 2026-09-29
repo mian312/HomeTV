@@ -200,6 +200,16 @@ export default function ProfileEditScreen() {
         )}
       </View>
 
+      <View style={{ marginTop: spacing.xl }}>
+        <Button
+          variant="outline"
+          onPress={() => router.push(`/profile/onboarding?id=${profile?.id}` as any)}
+          disabled={loading}
+        >
+          <ThemedText variant="button">Update Preferences</ThemedText>
+        </Button>
+      </View>
+
       <View style={{ marginTop: spacing.xxl }}>
         <Button
           variant="destructive"

@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { View, StyleSheet } from 'react-native';
 
-import { HorizontalList, ChannelCard } from '@/components/ui';
+import { HorizontalList, ChannelCard, HeroCarousel } from '@/components/ui';
 import { ThemedText } from '@/components/themed-text';
 import { Radius, Spacing } from '@/constants/theme';
 import type { Channel } from '@/types/domain';
@@ -29,8 +29,10 @@ export function HomeSectionRenderer({ descriptor, channels, model }: HomeSection
           .map(id => channels.find(c => c.id === id))
           .filter((c): c is Channel => c !== undefined);
 
-      case 'recommended':
-        return sortChannelsByScore(channels, model).slice(0, 20);
+      case 'recommended': {
+        const channelsToScore = channels.length > 500 ? channels.slice(0, 500) : channels;
+        return sortChannelsByScore(channelsToScore, model).slice(0, 20);
+      }
 
       case 'category':
         return channels.filter(c => c.categories.includes(descriptor.categoryId as any));
@@ -59,6 +61,10 @@ export function HomeSectionRenderer({ descriptor, channels, model }: HomeSection
   // T066: Hide Continue Watching if empty
   if (descriptor.type === 'recently-watched' && data.length === 0) {
     return null;
+  }
+
+  if (descriptor.type === 'recently-watched') {
+    return <HeroCarousel channels={data} />;
   }
 
   return (

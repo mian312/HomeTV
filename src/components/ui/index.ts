@@ -7,6 +7,7 @@
 
 export * from './badge';
 export * from './button';
+export * from './hero-carousel';
 export * from './card';
 export * from './channel-avatar-stack';
 export * from './channel-card';
