@@ -88,7 +88,7 @@ function createMockDb({
 describe('migrateDbIfNeeded', () => {
   describe('T100 — migration plan verification', () => {
     it('sets WAL mode and foreign_keys pragma at connection open', async () => {
-      const db = createMockDb({ userVersion: 2 }); // already up to date
+      const db = createMockDb({ userVersion: 3 }); // already up to date
       await migrateDbIfNeeded(db);
 
       expect(db.execAsync).toHaveBeenCalledWith(expect.stringContaining("journal_mode = 'wal'"));
@@ -96,7 +96,7 @@ describe('migrateDbIfNeeded', () => {
     });
 
     it('exits early when user_version >= TARGET_VERSION', async () => {
-      const db = createMockDb({ userVersion: 2 });
+      const db = createMockDb({ userVersion: 3 });
       await migrateDbIfNeeded(db);
 
       // No migration-specific execAsync calls beyond pragmas
