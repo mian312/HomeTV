@@ -24,10 +24,10 @@ export default function ProfileSelectScreen() {
   }, []);
 
   async function handleSelectProfile(profile: Profile) {
+    // Changing the phase will drop the old profile's cache and let SessionGate handle locked/onboarding transitions.
     switchProfile(profile);
-    if (profile.pinEnabled) {
-      router.replace('/profile/unlock' as any);
-    } else {
+
+    if (!profile.pinEnabled) {
       await profileRepository.saveLastActiveId(profile.id);
       router.replace('/' as any);
     }
