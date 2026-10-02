@@ -16,10 +16,10 @@ This is a verified implementation snapshot. `tasks.md` is the task/history recor
 ## Current milestone and next task
 
 - Current Version: V2 — Profiles & Personalization.
-- **Current Phase**: 17 — Profile UI & Performance Polish.
-- **Current Task**: T086 Profile transitions.
-- **Last Completed Task**: T085 Explicit search override.
-- **Next Planned Task**: T086 Profile transitions.
+- **Current Phase**: 18 — Testing, Validation & Migration Proof.
+- **Current Task**: T095 Profile isolation tests.
+- **Last Completed Task**: T093 Profile performance.
+- **Next Planned Task**: T095 Profile isolation tests.
 - **Critical completed task this phase**: T085 Explicit search override.
 
 ## Implemented design system (`src/constants/theme.ts`)

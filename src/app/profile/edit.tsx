@@ -3,7 +3,7 @@ import { View, StyleSheet, Alert } from 'react-native';
 import { router, useLocalSearchParams, useFocusEffect } from 'expo-router';
 
 import { useTheme } from '@/hooks/use-theme';
-import { Button, Input, LoadingView } from '@/components/ui';
+import { Button, Input, LoadingView, ProfileAvatar } from '@/components/ui';
 import { ThemedText } from '@/components/themed-text';
 import { useSessionStore } from '@/stores/session';
 import { profileRepository } from '@/data/repositories';
@@ -132,6 +132,10 @@ export default function ProfileEditScreen() {
         Edit Profile
       </ThemedText>
 
+      <View style={styles.avatarSection}>
+        <ProfileAvatar name={name || 'Profile'} avatarKey={avatarKey} size={100} />
+      </View>
+
       <Input
         label="Name"
         placeholder="Profile Name"
@@ -226,6 +230,7 @@ export default function ProfileEditScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, justifyContent: 'center' },
   title: { textAlign: 'center', marginBottom: 24 },
+  avatarSection: { alignItems: 'center', marginBottom: 32 },
   input: { marginBottom: 16 },
   button: { alignSelf: 'stretch', marginTop: 8 },
   cancelButton: { alignSelf: 'stretch', marginTop: 16 },

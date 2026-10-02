@@ -8,13 +8,13 @@ import { View, StyleSheet, Alert, Switch } from 'react-native';
 import { router } from 'expo-router';
 
 import { useTheme } from '@/hooks/use-theme';
-import { Button, Input } from '@/components/ui';
+import { Button, Input, ProfileAvatar } from '@/components/ui';
 import { ThemedText } from '@/components/themed-text';
 import { PIN_LENGTH } from '@/features/profile/pin-authenticator';
 import { profileAuthenticator } from '@/features/profile/secure-store-authenticator';
 import { profileRepository } from '@/data/repositories';
 export default function ProfileCreateScreen() {
-  const { colors, spacing, radius } = useTheme();
+  const { colors, spacing } = useTheme();
   
   const [name, setName] = useState('');
   const [avatarKey, setAvatarKey] = useState('');
@@ -70,11 +70,7 @@ export default function ProfileCreateScreen() {
         </ThemedText>
         
         <View style={styles.avatarSection}>
-          <View style={[styles.avatarCircle, { backgroundColor: colors.border, borderRadius: radius.full }]}>
-            <ThemedText variant="headlineLarge" style={styles.avatarText}>
-              {avatarKey || name.charAt(0).toUpperCase() || '?'}
-            </ThemedText>
-          </View>
+          <ProfileAvatar name={name || 'New Profile'} avatarKey={avatarKey} size={100} />
         </View>
 
         <Input
@@ -150,13 +146,6 @@ const styles = StyleSheet.create({
   content: { flex: 1, justifyContent: 'center' },
   title: { textAlign: 'center', marginBottom: 32 },
   avatarSection: { alignItems: 'center', marginBottom: 32 },
-  avatarCircle: {
-    width: 100,
-    height: 100,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  avatarText: { fontSize: 40 },
   input: { marginBottom: 16 },
   switchRow: {
     flexDirection: 'row',

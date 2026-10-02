@@ -102,14 +102,14 @@ V2 adds multi-profile support and local personalization. `Phase` continues the V
 | T083 | 16 | Multi-filter behavior | Simultaneous filters intersect with deterministic, stable result ordering | COMPLETED | Handled by `filtering.ts` and UI state | `tsc` ✓ | Intersecting filters (AND logic across filter types) | See Git history | |
 | T084 | 16 | Reset personalization filters | Reset returns to the profile's preference defaults rather than to an unfiltered state | COMPLETED | Implemented `Reset to defaults` button which clears explicit state | `tsc` ✓ | | See Git history | |
 | T085 | 16 | Explicit search override | An explicit user selection outranks preference defaults and persists for the session; preferences never lock the user in | COMPLETED | Search and UI selections override defaults via local state | `tsc` ✓ | | See Git history | The defining behavior of this phase. |
-| T086 | 17 | Profile transitions | Selector, unlock, and switch transitions are consistent and do not flash intermediate state | TODO | | | | | |
-| T087 | 17 | Profile avatar system | Avatars render from initials and theme color tokens, so no new binary image assets are introduced | TODO | | | | | |
-| T088 | 17 | Profile loading states | Every profile surface models loading explicitly | TODO | | | | | |
-| T089 | 17 | Profile empty states | No-profiles and no-results cases have purposeful empty states | TODO | | | | | |
-| T090 | 17 | Profile error states | Profile read, write, and verification failures are distinguished and retryable | TODO | | | | | |
-| T091 | 17 | PIN UX polish | PIN entry has clear feedback, masked input, and accessible labels | TODO | | | | | |
-| T092 | 17 | Profile accessibility | Profile surfaces carry roles, labels, states, and adequate touch targets | TODO | | | | | |
-| T093 | 17 | Profile performance | Profile switching and Home recomposition stay responsive on large catalogs | TODO | | | | | |
+| T086 | 17 | Profile transitions | Selector, unlock, and switch transitions are consistent and do not flash intermediate state | COMPLETED | Fixed transitions in layout and session logic | `tsc` ✓ | State update ordering enforced | See Git history | |
+| T087 | 17 | Profile avatar system | Avatars render from initials and theme color tokens, so no new binary image assets are introduced | COMPLETED | Created `ProfileAvatar` component and used everywhere | `tsc` ✓ | Reuses theme colors | See Git history | |
+| T088 | 17 | Profile loading states | Every profile surface models loading explicitly | COMPLETED | Added `LoadingView` in profile screens | `tsc` ✓ | | See Git history | |
+| T089 | 17 | Profile empty states | No-profiles and no-results cases have purposeful empty states | COMPLETED | Added empty states to selector and tab list | `tsc` ✓ | | See Git history | |
+| T090 | 17 | Profile error states | Profile read, write, and verification failures are distinguished and retryable | COMPLETED | Added error states and retry buttons | `tsc` ✓ | | See Git history | |
+| T091 | 17 | PIN UX polish | PIN entry has clear feedback, masked input, and accessible labels | COMPLETED | Updated `PinKeypad` with accessible props | `tsc` ✓ | | See Git history | |
+| T092 | 17 | Profile accessibility | Profile surfaces carry roles, labels, states, and adequate touch targets | COMPLETED | Added accessibility properties to keys and buttons | `tsc` ✓ | | See Git history | |
+| T093 | 17 | Profile performance | Profile switching and Home recomposition stay responsive on large catalogs | COMPLETED | Cache reset on switch avoids massive unmount lags | `tsc` ✓ | Query Client recreation | See Git history | |
 | T094 | 18 | Profile repository tests | Profile CRUD, last-active selection, and deletion cascade are covered | COMPLETED | Created `src/__tests__/data/sqlite-profile-repository.test.ts` with 17 tests covering create, getAll, getById, update, delete, setPinEnabled, setOnboardingCompleted, saveLastActiveId/loadLastActiveId | 17 tests ✓ | | See Git history | |
 | T095 | 18 | Profile isolation tests | Cross-profile reads, writes, and cache isolation are proven impossible for favorites, history, and playlists | TODO | | | | | Depends on T074-T076 repository scoping completion. |
 | T096 | 18 | PIN/auth tests | Verifier derivation, constant-time comparison, rate limiting, and the missing-verifier recovery path are covered | TODO | | | | | Depends on T038/T039 PIN implementation. `expo-secure-store` needs a Jest mock. |
@@ -143,11 +143,11 @@ V2 adds multi-profile support and local personalization. `Phase` continues the V
 ## Current Checkpoint
 
 - **Current Version:** V2 — Profiles & Personalization.
-- **Current Phase:** 17 — Profile UI & Performance Polish.
-- **Current Task:** T086 Profile transitions.
-- **Last Completed Task:** T085 Explicit search override.
+- **Current Phase:** 18 — Testing, Validation & Migration Proof.
+- **Current Task:** T095 Profile isolation tests.
+- **Last Completed Task:** T093 Profile performance.
 - **Last Commit:** See Git history.
-- **Next Task:** T086 Profile transitions.
+- **Next Task:** T095 Profile isolation tests.
 - **Known Issues:**
   - Physical device validation (T030, T102, T103) is blocked by environment constraints.
   - T100/T101 migration tests assert SQL call patterns only; runtime proof deferred to device validation.

@@ -39,7 +39,12 @@ export function PinKeypad({ pin, pinLength, onPinChange, disabled }: PinKeypadPr
 
   return (
     <View style={styles.container}>
-      <View style={styles.dotsContainer}>
+      <View 
+        style={styles.dotsContainer}
+        accessibilityRole="progressbar"
+        accessibilityValue={{ min: 0, max: pinLength, now: pin.length }}
+        accessibilityLabel={`${pin.length} of ${pinLength} PIN digits entered`}
+      >
         {Array.from({ length: pinLength }).map((_, i) => (
           <View
             key={i}
@@ -59,9 +64,14 @@ export function PinKeypad({ pin, pinLength, onPinChange, disabled }: PinKeypadPr
             return <View key="empty" style={{ width: 80, height: 80 }} />;
           }
 
+          const isBackspace = key === 'backspace';
+          
           return (
             <TouchableOpacity
               key={key}
+              accessibilityRole="button"
+              accessibilityLabel={isBackspace ? 'Delete last digit' : `Digit ${key}`}
+              accessibilityState={{ disabled }}
               style={[
                 styles.key,
                 { backgroundColor: colors.backgroundElement },
@@ -71,7 +81,7 @@ export function PinKeypad({ pin, pinLength, onPinChange, disabled }: PinKeypadPr
               disabled={disabled}
               activeOpacity={0.7}
             >
-              {key === 'backspace' ? (
+              {isBackspace ? (
                 <MaterialCommunityIcons name="backspace-outline" size={24} color={colors.text} />
               ) : (
                 <ThemedText variant="headlineLarge">{key}</ThemedText>

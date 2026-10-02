@@ -22,6 +22,7 @@ export * from './modal-picker';
 export * from './modal-multi-picker';
 export * from './pin-keypad';
 export * from './playlist-picker';
+export * from './profile-avatar';
 export * from './section-header';
 export * from './separator';
 export * from './skeleton';

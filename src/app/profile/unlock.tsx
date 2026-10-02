@@ -43,8 +43,8 @@ export default function ProfileUnlockScreen() {
       
       switch (result.status) {
         case 'success':
-          unlock(activeProfile);
           await profileRepository.saveLastActiveId(activeProfile.id);
+          unlock(activeProfile);
           router.replace('/' as any);
           break;
         case 'invalid':
@@ -79,7 +79,6 @@ export default function ProfileUnlockScreen() {
 
   function handleLeave() {
     leaveProfile();
-    router.replace('/profile/select' as any);
   }
 
   return (

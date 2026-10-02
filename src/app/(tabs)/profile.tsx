@@ -4,7 +4,7 @@ import { router, useFocusEffect } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 import { useTheme } from '@/hooks/use-theme';
-import { Button } from '@/components/ui';
+import { Button, ProfileAvatar, LoadingView } from '@/components/ui';
 import { ThemedText } from '@/components/themed-text';
 import { useSessionStore } from '@/stores/session';
 import { profileRepository } from '@/data/repositories';
@@ -13,11 +13,18 @@ import type { Profile } from '@/types/domain';
 export default function ProfileTabScreen() {
   const { colors, spacing } = useTheme();
   const { activeProfile, switchProfile } = useSessionStore();
-  const [profiles, setProfiles] = useState<readonly Profile[]>([]);
+  const [profiles, setProfiles] = useState<readonly Profile[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   async function loadProfiles() {
-    const list = await profileRepository.getAll();
-    setProfiles(list);
+    try {
+      setError(null);
+      const list = await profileRepository.getAll();
+      setProfiles(list);
+    } catch {
+      setError('Failed to load profiles.');
+      setProfiles([]);
+    }
   }
 
   useFocusEffect(
@@ -29,12 +36,12 @@ export default function ProfileTabScreen() {
   async function handleSelectProfile(profile: Profile) {
     if (profile.id === activeProfile?.id) return;
     
-    // Changing the phase will drop the old profile's cache and let SessionGate handle locked/onboarding transitions.
-    switchProfile(profile);
-
     if (!profile.pinEnabled) {
       await profileRepository.saveLastActiveId(profile.id);
+      switchProfile(profile);
       router.replace('/' as any);
+    } else {
+      switchProfile(profile);
     }
   }
 
@@ -42,48 +49,68 @@ export default function ProfileTabScreen() {
     router.push('/profile/create' as any);
   }
 
+  if (error) {
+    return (
+      <View style={[styles.container, { backgroundColor: colors.background, justifyContent: 'center', padding: spacing.xl }]}>
+        <ThemedText variant="body" themeColor="error" style={{ textAlign: 'center', marginBottom: spacing.md }}>
+          {error}
+        </ThemedText>
+        <Button variant="outline" onPress={() => void loadProfiles()}>
+          <ThemedText variant="button">Retry</ThemedText>
+        </Button>
+      </View>
+    );
+  }
+
+  if (profiles === null) return <LoadingView message="Loading profiles…" />;
+
   return (
     <ScrollView style={[styles.container, { backgroundColor: colors.background }]} contentContainerStyle={{ padding: spacing.xl }}>
       <ThemedText variant="headlineLarge" style={styles.title}>
         Profiles
       </ThemedText>
 
-      <View style={[styles.list, { gap: spacing.md }]}>
-        {profiles.map((p) => {
-          const isActive = p.id === activeProfile?.id;
-          return (
-            <Button
-              key={p.id}
-              variant={isActive ? 'default' : 'secondary'}
-              onPress={() => void handleSelectProfile(p)}
-              style={styles.profileRow}
-            >
-              <View style={styles.profileInfo}>
-                {p.avatarKey ? (
-                  <ThemedText variant="headlineSmall">{p.avatarKey}</ThemedText>
-                ) : (
-                  <View style={[styles.placeholderAvatar, { backgroundColor: colors.border }]} />
-                )}
-                <ThemedText variant="body" style={{ marginLeft: spacing.md, flex: 1 }}>
-                  {p.name}
-                </ThemedText>
-              </View>
-              <View style={styles.actions}>
-                {p.pinEnabled && (
-                  <MaterialCommunityIcons name="lock" size={20} color={isActive ? colors.primaryText : colors.text} />
-                )}
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  onPress={() => router.push(`/profile/edit?id=${p.id}` as any)}
-                >
-                  <MaterialCommunityIcons name="pencil" size={20} color={isActive ? colors.primaryText : colors.text} />
-                </Button>
-              </View>
-            </Button>
-          );
-        })}
-      </View>
+      {profiles.length === 0 ? (
+        <View style={{ marginVertical: spacing.xl, alignItems: 'center' }}>
+          <ThemedText variant="body" themeColor="textSecondary">
+            No profiles found.
+          </ThemedText>
+        </View>
+      ) : (
+        <View style={[styles.list, { gap: spacing.md }]}>
+          {profiles.map((p) => {
+            const isActive = p.id === activeProfile?.id;
+            return (
+              <Button
+                key={p.id}
+                variant={isActive ? 'default' : 'secondary'}
+                onPress={() => void handleSelectProfile(p)}
+                style={styles.profileRow}
+              >
+                <View style={styles.profileInfo}>
+                  <ProfileAvatar name={p.name} avatarKey={p.avatarKey} size={32} />
+                  <ThemedText variant="body" style={{ marginLeft: spacing.md, flex: 1 }}>
+                    {p.name}
+                  </ThemedText>
+                </View>
+                <View style={styles.actions}>
+                  {p.pinEnabled && (
+                    <MaterialCommunityIcons name="lock" size={20} color={isActive ? colors.primaryText : colors.text} />
+                  )}
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    onPress={() => router.push(`/profile/edit?id=${p.id}` as any)}
+                    accessibilityLabel={`Edit ${p.name}`}
+                  >
+                    <MaterialCommunityIcons name="pencil" size={20} color={isActive ? colors.primaryText : colors.text} />
+                  </Button>
+                </View>
+              </Button>
+            );
+          })}
+        </View>
+      )}
 
       <Button variant="outline" onPress={handleCreateProfile} style={styles.addButton}>
         <ThemedText variant="body">Add Profile</ThemedText>
@@ -112,11 +139,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-  },
-  placeholderAvatar: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
   },
   addButton: { alignSelf: 'stretch' },
 });
