@@ -13,8 +13,8 @@ describe('Local recommendation scoring', () => {
   };
 
   const createChannel = (id: string, name: string, country: string | null, languages: string[], categories: string[]): Channel => ({
-    id: id as ChannelId, name, country: country as CountryCode | null, languages: languages as unknown as LanguageCode[], categories: categories as unknown as CategoryId[], streamUrl: 'http://test'
-  });
+    id: id as ChannelId, name, country: country as CountryCode | null, languages: languages as unknown as LanguageCode[], categories: categories as unknown as CategoryId[]
+  } as unknown as Channel);
 
   const c1 = createChannel('chan1', 'A', 'uk', ['eng'], []); // Fav (100) + Lang (20) = 120
   const c2 = createChannel('chan2', 'B', 'us', [], []); // Recent (50) + Country (20) = 70

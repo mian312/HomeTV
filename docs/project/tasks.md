@@ -95,13 +95,13 @@ V2 adds multi-profile support and local personalization. `Phase` continues the V
 | T076 | 15 | Profile-scoped playlists | Playlists and their items are scoped per profile, with cascade delete proven to touch only the owning profile | COMPLETED | Updated PlaylistRepository and local queries | | | See Git history | |
 | T077 | 15 | Profile-scoped saved data | Remaining persisted data is confirmed scoped or intentionally global; theme mode stays application-global | COMPLETED | Verified SettingsRepository remains global | | | See Git history | |
 | T078 | 15 | Verify profile isolation | Tests prove one profile cannot read another's favorites, history, or playlists | COMPLETED | Added profile-isolation.test.ts | | | See Git history | The gating task for Phase 15. Covers both SQL scoping and the profile-scoped TanStack Query cache. |
-| T079 | 16 | Personalized Browse defaults | Browse renders the T063 defaults with filter chips that show active state and a reset affordance | TODO | | | | | Split from T063. Presentation only. |
-| T080 | 16 | Country filter UX | Country filtering is operable, labeled, and accessible from the existing filter row | TODO | | | | | |
-| T081 | 16 | Language filter UX | Language filtering is operable, labeled, and accessible | TODO | | | | | |
-| T082 | 16 | Category filter UX | Category filtering is operable, labeled, and accessible | TODO | | | | | |
-| T083 | 16 | Multi-filter behavior | Simultaneous filters intersect with deterministic, stable result ordering | TODO | | | | | |
-| T084 | 16 | Reset personalization filters | Reset returns to the profile's preference defaults rather than to an unfiltered state | TODO | | | | | |
-| T085 | 16 | Explicit search override | An explicit user selection outranks preference defaults and persists for the session; preferences never lock the user in | TODO | | | | | The defining behavior of this phase. |
+| T079 | 16 | Personalized Browse defaults | Browse renders the T063 defaults with filter chips that show active state and a reset affordance | COMPLETED | Updated `channels.tsx` to use `usePersonalizationModel` | `tsc` ✓ | Default state applied on render | See Git history | Split from T063. Presentation only. |
+| T080 | 16 | Country filter UX | Country filtering is operable, labeled, and accessible from the existing filter row | COMPLETED | Created `ModalMultiPicker`, updated `channels.tsx` | `tsc` ✓ | Multi-selection required | See Git history | |
+| T081 | 16 | Language filter UX | Language filtering is operable, labeled, and accessible | COMPLETED | Added language picker to `channels.tsx` | `tsc` ✓ | | See Git history | |
+| T082 | 16 | Category filter UX | Category filtering is operable, labeled, and accessible | COMPLETED | Updated category picker to use `ModalMultiPicker` | `tsc` ✓ | | See Git history | |
+| T083 | 16 | Multi-filter behavior | Simultaneous filters intersect with deterministic, stable result ordering | COMPLETED | Handled by `filtering.ts` and UI state | `tsc` ✓ | Intersecting filters (AND logic across filter types) | See Git history | |
+| T084 | 16 | Reset personalization filters | Reset returns to the profile's preference defaults rather than to an unfiltered state | COMPLETED | Implemented `Reset to defaults` button which clears explicit state | `tsc` ✓ | | See Git history | |
+| T085 | 16 | Explicit search override | An explicit user selection outranks preference defaults and persists for the session; preferences never lock the user in | COMPLETED | Search and UI selections override defaults via local state | `tsc` ✓ | | See Git history | The defining behavior of this phase. |
 | T086 | 17 | Profile transitions | Selector, unlock, and switch transitions are consistent and do not flash intermediate state | TODO | | | | | |
 | T087 | 17 | Profile avatar system | Avatars render from initials and theme color tokens, so no new binary image assets are introduced | TODO | | | | | |
 | T088 | 17 | Profile loading states | Every profile surface models loading explicitly | TODO | | | | | |
@@ -143,11 +143,11 @@ V2 adds multi-profile support and local personalization. `Phase` continues the V
 ## Current Checkpoint
 
 - **Current Version:** V2 — Profiles & Personalization.
-- **Current Phase:** 16 — Personalized Browse Defaults & Filters.
-- **Current Task:** T079 Personalized Browse defaults.
-- **Last Completed Task:** T078 Verify profile isolation.
+- **Current Phase:** 17 — Profile UI & Performance Polish.
+- **Current Task:** T086 Profile transitions.
+- **Last Completed Task:** T085 Explicit search override.
 - **Last Commit:** See Git history.
-- **Next Task:** T079 Personalized Browse defaults.
+- **Next Task:** T086 Profile transitions.
 - **Known Issues:**
   - Physical device validation (T030, T102, T103) is blocked by environment constraints.
   - T100/T101 migration tests assert SQL call patterns only; runtime proof deferred to device validation.

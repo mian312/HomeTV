@@ -19,6 +19,7 @@ export * from './filter-row';
 export * from './horizontal-list';
 export * from './input';
 export * from './modal-picker';
+export * from './modal-multi-picker';
 export * from './pin-keypad';
 export * from './playlist-picker';
 export * from './section-header';

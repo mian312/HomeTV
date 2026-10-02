@@ -10,7 +10,7 @@ export interface FilterState {
 /**
  * Applies a set of active filters to a list of channels.
  */
-export function filterChannels(channels: Channel[], filters: FilterState): Channel[] {
+export function filterChannels(channels: readonly Channel[], filters: FilterState): Channel[] {
   return channels.filter(channel => {
     if (filters.searchQuery) {
       const q = filters.searchQuery.toLowerCase();

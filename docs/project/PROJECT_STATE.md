@@ -16,11 +16,11 @@ This is a verified implementation snapshot. `tasks.md` is the task/history recor
 ## Current milestone and next task
 
 - Current Version: V2 — Profiles & Personalization.
-- **Current Phase**: 16 — Personalized Browse Defaults & Filters.
-- **Current Task**: T079 Personalized Browse defaults.
-- **Last Completed Task**: T078 Verify profile isolation.
-- **Next Planned Task**: T079 Personalized Browse defaults.
-- **Critical completed task this phase**: T078 Verify profile isolation.
+- **Current Phase**: 17 — Profile UI & Performance Polish.
+- **Current Task**: T086 Profile transitions.
+- **Last Completed Task**: T085 Explicit search override.
+- **Next Planned Task**: T086 Profile transitions.
+- **Critical completed task this phase**: T085 Explicit search override.
 
 ## Implemented design system (`src/constants/theme.ts`)
 

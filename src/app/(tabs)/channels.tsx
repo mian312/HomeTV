@@ -4,11 +4,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { ChannelCard, ErrorView, Input, LoadingView, ModalPicker } from '@/components/ui';
+import { ChannelCard, ErrorView, Input, LoadingView, ModalMultiPicker } from '@/components/ui';
 import { BottomTabInset, MaxContentWidth, Radius, Spacing } from '@/constants/theme';
-import { useCategories, useChannels, useCountries } from '@/data/queries/iptv';
+import { useCategories, useChannels, useCountries, useLanguages } from '@/data/queries/iptv';
 import { useTheme } from '@/hooks/use-theme';
-import type { CategoryId, CountryCode } from '@/types/domain';
+import { usePersonalizationModel } from '@/features/personalization/hooks';
+import { getDefaultFilterState } from '@/features/personalization/defaults';
+import { filterChannels, type FilterState } from '@/features/personalization/filtering';
 
 export default function ChannelsScreen() {
   const { colors } = useTheme();
@@ -28,27 +30,42 @@ export default function ChannelsScreen() {
   } = useChannels();
   const { data: categories } = useCategories();
   const { data: countries } = useCountries();
+  const { data: languages } = useLanguages();
 
-  const [selectedCategory, setSelectedCategory] = useState<CategoryId | null>(null);
-  const [selectedCountry, setSelectedCountry] = useState<CountryCode | null>(null);
+  const { data: personalizationModel } = usePersonalizationModel();
+  
+  const defaultFilters = useMemo(() => {
+    return personalizationModel ? getDefaultFilterState(personalizationModel) : {};
+  }, [personalizationModel]);
+
+  const [explicitFilters, setExplicitFilters] = useState<FilterState | null>(null);
+
+  const activeFilters = explicitFilters ?? defaultFilters;
+
   const [searchQuery, setSearchQuery] = useState('');
   const deferredSearchQuery = useDeferredValue(searchQuery);
 
+  const currentFilterState = useMemo<FilterState>(() => {
+    return {
+      ...activeFilters,
+      searchQuery: deferredSearchQuery.trim()
+    };
+  }, [activeFilters, deferredSearchQuery]);
+
   const filteredChannels = useMemo(() => {
     if (!channels) return [];
-    const query = deferredSearchQuery.trim().toLowerCase();
+    return filterChannels(channels, currentFilterState);
+  }, [channels, currentFilterState]);
 
-    return channels.filter((c) => {
-      if (selectedCategory && !c.categories.includes(selectedCategory)) return false;
-      if (selectedCountry && c.country !== selectedCountry) return false;
-      if (query) {
-        if (!c.name.toLowerCase().includes(query) && !c.id.toLowerCase().includes(query)) {
-          return false;
-        }
-      }
-      return true;
+  const setFilter = (key: keyof FilterState, value: any) => {
+    setExplicitFilters(prev => {
+      const next = { ...(prev ?? defaultFilters) };
+      next[key] = value;
+      return next;
     });
-  }, [channels, selectedCategory, selectedCountry, deferredSearchQuery]);
+  };
+
+  const hasExplicitFilters = explicitFilters !== null;
 
   if (channelsLoading) {
     return <LoadingView message="Loading catalog..." />;
@@ -115,40 +132,48 @@ export default function ChannelsScreen() {
               >
                 {/* Category filter */}
                 {categories && (
-                  <ModalPicker
-                    title="Select Category"
+                  <ModalMultiPicker
+                    title="Select Categories"
                     placeholder="Categories"
                     items={categories.map((c) => ({ label: c.name, value: c.id }))}
-                    selectedValue={selectedCategory}
-                    onValueChange={setSelectedCategory}
+                    selectedValues={activeFilters.categories ?? []}
+                    onValuesChange={(vals) => setFilter('categories', vals)}
                   />
                 )}
 
                 {/* Country filter */}
                 {countries && (
-                  <ModalPicker
-                    title="Select Country"
+                  <ModalMultiPicker
+                    title="Select Countries"
                     placeholder="Countries"
                     items={countries.map((c) => ({ label: c.name, value: c.code }))}
-                    selectedValue={selectedCountry}
-                    onValueChange={setSelectedCountry}
+                    selectedValues={activeFilters.countries ?? []}
+                    onValuesChange={(vals) => setFilter('countries', vals)}
+                  />
+                )}
+                
+                {/* Language filter */}
+                {languages && (
+                  <ModalMultiPicker
+                    title="Select Languages"
+                    placeholder="Languages"
+                    items={languages.map((l) => ({ label: l.name, value: l.code }))}
+                    selectedValues={activeFilters.languages ?? []}
+                    onValuesChange={(vals) => setFilter('languages', vals)}
                   />
                 )}
 
                 {/* Active filters clear */}
-                {(selectedCategory || selectedCountry) && (
+                {hasExplicitFilters && (
                   <Pressable
-                    onPress={() => {
-                      setSelectedCategory(null);
-                      setSelectedCountry(null);
-                    }}
+                    onPress={() => setExplicitFilters(null)}
                     style={({ pressed }) => [
                       styles.clearBtn,
                       { backgroundColor: colors.errorMuted, opacity: pressed ? 0.7 : 1 },
                     ]}
                   >
                     <ThemedText style={[styles.clearBtnText, { color: colors.error }]}>
-                      Clear filters ✕
+                      Reset to defaults ✕
                     </ThemedText>
                   </Pressable>
                 )}
