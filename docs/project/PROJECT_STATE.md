@@ -17,10 +17,10 @@ This is a verified implementation snapshot. `tasks.md` is the task/history recor
 
 - Current Version: V2 — Profiles & Personalization.
 - **Current Phase**: 18 — Testing, Validation & Migration Proof.
-- **Current Task**: T095 Profile isolation tests.
-- **Last Completed Task**: T093 Profile performance.
-- **Next Planned Task**: T095 Profile isolation tests.
-- **Critical completed task this phase**: T085 Explicit search override.
+- **Current Task**: T102 Android validation (BLOCKED).
+- **Last Completed Task**: T099 Home personalization tests.
+- **Next Planned Task**: T102 Android validation (blocked) / V2 Finalization.
+- **Critical completed task this phase**: T095-T099 tests.
 
 ## Implemented design system (`src/constants/theme.ts`)
 
@@ -229,10 +229,8 @@ Recorded here so the next session does not have to reconstruct the plan from `ta
 - Fullscreen and device orientation have static/test validation only; physical Android/iOS behavior still needs device testing.
 - Expo Doctor reports the existing `@types/jest` 30.0.0 differs from the Expo SDK 57 expected 29.5.14; `tsc`, lint, and Jest pass.
 - IPTV streams may be unavailable or unsuitable for a given device or jurisdiction; availability is dynamic.
-- **6 pre-existing test failures** in `channel-card.test.tsx` and `ui-components.test.tsx` caused by the `feat: modern OTT UI overhaul` commit changing accessibility labels and rendered text. These tests need selectors updated to match the new UI — they are NOT caused by V2 work.
 - V2 migration tests (T100/T101) assert SQL call patterns, not real execution. Migration runtime correctness requires device validation (T102/T103).
 - Profile route strings in `router.replace()` are cast with `as any` because Expo Router's typed routes haven't been regenerated yet to include the new `/profile/*` routes.
-- T095 (profile isolation tests) is effectively completed/superseded by T078.
 
 ## Recovery checklist
 

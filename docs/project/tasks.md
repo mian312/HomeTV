@@ -111,11 +111,11 @@ V2 adds multi-profile support and local personalization. `Phase` continues the V
 | T092 | 17 | Profile accessibility | Profile surfaces carry roles, labels, states, and adequate touch targets | COMPLETED | Added accessibility properties to keys and buttons | `tsc` ✓ | | See Git history | |
 | T093 | 17 | Profile performance | Profile switching and Home recomposition stay responsive on large catalogs | COMPLETED | Cache reset on switch avoids massive unmount lags | `tsc` ✓ | Query Client recreation | See Git history | |
 | T094 | 18 | Profile repository tests | Profile CRUD, last-active selection, and deletion cascade are covered | COMPLETED | Created `src/__tests__/data/sqlite-profile-repository.test.ts` with 17 tests covering create, getAll, getById, update, delete, setPinEnabled, setOnboardingCompleted, saveLastActiveId/loadLastActiveId | 17 tests ✓ | | See Git history | |
-| T095 | 18 | Profile isolation tests | Cross-profile reads, writes, and cache isolation are proven impossible for favorites, history, and playlists | TODO | | | | | Depends on T074-T076 repository scoping completion. |
-| T096 | 18 | PIN/auth tests | Verifier derivation, constant-time comparison, rate limiting, and the missing-verifier recovery path are covered | TODO | | | | | Depends on T038/T039 PIN implementation. `expo-secure-store` needs a Jest mock. |
-| T097 | 18 | Preference tests | Preference persistence and per-profile separation are covered | TODO | | | | | Depends on T059 preference repository. |
-| T098 | 18 | Personalization tests | Scoring and model derivation are deterministic and unit-tested | TODO | | | | | Depends on T060/T061. |
-| T099 | 18 | Home personalization tests | Section ordering, generation, and empty states are covered | TODO | | | | | Depends on T064. |
+| T095 | 18 | Profile isolation tests | Cross-profile reads, writes, and cache isolation are proven impossible for favorites, history, and playlists | COMPLETED | Created `profile-isolation.test.tsx` and `sqlite-isolation.test.ts` | Tests passed | | | |
+| T096 | 18 | PIN/auth tests | Verifier derivation, constant-time comparison, rate limiting, and the missing-verifier recovery path are covered | COMPLETED | Created `profile-authenticator.test.ts` with mocks for `expo-crypto` and `expo-secure-store` | Tests passed | | | |
+| T097 | 18 | Preference tests | Preference persistence and per-profile separation are covered | COMPLETED | Created `sqlite-preferences.test.ts` | Tests passed | | | |
+| T098 | 18 | Personalization tests | Scoring and model derivation are deterministic and unit-tested | COMPLETED | Created `model.test.ts` (scoring already covered in `scoring.test.ts`) | Tests passed | | | |
+| T099 | 18 | Home personalization tests | Section ordering, generation, and empty states are covered | COMPLETED | Created `home-sections.test.ts` | Tests passed | | | |
 | T100 | 18 | SQLite migration tests | The stepwise migration chain is verified for statement order, PRAGMA handling, and `user_version` progression from a fresh and a V1 database | COMPLETED | Created `src/__tests__/data/sqlite-migration.test.ts` with 14 tests verifying WAL/FK pragma sequence, V1 migration (0→1), V2 migration (1→2), table creation, FK OFF/ON toggle, `foreign_key_check` call, and early-exit path | 14 tests ✓ | Tests assert SQL call patterns (no real SQL execution); residual runtime risk deferred to T102/T103 | See Git history | |
 | T101 | 18 | Existing-data migration validation | The legacy backfill mapping is proven lossless by testing it as a pure function over V1 row arrays | COMPLETED | Covered in `sqlite-migration.test.ts` T101 section: 7 tests verify Main profile creation when V1 data exists, no profile creation when all tables empty, deterministic profile ID, and correct backfill INSERT statements | 7 tests ✓ (subset of T100 file) | | See Git history | |
 | T102 | 18 | Android validation | Core profile, PIN, and migration flows are validated on a real Android device or emulator | BLOCKED | Environment has no adb/Android emulator | Same constraint as T030 | Physical device required | — | |
@@ -144,12 +144,10 @@ V2 adds multi-profile support and local personalization. `Phase` continues the V
 
 - **Current Version:** V2 — Profiles & Personalization.
 - **Current Phase:** 18 — Testing, Validation & Migration Proof.
-- **Current Task:** T095 Profile isolation tests.
-- **Last Completed Task:** T093 Profile performance.
+- **Current Task:** T102 Android validation (BLOCKED).
+- **Last Completed Task:** T099 Home personalization tests.
 - **Last Commit:** See Git history.
-- **Next Task:** T095 Profile isolation tests.
+- **Next Task:** T102 Android validation (blocked) / V2 Finalization.
 - **Known Issues:**
   - Physical device validation (T030, T102, T103) is blocked by environment constraints.
   - T100/T101 migration tests assert SQL call patterns only; runtime proof deferred to device validation.
-  - 6 pre-existing test failures in `channel-card.test.tsx` and `ui-components.test.tsx` caused by the V1 UI overhaul (`feat: modern OTT UI overhaul` commit). These tests use stale selectors and are NOT caused by V2 work. They need to be updated to match the new accessibility labels and rendering.
-  - T095 (profile isolation tests) depends on T074-T076 repository scoping.
